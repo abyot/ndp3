@@ -25,6 +25,8 @@
       <list>
         <value>dhis-web-maintenance-user</value>
         <value>dhis-web-dataentry</value>
+        <value>dhis-web-data-dictionary</value>
+        <value>dhis-web-ndp3-framework</value>
         <value>dhis-web-importexport</value>
         <value>dhis-web-dashboard</value>
         <value>dhis-web-pivot</value>

@@ -1,0 +1,14 @@
+<div class="menu-title">
+    <h4>{{model.menuTitle}}</h4>
+</div>
+
+<div class="vertical-spacing category-menu">
+    <table class="table table-striped dhis2-table-hover table-bordered">
+        <tr>
+            <td ng-click="model.selectedMenu = 'NDP'">{{'program_structure' | translate}}</td>
+        </tr>
+        <tr>
+            <td ng-click="model.selectedMenu = 'DICTIONARY'">{{'indicator_dictionary' | translate}}</td>
+        </tr>
+    </table>
+</div>
