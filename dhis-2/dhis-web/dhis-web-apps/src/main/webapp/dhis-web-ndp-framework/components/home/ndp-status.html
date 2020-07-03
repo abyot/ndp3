@@ -18,14 +18,14 @@
             </div>
             <div class="row small-vertical-spacing">
                 <div class="col-sm-4">
-                    {{'objective'| translate}} - {{model.selectedNDP.code}}
+                    {{'objective'| translate}}
                 </div>
                 <div class="col-sm-8">
                     <ui-select ng-model="model.selectedDataElementGroupSet" 
                                theme="select2"                                 
                                style="width:100%;">
-                        <ui-select-match allow-clear="true" class="form-control-ui-select" placeholder="{{model.dataElementGroupSets && model.dataElementGroupSets.length > 0 ? 'select_or_search' : 'empty'| translate}}">{{$select.selected.displayName|| $select.selected}}</ui-select-match>
-                        <ui-select-choices group-by="'ndp'" repeat="degs in model.dataElementGroupSets | filter: $select.search | filter: {ndp: model.selectedNDP.code} : true | limitTo:maxOptionSize">
+                        <ui-select-match allow-clear="true" class="form-control-ui-select" placeholder="{{model.ndpDataElementGroupSets && model.ndpDataElementGroupSets.length > 0 ? 'select_or_search' : 'empty'| translate}}">{{$select.selected.displayName|| $select.selected}}</ui-select-match>
+                        <ui-select-choices group-by="'domain'" repeat="degs in model.ndpDataElementGroupSets | filter: $select.search | filter: {ndp: model.selectedNDP.code} : true | limitTo:maxOptionSize | orderBy: ['domainOrder', 'displayName']">
                             <span ng-bind-html="degs.displayName | highlight: $select.search"></span>
                         </ui-select-choices>
                     </ui-select>
@@ -38,11 +38,9 @@
                 <div class="col-sm-8">
                     <ui-select ng-model="model.selectedDataElementGroup" 
                                theme="select2"
-                               on-select="saveDataValue()"
-                               on-remove="saveDataValue()"
                                style="width:100%;">
                         <ui-select-match allow-clear="true" class="form-control-ui-select" placeholder="{{model.selectedDataElementGroupSet && model.selectedDataElementGroupSet.dataElementGroups && model.selectedDataElementGroupSet.dataElementGroups.length > 0 ? 'select_or_search' : 'empty'| translate}}">{{$select.selected.displayName|| $select.selected}}</ui-select-match>
-                        <ui-select-choices repeat="deg in model.selectedDataElementGroupSet.dataElementGroups | filter: $select.search | limitTo:maxOptionSize | orderBy: 'order' ">
+                        <ui-select-choices repeat="deg in model.selectedDataElementGroupSet.dataElementGroups | filter: $select.search | limitTo:maxOptionSize | orderBy: ['domainOrder', 'displayName']">
                             <span ng-bind-html="deg.displayName | highlight: $select.search"></span>
                         </ui-select-choices>
                     </ui-select>
@@ -90,32 +88,55 @@
     </div>
 </div>
 <div class="row" ng-if="model.reportReady">
-    <div class="col-sm-12">
-        <table class="table table-bordered table-striped">
-            <thead>
-                <tr>
-                    <th></th>
-                    <th class="center" colspan="period.colSpan" ng-repeat="period in model.selectedPeriods">
-                        {{period.displayName}}
-                    </th>
-                </tr>
-                <tr>
-                    <th></th>
-                    <th class="center" ng-repeat="header in model.dataHeaders">
-                        {{model.metaData.items[header.dimensionId].name}}
-                    </th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr ng-repeat="de in model.dataElementGroup.dataElements">
-                    <td>
-                        {{model.metaData.items[de.id].name}}
-                    </td>
-                    <td ng-repeat="header in model.dataHeaders">
-                        {{filterData(header, de.id)}}
-                    </td>
-                </tr>
-            </tbody>
-        </table>
+    <div class="col-sm-12" ng-if="model.dataExists">
+        <span class="long-horizontal-spacing hideInPrint">
+            <span class="dropdown">
+                <label class="btn btn-default dropdown-toggle" data-toggle="dropdown" ng-attr-title="{{'download_as'| translate}}"><i class="fa fa-download"></i></label>
+                <ul class="dropdown-menu">
+                    <li><h6 class="dropdown-header">{{'download_as'| translate}}</h6></li>
+                    <li class="divider"></li>
+                    <li><a href ng-click="exportData()">{{'csv'| translate}}</a></li>
+                    <li><a href onclick="javascript:window.print()">{{'pdf'| translate}}</a></li>
+                </ul>
+            </span>
+        </span>
+        <div id="exportTable">
+            <table class="table table-bordered table-striped">
+                <thead>
+                    <tr>
+                        <th colspan="{{model.dataHeaders.length + 1}}">
+                            {{model.selectedNDP.displayName}}
+                        </th>
+                    </tr>
+                    <tr>
+                        <th></th>
+                        <th class="center" colspan="period.colSpan" ng-repeat="period in model.selectedPeriods" ng-if="period.hasData">
+                            {{period.displayName}}
+                        </th>
+                    </tr>
+                    <tr>
+                        <th></th>
+                        <th class="center" ng-repeat="header in model.dataHeaders">
+                            {{model.metaData.items[header.dimensionId].name}}
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr ng-repeat="de in model.dataElementGroup.dataElements">
+                        <td>
+                            {{model.metaData.items[de.id].name}}
+                        </td>
+                        <td ng-repeat="header in model.dataHeaders">
+                            {{filterData(header, de.id)}}
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div class="col-sm-12" ng-if="!model.dataExists">
+        <div class="alert alert-warning">
+            {{'no_data_exists' | translate}}
+        </div>
     </div>
 </div>

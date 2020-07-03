@@ -53,9 +53,7 @@ ndpFramework.controller('HomeController',
         $scope.model.selectedDataElementGroup = null;
         $scope.resetDataView();
         if( angular.isObject($scope.model.selectedNDP) && $scope.model.selectedNDP.id && $scope.model.selectedNDP.code){
-            console.log('the code:  ', $scope.model.selectedNDP.code);
             $scope.model.selectedDataElementGroupSets = $filter('filter')($scope.model.dataElementGroupSets, {ndp: $scope.model.selectedNDP.code, indicatorGroupSetType: 'objective'}, true);
-            console.log('the s degs:  ', $scope.model.selectedDataElementGroupSets);
         }
     });
     
@@ -101,7 +99,6 @@ ndpFramework.controller('HomeController',
                     
                     $scope.model.ndp = $filter('filter')(optionSets, {code: 'ndp'})[0];
                     $scope.model.ndpProgram = $filter('filter')(optionSets, {code: 'ndpIIIProgram'})[0];
-
 
                     MetaDataFactory.getAll('dataSets').then(function(dataSets){
 
@@ -165,8 +162,22 @@ ndpFramework.controller('HomeController',
 
                                 $scope.model.dictionaryItems.push({id: 'dataElementGroups', name: $translate.instant('outcomes_outputs')});
                                 $scope.model.dataElementGroups = dataElementGroups;
-
+                                $scope.model.ndpDataElementGroupSets = [];
+                                $scope.model.programDataElementGroupSets = [];
                                 MetaDataFactory.getAll('dataElementGroupSets').then(function(dataElementGroupSets){
+                                       angular.forEach(dataElementGroupSets, function(degs){
+                                        if( degs.ndp ){
+                                            degs.domain = degs.ndp;
+                                            degs.domainOrder = 1;
+                                            $scope.model.ndpDataElementGroupSets.push( degs );
+                                        }
+                                        else if( degs.ndpProgramme && $scope.model.ndpProgram && $scope.model.ndpProgram.options){
+                                            degs.domain = $filter('filter')($scope.model.ndpProgram.options, {code: degs.ndpProgramme})[0].displayName;
+                                            degs.domainOrder = degs.ndpProgramme;
+                                            $scope.model.programDataElementGroupSets.push( degs );
+                                        }
+                                    });
+
                                     $scope.model.dictionaryHeaders['dataElementGroupSets'] = [
                                         {id: 'displayName', name: 'name', colSize: "col-sm-3", show: true, fetch: false},                
                                         {id: 'code', name: '_code', colSize: "col-sm-1", show: true, fetch: false}
@@ -246,6 +257,8 @@ ndpFramework.controller('HomeController',
                 $scope.model.dataHeaders = [];
                 angular.forEach($scope.model.selectedPeriods, function(pe){
                     var colSpan = 0;
+                    var d = $filter('filter')($scope.model.data, {pe: pe.id});
+                    pe.hasData = d && d.length > 0;
                     angular.forEach($scope.model.baseLineTargetActualDimensions, function(dm){
                         var d = $filter('filter')($scope.model.data, {Duw5yep8Vae: dm, pe: pe.id});
                         if( d && d.length > 0 ){
@@ -256,7 +269,7 @@ ndpFramework.controller('HomeController',
                     pe.colSpan = colSpan;
                 });
 
-                if( Object.keys( data ).length === 0 ){                    
+                if( Object.keys( $scope.model.data ).length === 0 ){
                     $scope.model.dataExists = false;
                     return;
                 }

@@ -24,8 +24,8 @@
                     <ui-select ng-model="model.selectedDataElementGroupSet" 
                                theme="select2"                                 
                                style="width:100%;">
-                        <ui-select-match allow-clear="true" class="form-control-ui-select" placeholder="{{model.selectedDataElementGroupSets && model.selectedDataElementGroupSets.length > 0 ? 'select_or_search' : 'empty'| translate}}">{{$select.selected.displayName|| $select.selected}}</ui-select-match>
-                        <ui-select-choices repeat="degs in model.selectedDataElementGroupSets | filter: $select.search | limitTo:maxOptionSize | orderBy: 'order' ">
+                        <ui-select-match allow-clear="true" class="form-control-ui-select" placeholder="{{model.programDataElementGroupSets && model.programDataElementGroupSets.length > 0 ? 'select_or_search' : 'empty'| translate}}">{{$select.selected.displayName|| $select.selected}}</ui-select-match>
+                        <ui-select-choices group-by="'domain'" repeat="degs in model.programDataElementGroupSets | filter: $select.search | filter: {ndpProgramme: model.selectedProgram.code} : true | limitTo:maxOptionSize | orderBy: 'order' ">
                             <span ng-bind-html="degs.displayName | highlight: $select.search"></span>
                         </ui-select-choices>
                     </ui-select>
@@ -89,12 +89,17 @@
     </div>
 </div>
 <div class="row" ng-if="model.reportReady">
-    <div class="col-sm-12">
+    <div class="col-sm-12" ng-if="model.dataExists">
         <table class="table table-bordered table-striped">
             <thead>
                 <tr>
+                    <th colspan="{{model.dataHeaders.length + 1}}">
+                        {{model.selectedProgram.displayName}}
+                    </th>
+                </tr>
+                <tr>
                     <th></th>
-                    <th class="center" colspan="3" ng-repeat="period in model.selectedPeriods">
+                    <th class="center" colspan="period.colSpan" ng-repeat="period in model.selectedPeriods" ng-if="period.hasData">
                         {{period.displayName}}
                     </th>
                 </tr>
@@ -116,5 +121,10 @@
                 </tr>
             </tbody>
         </table>
+    </div>
+    <div class="col-sm-12" ng-if="!model.dataExists">
+        <div class="alert alert-warning">
+            {{'no_data_exists' | translate}}
+        </div>
     </div>
 </div>
