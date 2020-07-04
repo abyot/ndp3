@@ -31,8 +31,8 @@
                     <th ng-click="sortItems(header)" ng-class="header.colSize" ng-repeat="header in model.dictionaryHeaders[model.selectedDictionary.id]| filter: {show: true}">
                         {{header.name| translate}}                            
                         <span class="fa-stack hideInPrint">
-                            <span ng-class="{true: 'alert - danger'} [sortHeader.id === header.id && !reverse]"><i class="fa fa-sort-asc fa-stack-1x"></i></span>
-                            <span ng-class="{true: 'alert - danger'} [sortHeader.id === header.id && reverse]"><i class="fa fa-sort-desc fa-stack-1x"></i></span>
+                            <span ng-class="{true: 'alert-danger'} [sortHeader.id === header.id && !reverse]"><i class="fa fa-sort-asc fa-stack-1x"></i></span>
+                            <span ng-class="{true: 'alert-danger'} [sortHeader.id === header.id && reverse]"><i class="fa fa-sort-desc fa-stack-1x"></i></span>
                         </span>
                     </th>
                 </tr>                        
