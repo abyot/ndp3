@@ -17,7 +17,12 @@ var ndpFrameworkDirectives = angular.module('ndpFrameworkDirectives', [])
 .directive('equalHeightNavTabs', function ($timeout) {
     return function (scope, element, attrs) {        
         $timeout(function () {
-            var highest = 0;            
+            var tabMenus = '.nav.nav-tabs.nav-justified';
+            $(tabMenus).each(function(){
+                $(this).addClass('hideInPrint');
+            }); 
+
+            var highest = 0;
             var selector = '.nav-tabs.nav-justified > li > a';
             $(selector).each(function(){
                 var h = $(this).height();
