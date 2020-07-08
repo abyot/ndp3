@@ -22,6 +22,8 @@ html, body {
     body, html {
         width: 100% !important;
         height: auto !important;
+        overflow-y: hidden; /* Hide vertical scrollbar */
+        overflow-x: hidden; /* Hide horizontal scrollbar */
     }
 
     ::-webkit-input-placeholder { /* WebKit browsers */
@@ -63,6 +65,11 @@ html, body {
 
 .vertical-spacing {
     margin-top: 20px;    
+}
+
+.vertical-center {
+    vertical-align: middle !important;
+    display: table-cell;
 }
 
 .dhis2-table-hover > tbody > tr:hover > td, .table-hover > tbody > tr:hover > th {
@@ -214,4 +221,11 @@ html, body {
 .form-control{    
     padding: 5px !important;
     color: #555 !important;
+}
+
+.bottomright {
+    position:absolute;
+    bottom:0;
+    right: 0;
+    margin:5px;
 }

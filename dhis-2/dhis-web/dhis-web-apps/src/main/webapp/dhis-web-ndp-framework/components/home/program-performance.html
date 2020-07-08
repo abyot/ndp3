@@ -1,4 +1,4 @@
-<div class="small-vertical-spacing">
+<div class="small-vertical-spacing hideInPrint">
     <div class="selection-group">
         <div class="col-sm-7 green-info-area">
             <div class="row small-vertical-spacing">
@@ -46,6 +46,15 @@
                     </ui-select>
                 </div>
             </div>
+            <div class="row bottomright">
+                <div class="col-sm-12">
+                    <button type="button"
+                            class="btn btn-primary"
+                            ng-click="getAnalyticsData()">
+                        {{'display_report'| translate}}
+                    </button>
+                </div>
+            </div>
         </div>
         <div class="col-sm-5 blue-info-area add-small-left-padding">
             <div class="row small-vertical-spacing">
@@ -88,39 +97,54 @@
         </div>
     </div>
 </div>
+
 <div class="row" ng-if="model.reportReady">
     <div class="col-sm-12" ng-if="model.dataExists">
-        <table class="table table-bordered table-striped">
-            <thead>
-                <tr>
-                    <th colspan="{{model.dataHeaders.length + 1}}">
-                        {{model.selectedProgram.displayName}}
-                    </th>
-                </tr>
-                <tr>
-                    <th></th>
-                    <th class="center" colspan="period.colSpan" ng-repeat="period in model.selectedPeriods" ng-if="period.hasData">
-                        {{period.displayName}}
-                    </th>
-                </tr>
-                <tr>
-                    <th></th>
-                    <th class="center" ng-repeat="header in model.dataHeaders">
-                        {{model.metaData.items[header.dimensionId].name}}
-                    </th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr ng-repeat="de in model.dataElementGroup.dataElements">
-                    <td>
-                        {{model.metaData.items[de.id].name}}
-                    </td>
-                    <td ng-repeat="header in model.dataHeaders">
-                        {{filterData(header, de.id)}}
-                    </td>
-                </tr>
-            </tbody>
-        </table>
+        <span class="long-horizontal-spacing hideInPrint">
+            <span class="dropdown">
+                <label class="btn btn-default dropdown-toggle" data-toggle="dropdown" ng-attr-title="{{'download_as'| translate}}"><i class="fa fa-download"></i></label>
+                <ul class="dropdown-menu">
+                    <li><h6 class="dropdown-header">{{'download_as'| translate}}</h6></li>
+                    <li class="divider"></li>
+                    <li><a href ng-click="exportData()">{{'csv'| translate}}</a></li>
+                    <li><a href onclick="javascript:window.print()">{{'pdf'| translate}}</a></li>
+                </ul>
+            </span>
+        </span>
+        <div id="exportTable">
+            <table class="table table-bordered table-striped">
+                <thead>
+                    <tr>
+                        <th class="center" colspan="{{model.dataHeaders.length + 3}}">
+                            {{model.selectedProgram.displayName}}
+                        </th>
+                    </tr>
+                    <tr>
+                        <th></th>
+                        <th></th>
+                        <th></th>
+                        <th class="center" colspan="period.colSpan" ng-repeat="period in model.selectedPeriods" ng-if="period.hasData">
+                            {{period.displayName}}
+                        </th>
+                    </tr>
+                    <tr>
+                        <th>{{'objective' | translate}}</th>
+                        <th>{{'outcome' | translate}}</th>
+                        <th>{{'indicator' | translate}}</th>
+                        <th class="center" ng-repeat="header in model.dataHeaders">
+                            {{model.metaData.items[header.dimensionId].name}}
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr ng-repeat="row in model.finalData">
+                        <td class="vertical-center" ng-repeat="col in row" rowspan="{{col.span}}">
+                            {{col.val}}
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
     </div>
     <div class="col-sm-12" ng-if="!model.dataExists">
         <div class="alert alert-warning">

@@ -46,6 +46,15 @@
                     </ui-select>
                 </div>
             </div>
+            <div class="row bottomright">
+                <div class="col-sm-12">
+                    <button type="button"
+                            class="btn btn-primary"
+                            ng-click="getAnalyticsData()">
+                        {{'display_report'| translate}}
+                    </button>
+                </div>
+            </div>
         </div>
         <div class="col-sm-5 blue-info-area add-small-left-padding">
             <div class="row small-vertical-spacing">
@@ -104,30 +113,31 @@
             <table class="table table-bordered table-striped">
                 <thead>
                     <tr>
-                        <th colspan="{{model.dataHeaders.length + 1}}">
+                        <th colspan="{{model.dataHeaders.length + 3}}">
                             {{model.selectedNDP.displayName}}
                         </th>
                     </tr>
                     <tr>
+                        <th></th>
+                        <th></th>
                         <th></th>
                         <th class="center" colspan="period.colSpan" ng-repeat="period in model.selectedPeriods" ng-if="period.hasData">
                             {{period.displayName}}
                         </th>
                     </tr>
                     <tr>
-                        <th></th>
+                        <th>{{'category' | translate}}</th>
+                        <th>{{'kra' | translate}}</th>
+                        <th>{{'indicator' | translate}}</th>
                         <th class="center" ng-repeat="header in model.dataHeaders">
                             {{model.metaData.items[header.dimensionId].name}}
                         </th>
                     </tr>
                 </thead>
                 <tbody>
-                    <tr ng-repeat="de in model.dataElementGroup.dataElements">
-                        <td>
-                            {{model.metaData.items[de.id].name}}
-                        </td>
-                        <td ng-repeat="header in model.dataHeaders">
-                            {{filterData(header, de.id)}}
+                    <tr ng-repeat="row in model.finalData">
+                        <td class="vertical-center" ng-repeat="col in row" rowspan="{{col.span}}">
+                            {{col.val}}
                         </td>
                     </tr>
                 </tbody>

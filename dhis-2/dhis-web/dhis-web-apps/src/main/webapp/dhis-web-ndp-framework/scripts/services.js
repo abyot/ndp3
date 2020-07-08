@@ -17,35 +17,7 @@ var ndpFrameworkServices = angular.module('ndpFrameworkServices', ['ngResource']
     };
 })
 
-/* current selections */
-/*.service('PeriodService', function(DateUtils){
-    
-    this.getPeriods = function(periodType, periodOffset, futurePeriods){
-        periodOffset = angular.isUndefined(periodOffset) ? 0 : periodOffset;
-        futurePeriods = angular.isUndefined(futurePeriods) ? 1 : futurePeriods;
-        var availablePeriods = [];
-        if(!periodType){
-            return availablePeriods;
-        }
-        
-        var pt = new PeriodType();
-        var d2Periods = pt.get(periodType).generatePeriods({offset: periodOffset, filterFuturePeriods: false, reversePeriods: false});
-        
-        d2Periods = d2Periods.slice( 0, d2Periods.length - 1 + futurePeriods );
-                
-        d2Periods = d2Periods.slice( d2Periods.length - 2, d2Periods.length );
-        d2Periods.reverse();
-        
-        angular.forEach(d2Periods, function(p){
-            p.endDate = DateUtils.formatFromApiToUser(p.endDate);
-            p.startDate = DateUtils.formatFromApiToUser(p.startDate);
-            availablePeriods.push( p );
-        });
-        return availablePeriods;
-    };
-})*/
-
-.service('PeriodService', function(DateUtils, CalendarService){
+.service('PeriodService', function(CalendarService){
     
     this.getPeriods = function(periodType, periodOffset, futurePeriods){
         if(!periodType){
