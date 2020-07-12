@@ -25,7 +25,7 @@
                                theme="select2"                                 
                                style="width:100%;">
                         <ui-select-match allow-clear="true" class="form-control-ui-select" placeholder="{{model.programDataElementGroupSets && model.programDataElementGroupSets.length > 0 ? 'select_or_search' : 'empty'| translate}}">{{$select.selected.displayName|| $select.selected}}</ui-select-match>
-                        <ui-select-choices group-by="'domain'" repeat="degs in model.programDataElementGroupSets | filter: $select.search | filter: {ndpProgramme: model.selectedProgram.code} : true | limitTo:maxOptionSize | orderBy: 'order' ">
+                        <ui-select-choices group-by="'domain'" repeat="degs in model.programDataElementGroupSets | filter: $select.search | filter: {ndpProgramme: model.selectedProgram.code} : true | limitTo:maxOptionSize | orderBy: '-ndpProgramme' ">
                             <span ng-bind-html="degs.displayName | highlight: $select.search"></span>
                         </ui-select-choices>
                     </ui-select>
@@ -40,7 +40,7 @@
                                theme="select2"                                 
                                style="width:100%;">
                         <ui-select-match allow-clear="true" class="form-control-ui-select" placeholder="{{model.selectedDataElementGroupSet && model.selectedDataElementGroupSet.dataElementGroups && model.selectedDataElementGroupSet.dataElementGroups.length > 0 ? 'select_or_search' : 'empty'| translate}}">{{$select.selected.displayName|| $select.selected}}</ui-select-match>
-                        <ui-select-choices repeat="deg in model.selectedDataElementGroupSet.dataElementGroups | filter: $select.search | limitTo:maxOptionSize | orderBy: 'order' ">
+                        <ui-select-choices repeat="deg in model.selectedDataElementGroupSet.dataElementGroups | filter: $select.search | limitTo:maxOptionSize">
                             <span ng-bind-html="deg.displayName | highlight: $select.search"></span>
                         </ui-select-choices>
                     </ui-select>
