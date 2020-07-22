@@ -1,0 +1,124 @@
+<div ng-if="model.selectedOptionSet && model.selectedOptionSet.options.length > 0">
+
+    <tabset justified="true">
+
+        <tab heading="{{option.displayName}}" class="horizontal-menu" ng-repeat="option in model.selectedOptionSet.options">
+
+            <div class="row vertical-spacing" ng-if="!model.showFileUpload">
+                <div class="col-sm-12">
+                    <button type="button"
+                            class="btn btn-primary"
+                            title="{{'file_upload'| translate}}"
+                            ng-click="showFileUpload()">
+                        <i class="fa fa-upload" aria-hidden="true"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="row vertical-spacing" ng-if="model.showFileUpload">
+
+                <div class="col-sm-6">
+                    <div class="panel panel-default">
+                        <div class="panel-heading">{{'select_file' | translate}}</div>
+                        <div class="panel-body">
+                            
+                            <input multiple type="file" file-upload="model.fileInput"/>
+                            
+                            <table class="table table-bordered table-striped" ng-if="model.fileInput.length > 0">
+                                <thead>
+                                    <tr>
+                                        <th>
+                                            {{'file_name' | translate}}
+                                        </th>
+                                        <th>
+                                            {{'file_size' | translate}}
+                                        </th>
+                                        <th>
+                                            {{'description' | translate}}
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr ng-repeat="file in model.fileInput">
+                                        <td>
+                                            {{file.name}}
+                                        </td>
+                                        <td>
+                                            {{file.size | fileSize}}
+                                        </td>
+                                        <td>
+                                            <input type="text" 
+                                                class="form-control pull-center" 
+                                                ng-model="file.description">
+                                        </td>
+                                    </tr>
+                                </tbody>                                
+                            </table>
+
+                            <div class="row col-sm-12 vertical-spacing">
+
+                                <button type="button"
+                                        class="btn btn-danger"
+                                        ng-click="cancelFileUpload()">
+                                    {{'cancel' | translate}}
+                                </button>
+                                <button type="button"
+                                        class="btn btn-primary"
+                                        ng-click="uploadFile(option)">
+                                    {{'upload' | translate}}
+                                </button>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                
+            </div>
+            <div class="row">
+                <div class="col-sm-12">
+                    <table class="table table-bordered table-striped" ng-if="(model.documents | filter : {folder: option.code}).length > 0">
+                        <thead>
+                            <tr>
+                                <th class="vertical-center" ng-repeat="header in model.documentHeaders">
+                                    {{header.title| translate}}
+                                </th>
+                                <th class="vertical-center">
+                                    {{'action' | translate}}
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr ng-repeat="document in model.documents | filter : {folder: option.code} : true">
+                                <td class="vertical-center" ng-repeat="header in model.documentHeaders">
+                                    {{document[header.id]}}
+                                </td>
+                                <td class="vertical-center">
+                                    <span ng-if="document.path">
+                                        <button type="button"
+                                                class="btn btn-success"
+                                                title="{{'download_file'| translate}}"
+                                                ng-click="downloadFile(document.path, $event)">
+                                            <i class="fa fa-download" aria-hidden="true"></i>
+                                        </button>
+                                        <button type="button"
+                                                class="btn btn-danger"
+                                                title="{{'delete_file'| translate}}"
+                                                ng-click="deleteFile(document, $event)">
+                                            <i class="fa fa-trash-o" aria-hidden="true"></i>
+                                        </button>
+                                        
+                                    </span>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    
+                    <div class="alert alert-warning" ng-if="(model.documents | filter : {folder: option.code}).length === 0">
+                        {{'no_files_available' | translate}}
+                    </div>
+                </div>
+            </div>
+        </tab>
+    </tabset>
+</div>
+
