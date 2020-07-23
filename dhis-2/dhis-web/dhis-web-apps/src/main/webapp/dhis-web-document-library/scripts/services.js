@@ -245,7 +245,7 @@ var docLibraryServices = angular.module('docLibraryServices', ['ngResource'])
     
     var skipPaging = "&skipPaging=true";
     
-    var getByOrgUnitAndProgram = function(orgUnit, ouMode, program, typeDataElement, fileDataElement){
+    var getByOrgUnitAndProgram = function(orgUnit, ouMode, program, typeDataElement, fileDataElement, descDataElement){
         var url = DHIS2URL + '/events.json?' + 'orgUnit=' + orgUnit + '&ouMode='+ ouMode + '&program=' + program + skipPaging;
 
         /*if( startDate && endDate ){
@@ -273,7 +273,10 @@ var docLibraryServices = angular.module('docLibraryServices', ['ngResource'])
 
                     if( ev.dataValues ){
                         angular.forEach(ev.dataValues, function(dv){
-                            if( dv.dataElement === typeDataElement.id ){
+                            if( dv.dataElement === descDataElement.id){
+                                doc.description = dv.value;
+                            }                                
+                            else if( dv.dataElement === typeDataElement.id ){
                                 doc.folder = dv.value;
                             }
                             else if( dv.dataElement === fileDataElement.id ){

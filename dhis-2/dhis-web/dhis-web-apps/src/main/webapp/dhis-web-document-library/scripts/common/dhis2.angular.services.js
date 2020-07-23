@@ -36,7 +36,7 @@ var d2Services = angular.module('d2Services', ['ngResource'])
         var locale = 'en';
 
         var promise = $http.get( DHIS2URL + '/systemSettings?key=keyUiLocale&key=keyCalendar&key=keyDateFormat&key=multiOrganisationUnitForms').then(function (response) {
-            SessionStorageService.set('USER_PROFILE', response.data);
+            SessionStorageService.set('SYSTEM_SETTING', response.data);
             if (response.data && response.data.settings && response.data.keyUiLocale) {
                 locale = response.data.keyUiLocale;
             }
@@ -49,7 +49,7 @@ var d2Services = angular.module('d2Services', ['ngResource'])
     };
     return function () {
         var deferred = $q.defer(), translations;
-        var userProfile = SessionStorageService.get('USER_PROFILE');
+        var userProfile = SessionStorageService.get('SYSTEM_SETTING');
         if (userProfile && userProfile.keyUiLocale) {
             getTranslationStrings(userProfile.keyUiLocale).then(function (response) {
                 translations = response.keys;
@@ -360,6 +360,11 @@ var d2Services = angular.module('d2Services', ['ngResource'])
                 }
             }
             return false;
+        },
+        getUsername: function(){            
+            var userProfile = SessionStorageService.get('USER_PROFILE');
+            var username = userProfile && userProfile.userCredentials && userProfile.userCredentials.username ? userProfile.userCredentials.username : '';
+            return username;
         },
         getSum: function( op1, op2 ){
             op1 = dhis2.validation.isNumber(op1) ? parseInt(op1) : 0;

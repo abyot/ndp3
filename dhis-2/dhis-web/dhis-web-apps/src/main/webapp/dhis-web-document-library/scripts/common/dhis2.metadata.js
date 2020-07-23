@@ -363,7 +363,6 @@ dhis2.metadata.getMetaObjects = function( store, objs, url, filter, storage, db,
     return def.promise();
 };
 
-//return dhis2.metadata.getMetaObject(null, 'ACCESSIBLE_PROGRAMS', dhis2.doclib.apiUrl + '/programs.json', 'fields=id,access[data[write]]&paging=false', 'sessionStorage', dhis2.doclib.store);
 dhis2.metadata.getMetaObject = function( id, store, url, filter, storage, db )
 {
     var def = $.Deferred();
@@ -403,6 +402,28 @@ dhis2.metadata.getMetaObject = function( id, store, url, filter, storage, db )
     });
     
     return def.promise();
+};
+
+dhis2.metadata.simpleGet = function( store, url, filter, storage )
+{
+    return $.ajax(
+        {
+            url: url,
+            type: 'GET',
+            data: filter
+        })
+        .then(function(response) {
+            if(storage === 'localStorage'){                
+                localStorage[store] = JSON.stringify(response);
+            }            
+            if(storage === 'sessionStorage'){
+                var SessionStorageService = angular.element('body').injector().get('SessionStorageService');
+                SessionStorageService.set(store, response);
+            }
+            if(storage === 'temp'){
+                return response || {};
+            }
+        });
 };
 
 dhis2.metadata.processObject = function(obj, prop){

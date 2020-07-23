@@ -1,9 +1,6 @@
 <div ng-if="model.selectedOptionSet && model.selectedOptionSet.options.length > 0">
-
     <tabset justified="true">
-
         <tab heading="{{option.displayName}}" class="horizontal-menu" ng-repeat="option in model.selectedOptionSet.options">
-
             <div class="row vertical-spacing" ng-if="!model.showFileUpload">
                 <div class="col-sm-12">
                     <button type="button"
@@ -15,14 +12,11 @@
                 </div>
             </div>
             <div class="row vertical-spacing" ng-if="model.showFileUpload">
-
                 <div class="col-sm-6">
                     <div class="panel panel-default">
                         <div class="panel-heading">{{'select_file' | translate}}</div>
                         <div class="panel-body">
-                            
                             <input multiple type="file" file-upload="model.fileInput"/>
-                            
                             <table class="table table-bordered table-striped" ng-if="model.fileInput.length > 0">
                                 <thead>
                                     <tr>
@@ -46,14 +40,20 @@
                                             {{file.size | fileSize}}
                                         </td>
                                         <td>
-                                            <input type="text" 
-                                                class="form-control pull-center" 
-                                                ng-model="file.description">
+                                            <ng-form name="innerForm">
+                                                <input type="text" 
+                                                       name="foo"
+                                                       placeholder="{{'please_describe_document'| translate}}"
+                                                       class="form-control pull-center" 
+                                                       ng-required="true" 
+                                                       ng-model="file.description">
+                                                <span ng-messages="innerForm.foo.$error" ng-if="interacted(innerForm.foo)" class="required" ng-messages-include="../dhis-web-commons/angular-forms/error-messages.html">                                         
+                                                </span>
+                                            </ng-form>
                                         </td>
                                     </tr>
                                 </tbody>                                
                             </table>
-
                             <div class="row col-sm-12 vertical-spacing">
 
                                 <button type="button"
@@ -71,8 +71,6 @@
                         </div>
                     </div>
                 </div>
-
-                
             </div>
             <div class="row">
                 <div class="col-sm-12">
@@ -112,7 +110,6 @@
                             </tr>
                         </tbody>
                     </table>
-                    
                     <div class="alert alert-warning" ng-if="(model.documents | filter : {folder: option.code}).length === 0">
                         {{'no_files_available' | translate}}
                     </div>

@@ -137,6 +137,7 @@ function downloadMetaData()
     var promise = def.promise();
 
     promise = promise.then( dhis2.doclib.store.open );
+    promise = promise.then( getUserProfile );
     promise = promise.then( getUserAccessiblePrograms );
     promise = promise.then( getOrgUnitLevels );
     promise = promise.then( getSystemSetting );
@@ -168,12 +169,16 @@ function downloadMetaData()
     def.resolve();    
 }
 
-function getUserAccessiblePrograms(){
+function getUserProfile(){
+    return dhis2.metadata.simpleGet('USER_PROFILE', dhis2.doclib.apiUrl + '/me.json', 'fields=id,displayName,userCredentials[username]', 'sessionStorage');
+}
+
+function getUserAccessiblePrograms()
+{
     return dhis2.metadata.getMetaObject(null, 'ACCESSIBLE_PROGRAMS', dhis2.doclib.apiUrl + '/programs.json', 'fields=id,access[data[write]]&paging=false', 'sessionStorage', dhis2.doclib.store);
 }
 
-function getOrgUnitLevels()
-{
+function getOrgUnitLevels(){
     dhis2.doclib.store.getKeys( 'ouLevels').done(function(res){
         if(res.length > 0){
             return;
@@ -182,11 +187,8 @@ function getOrgUnitLevels()
     });
 }
 
-function getSystemSetting(){   
-    if(localStorage['SYSTEM_SETTING']){
-       return; 
-    }    
-    return dhis2.metadata.getMetaObject(null, 'SYSTEM_SETTING', dhis2.doclib.apiUrl + '/systemSettings?key=keyUiLocale&key=keyCalendar&key=keyDateFormat&key=multiOrganisationUnitForms', '', 'localStorage', dhis2.doclib.store);
+function getSystemSetting(){
+    return dhis2.metadata.simpleGet('SYSTEM_SETTING', dhis2.doclib.apiUrl + '/systemSettings?key=keyUiLocale&key=keyCalendar&key=keyDateFormat&key=multiOrganisationUnitForms','', 'sessionStorage');
 }
 
 function getMetaCategoryCombos(){
@@ -210,7 +212,6 @@ function filterMissingPrograms( objs ){
 }
 
 function getPrograms( ids ){
-    //fields=*,categoryCombo[id,displayName,isDefault,categories[id,displayName]],organisationUnits[id,displayName],programStages[*,dataEntryForm[*],programStageSections[id,displayName,description,sortOrder,dataElements[id]],programStageDataElements[*,dataElement[*,optionSet[id]]]]&paging=false&filter=id:in:' + ids
     return dhis2.metadata.getBatches( ids, batchSize, 'programs', 'programs', dhis2.doclib.apiUrl + '/programs.json', 'paging=false&fields=*,categoryCombo[id],attributeValues[value,attribute[id,name,valueType,code]],organisationUnits[id,level],programStages[*,programStageDataElements[id,dataElement[*,attributeValues[value,attribute[id,name,valueType,code]]]]]', 'idb', dhis2.doclib.store, dhis2.metadata.processObject);
 }
 
