@@ -3,14 +3,14 @@
         <div class="col-sm-7 green-info-area">
             <div class="row small-vertical-spacing">
                 <div class="col-sm-4">
-                    {{'ndp'| translate}}
+                    {{'sub_program'| translate}}
                 </div>
                 <div class="col-sm-8">
-                    <ui-select ng-model="model.selectedNDP" 
+                    <ui-select ng-model="model.selectedProgram" 
                                theme="select2"                                 
                                style="width:100%;">
-                        <ui-select-match allow-clear="true" class="form-control-ui-select" placeholder="{{model.ndp && model.ndp.options && model.ndp.options.length > 0 ? 'select_or_search' : 'empty'| translate}}">{{$select.selected.displayName|| $select.selected}}</ui-select-match>
-                        <ui-select-choices repeat="opt in model.ndp.options | filter: $select.search | limitTo:maxOptionSize | orderBy: 'order' ">
+                        <ui-select-match allow-clear="true" class="form-control-ui-select" placeholder="{{model.ndpProgram && model.ndpProgram.options && model.ndpProgram.options.length > 0 ? 'select_or_search' : 'empty'| translate}}">{{$select.selected.displayName|| $select.selected}}</ui-select-match>
+                        <ui-select-choices repeat="opt in model.ndpProgram.options | filter: $select.search | limitTo:maxOptionSize | orderBy: 'order' ">
                             <span ng-bind-html="opt.displayName | highlight: $select.search"></span>
                         </ui-select-choices>
                     </ui-select>
@@ -18,32 +18,17 @@
             </div>
             <div class="row small-vertical-spacing">
                 <div class="col-sm-4">
-                    {{'objective'| translate}}
+                    {{'performance'| translate}}
                 </div>
                 <div class="col-sm-8">
-                    <ui-select ng-model="model.selectedDataElementGroupSet" 
-                               theme="select2"                                 
-                               style="width:100%;">
-                        <ui-select-match allow-clear="true" class="form-control-ui-select" placeholder="{{model.ndpDataElementGroupSets && model.ndpDataElementGroupSets.length > 0 ? 'select_or_search' : 'empty'| translate}}">{{$select.selected.displayName|| $select.selected}}</ui-select-match>
-                        <ui-select-choices group-by="'domain'" repeat="degs in model.ndpDataElementGroupSets | filter: $select.search | filter: {ndp: model.selectedNDP.code} : true | limitTo:maxOptionSize | orderBy: ['domainOrder', 'displayName']">
-                            <span ng-bind-html="degs.displayName | highlight: $select.search"></span>
-                        </ui-select-choices>
-                    </ui-select>
-                </div>
-            </div>
-            <div class="row small-vertical-spacing">
-                <div class="col-sm-4">
-                    {{'kra'| translate}}
-                </div>
-                <div class="col-sm-8">
-                    <ui-select ng-model="model.selectedDataElementGroup" 
-                               theme="select2"
-                               style="width:100%;">
-                        <ui-select-match allow-clear="true" class="form-control-ui-select" placeholder="{{model.selectedDataElementGroupSet && model.selectedDataElementGroupSet.dataElementGroups && model.selectedDataElementGroupSet.dataElementGroups.length > 0 ? 'select_or_search' : 'empty'| translate}}">{{$select.selected.displayName|| $select.selected}}</ui-select-match>
-                        <ui-select-choices repeat="deg in model.selectedDataElementGroupSet.dataElementGroups | filter: $select.search | limitTo:maxOptionSize | orderBy: ['domainOrder', 'displayName']">
-                            <span ng-bind-html="deg.displayName | highlight: $select.search"></span>
-                        </ui-select-choices>
-                    </ui-select>
+                    <label class="checkbox-inline">
+                        <input type="checkbox" ng-model="model.physicalPerformance">
+                        <span>{{'physical' | translate}}</span>
+                    </label>
+                    <label class="checkbox-inline">
+                        <input type="checkbox" ng-model="model.financialPerformance">
+                        <span>{{'financial' | translate}}</span>
+                    </label>                    
                 </div>
             </div>
             <div class="row bottomright">
@@ -116,9 +101,11 @@
                     </div>
                 </div>
             </div>
+
         </div>
     </div>
 </div>
+
 <div class="row" ng-if="model.reportReady">
     <div class="col-sm-12" ng-if="model.dataExists">
         <span class="long-horizontal-spacing hideInPrint">
@@ -136,8 +123,8 @@
             <table class="table table-bordered table-striped">
                 <thead>
                     <tr>
-                        <th colspan="{{model.dataHeaders.length + 3}}">
-                            {{model.selectedNDP.displayName}}
+                        <th class="center" colspan="{{model.dataHeaders.length + 3}}">
+                            {{model.selectedProgram.displayName}}
                         </th>
                     </tr>
                     <tr>
@@ -149,8 +136,8 @@
                         </th>
                     </tr>
                     <tr>
-                        <th>{{'category' | translate}}</th>
-                        <th>{{'kra' | translate}}</th>
+                        <th>{{'objective' | translate}}</th>
+                        <th>{{'outcome' | translate}}</th>
                         <th>{{'indicator' | translate}}</th>
                         <th class="center" ng-repeat="header in model.dataHeaders">
                             {{model.metaData.items[header.dimensionId].name}}

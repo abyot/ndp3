@@ -12,6 +12,7 @@ ndpFramework.controller('HomeController',
                 orderByFilter,
                 PeriodService,
                 MetaDataFactory,
+                OrgUnitFactory,
                 Analytics) {
    
     $scope.model = {
@@ -40,17 +41,33 @@ ndpFramework.controller('HomeController',
         ndpProgram: null,
         selectedNDP: null,
         selectedProgram: null,
-        groupSetSize: {}
+        groupSetSize: {},
+        physicalPerformance: true,
+        financialPerformance: true
     };
 
+    //Get orgunits for the logged in user
+    OrgUnitFactory.getViewTreeRoot().then(function(response) {
+        $scope.orgUnits = response.organisationUnits;
+        angular.forEach($scope.orgUnits, function(ou){
+            ou.show = true;
+            angular.forEach(ou.children, function(o){
+                o.hasChildren = o.children && o.children.length > 0 ? true : false;
+            });
+        });
+        $scope.selectedOrgUnit = $scope.orgUnits[0] ? $scope.orgUnits[0] : null;
+    });
+    
+    
     $scope.model.horizontalMenus = [
         {id: 'sdg', title: 'sdg_status', order: 1, view: 'components/home/sdg-status.html'},
         {id: 'ndp', title: 'ndp_status', order: 2, view: 'components/home/ndp-status.html', active: true},
         {id: 'program', title: 'programme_performance', order: 3, view: 'components/home/program-performance.html'},
-        {id: 'project', title: 'project_status', order: 4, view: 'components/home/project-status.html'},
-        {id: 'sector', title: 'sector_performance', order: 5, view: 'components/home/sector-performance.html'},
-        {id: 'vote', title: 'vote_performance', order: 6, view: 'components/home/vote-performance.html'},
-        {id: 'subNational', title: 'sub_national_data', order: 7, view: 'components/home/sub-national-data.html'}
+        {id: 'sub-program', title: 'sub_program_performance', order: 4, view: 'components/home/sub-program-performance.html'},
+        {id: 'project', title: 'project_status', order: 5, view: 'components/home/project-status.html'},
+        //{id: 'sector', title: 'sector_performance', order: 5, view: 'components/home/sector-performance.html'},
+        //{id: 'vote', title: 'vote_performance', order: 6, view: 'components/home/vote-performance.html'},
+        {id: 'subNational', title: 'sub_national_data', order: 6, view: 'components/home/sub-national-data.html'}
     ];
 
     $scope.model.activeHorizontalMenu = $scope.model.horizontalMenus[1];
@@ -288,7 +305,7 @@ ndpFramework.controller('HomeController',
     };
     
     $scope.getAnalyticsData = function(){
-        
+
         $scope.model.data = null;
         var analyticsUrl = '';
         switch( $scope.model.activeHorizontalMenu.id ){
@@ -304,12 +321,21 @@ ndpFramework.controller('HomeController',
                     return;
                 }
                 break;
+            case 'sub-program':
+                if( !$scope.model.selectedSubProgram ){
+                    NotificationService.showNotifcationDialog($translate.instant("error"), $translate.instant("missing_sub-program"));
+                    return;
+                }
             default:
                 //NotificationService.showNotifcationDialog($translate.instant("error"), $translate.instant("missing_horizontal_menu"));
         }
+        
+        if( !$scope.selectedOrgUnit || !$scope.selectedOrgUnit.id ){
+            NotificationService.showNotifcationDialog($translate.instant("error"), $translate.instant("missing_vote"));
+        }
 
         if( $scope.model.dataElementGroup && $scope.model.selectedPeriods.length > 0){
-            analyticsUrl += '&filter=ou:ONXWQ2EoOcP&displayProperty=NAME&includeMetadataDetails=true';
+            analyticsUrl += '&filter=ou:'+ $scope.selectedOrgUnit.id +'&displayProperty=NAME&includeMetadataDetails=true';
             analyticsUrl += '&dimension=Duw5yep8Vae:' + $.map($scope.model.baseLineTargetActualDimensions, function(dm){return dm;}).join(';');
             analyticsUrl += '&dimension=pe:' + $.map($scope.model.selectedPeriods, function(pe){return pe.id;}).join(';');
 
@@ -319,7 +345,7 @@ ndpFramework.controller('HomeController',
                     des.push( de.id );
                 });
             });
-            
+
             analyticsUrl += '&dimension=dx:' + des.join(';');
 
             Analytics.getData( analyticsUrl ).then(function(data){
@@ -390,6 +416,28 @@ ndpFramework.controller('HomeController',
                 }
             });
         }        
+    };
+    
+    $scope.showOrgUnitTree = function(){
+        var modalInstance = $modal.open({
+            templateUrl: 'components/outree/orgunit-tree.html',
+            controller: 'OuTreeController',
+            resolve: {
+                orgUnits: function(){
+                    return $scope.orgUnits;
+                },
+                selectedOrgUnit: function(){
+                    return $scope.selectedOrgUnit;
+                }
+            }
+        });
+
+        modalInstance.result.then(function ( selectedOu ) {
+            if( selectedOu && selectedOu.id ){
+                $scope.selectedOrgUnit = selectedOu;
+                $scope.resetDataView();
+            }
+        }); 
     };
     
     $scope.filterData = function(header, dataElement){
