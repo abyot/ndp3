@@ -234,7 +234,7 @@ var docLibraryServices = angular.module('docLibraryServices', ['ngResource'])
 })
 
 /* service for handling events */
-.service('EventService', function($http, $q, DHIS2URL, CommonUtils, DateUtils, FileService) {   
+.service('EventService', function($http, $q, DHIS2URL, CommonUtils, DateUtils, FileService, OptionSetService) {
     
     var bytesToSize = function ( bytes ){
         var sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
@@ -245,7 +245,7 @@ var docLibraryServices = angular.module('docLibraryServices', ['ngResource'])
     
     var skipPaging = "&skipPaging=true";
     
-    var getByOrgUnitAndProgram = function(orgUnit, ouMode, program, typeDataElement, fileDataElement, descDataElement){
+    var getByOrgUnitAndProgram = function(orgUnit, ouMode, program, typeDataElement, fileDataElement, optionSets, dataElementById){
         var url = DHIS2URL + '/events.json?' + 'orgUnit=' + orgUnit + '&ouMode='+ ouMode + '&program=' + program + skipPaging;
 
         /*if( startDate && endDate ){
@@ -273,10 +273,7 @@ var docLibraryServices = angular.module('docLibraryServices', ['ngResource'])
 
                     if( ev.dataValues ){
                         angular.forEach(ev.dataValues, function(dv){
-                            if( dv.dataElement === descDataElement.id){
-                                doc.description = dv.value;
-                            }                                
-                            else if( dv.dataElement === typeDataElement.id ){
+                            if( dv.dataElement === typeDataElement.id ){
                                 doc.folder = dv.value;
                             }
                             else if( dv.dataElement === fileDataElement.id ){
@@ -287,6 +284,16 @@ var docLibraryServices = angular.module('docLibraryServices', ['ngResource'])
                                     doc.type = res.contentType || 'undefined';
                                     doc.path = '/events/files?dataElementUid=' + dv.dataElement + '&eventUid=' + ev.event;
                                 });
+                            }
+                            else{
+                                var val = dv.value;
+                                var de = dataElementById[dv.dataElement];
+
+                                if( de && de.optionSetValue ){
+                                    val = OptionSetService.getName(optionSets[de.optionSet.id].options, String(val));
+                                }
+
+                                doc[dv.dataElement] = val;
                             }
                         });
                     }

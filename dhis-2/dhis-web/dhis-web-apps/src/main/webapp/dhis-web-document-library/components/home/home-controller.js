@@ -18,6 +18,7 @@ docLibrary.controller('HomeController',
                 DateUtils,
                 FileService,
                 CommonUtils,
+                OptionSetService,
                 DHIS2URL) {
                     
     $scope.model = {
@@ -29,16 +30,16 @@ docLibrary.controller('HomeController',
         events: [],
         programs: [],
         fileInput: null,
-        showFileUpload: false
+        showFileUpload: false,
+        dataElements: [],
+        dynamicHeaders: []
     };
     
-    $scope.model.documentHeaders = [
-        {id: 'dateUploaded', title: 'date_uploaded'},
-        {id: 'uploadedBy', title: 'uploaded_by'},
+    $scope.model.staticHeaders = [
         {id: 'name', title: 'file_name'},
-        {id: 'description', title: 'description'},
-        {id: 'type', title: 'file_type'},
-        {id: 'size', title: 'file_size'}
+        {id: 'size', title: 'file_size'},
+        {id: 'dateUploaded', title: 'date_uploaded'},
+        {id: 'uploadedBy', title: 'uploaded_by'}
     ];
     
     //watch for selection of org unit from tree
@@ -89,32 +90,35 @@ docLibrary.controller('HomeController',
         {
             if ( $scope.model.selectedProgram.programStages.length > 1 )
             {
-                NotificationService.showNotifcationDialog($translate.instant("error"), $translate.instant("invalid_document_category"));
+                NotificationService.showNotifcationDialog($translate.instant("error"), $translate.instant("invalid_document_folder"));
                 return;
             }
             
             $scope.model.selectedProgramStage = $scope.model.selectedProgram.programStages[0];
+
             var prDes = $scope.model.selectedProgramStage.programStageDataElements;
             
-            angular.forEach(prDes, function(prDe){
-                if( prDe.dataElement.valueType === 'FILE_RESOURCE' ){
-                    $scope.model.fileDataElement = prDe.dataElement;
-                }
-                else if( prDe.dataElement.optionSetValue ){
-                    $scope.model.typeDataElement = prDe.dataElement;
-                }
-                else{
-                    $scope.model.descDataElement = prDe.dataElement;
-                }
-            });
+            var docDe = $filter('filter')(prDes, {dataElement: {valueType: 'FILE_RESOURCE'}});
+            var typeDe = $filter('filter')(prDes, {dataElement: {isDocumentFolder: true}});
             
-            if( !$scope.model.typeDataElement || !$scope.model.fileDataElement || !$scope.model.descDataElement ){
-                NotificationService.showNotifcationDialog($translate.instant("error"), $translate.instant("invalid_document_category_configuration"));
+            if( docDe.length !== 1 || typeDe.length !== 1 ){
+                NotificationService.showNotifcationDialog($translate.instant("error"), $translate.instant("invalid_document_folder_configuration"));
                 return;
             }
 
+            $scope.model.fileDataElement = docDe[0].dataElement;
+            $scope.model.typeDataElement = typeDe[0].dataElement;
             $scope.model.selectedOptionSet = $scope.model.optionSets[$scope.model.typeDataElement.optionSet.id];
             
+            $scope.model.dynamicHeaders = [];
+            $scope.model.dataElements = [];
+            angular.forEach(prDes, function(prDe){
+                $scope.model.dataElements[prDe.dataElement.id] = prDe.dataElement;
+                if( prDe.dataElement.valueType !== 'FILE_RESOURCE' && !prDe.dataElement.isDocumentFolder ){
+                    $scope.model.dynamicHeaders.push(prDe.dataElement);
+                }
+            });
+
             if( !$scope.model.selectedOptionSet || $scope.model.selectedOptionSet.lenth === 0 ){
                 NotificationService.showNotifcationDialog($translate.instant("error"), $translate.instant("missing_document_types"));
                 return;
@@ -133,9 +137,9 @@ docLibrary.controller('HomeController',
             $scope.model.selectedProgram.id, 
             $scope.model.typeDataElement, 
             $scope.model.fileDataElement,
-            $scope.model.descDataElement).then(function(events){
+            $scope.model.optionSets,
+            $scope.model.dataElements).then(function(events){
                 $scope.model.documents = events;
-                console.log('documents: ', $scope.model.documents);
             });
         }
     };
@@ -143,6 +147,8 @@ docLibrary.controller('HomeController',
     $scope.resetFileUploadForm = function(){
         $scope.model.showFileUpload = false;
         $scope.model.fileInput = null;
+        $scope.outerForm.submitted = false;
+        $scope.outerForm.$setPristine();
     };
     
     $scope.showFileUpload = function(){
@@ -185,22 +191,34 @@ docLibrary.controller('HomeController',
             FileService.upload(f).then(function(fileRes){
                     
                 if(fileRes && fileRes.status === 'OK' && fileRes.response && fileRes.response.fileResource && fileRes.response.fileResource.id && fileRes.response.fileResource.name){
+                    var dataValues = [{
+                        dataElement: $scope.model.typeDataElement.id,
+                        value: fileType.code
+                    },{
+                        dataElement: $scope.model.fileDataElement.id,
+                        value: fileRes.response.fileResource.id
+                    }];
+
+                    angular.forEach($scope.model.dynamicHeaders, function(header){
+                        var value = f[header.id];
+                        if( header.optionSetValue){
+                            value = OptionSetService.getName($scope.model.optionSets[header.optionSet.id].options, String(value));
+                        }
+
+                        var dv = {
+                            dataElement: header.id,
+                            value: value
+                        };
+                        dataValues.push( dv );
+                    });
+
                     var ev = {
                         program: $scope.model.selectedProgram.id,
                         programStage: $scope.model.selectedProgramStage.id,
                         orgUnit: $scope.selectedOrgUnit.id,
                         status: 'ACTIVE',
                         eventDate: today,
-                        dataValues: [{
-                            dataElement: $scope.model.typeDataElement.id,
-                            value: fileType.code
-                        },{
-                            dataElement: $scope.model.fileDataElement.id,
-                            value: fileRes.response.fileResource.id
-                        },{
-                            dataElement: $scope.model.descDataElement.id,
-                            value: f.description
-                        }]
+                        dataValues: dataValues
                     };
                     
                     EventService.create(ev).then(function(eventRes){
@@ -221,6 +239,10 @@ docLibrary.controller('HomeController',
                                 path: '/events/files?dataElementUid=' + $scope.model.fileDataElement.id + '&eventUid=' + eventRes.response.importSummaries[0].reference,
                                 folder: fileType.code
                             };
+
+                            angular.forEach($scope.model.dynamicHeaders, function(header){
+                                d[header.id] = f[header.id];
+                            });
 
                             $scope.model.documents.splice(0,0,d);
                             $scope.outerForm.submitted = false;
@@ -270,6 +292,12 @@ docLibrary.controller('HomeController',
         ModalService.showModal({}, modalOptions).then(function(result){            
             if( document ){
                 EventService.deleteEvent(document).then(function(data){
+                    for( var i=0; i< $scope.model.documents.length; i++ ){
+                        if( $scope.model.documents[i].event === document.event ){
+                            $scope.model.documents.splice(i, 1);
+                            return;
+                        }
+                    }
                 });
             }
             if(e){
