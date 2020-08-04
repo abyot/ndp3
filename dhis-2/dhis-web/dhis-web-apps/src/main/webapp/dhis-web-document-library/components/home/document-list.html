@@ -1,4 +1,4 @@
-<div equal-height-nav-tabs ng-if="model.selectedOptionSet && model.selectedOptionSet.options.length > 0">
+<div equal-height-nav-tabs ng-if="(!model.isProgrammeDocument || model.isProgrammeDocument && model.selectedNdpProgram.id) && model.selectedOptionSet && model.selectedOptionSet.options.length > 0">
     <tabset justified="true">
         <tab heading="{{option.displayName}}" class="horizontal-menu" ng-repeat="option in model.selectedOptionSet.options">
             <div class="row vertical-spacing" ng-if="!model.showFileUpload">
@@ -103,7 +103,7 @@
             </div>
             <div class="row">
                 <div class="col-sm-12">
-                    <table class="table table-bordered table-striped" ng-if="(model.documents | filter : {folder: option.code}).length > 0">
+                    <table class="table table-bordered table-striped" ng-if="(model.documents | documentFilter:option.code:model.selectedNdpProgram:model.programmeDataElement).length > 0">
                         <thead>
                             <tr>
                                 <th class="vertical-center" ng-repeat="header in model.dynamicHeaders">
@@ -118,7 +118,7 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <tr ng-repeat="document in model.documents | filter : {folder: option.code} : true">
+                            <tr ng-repeat="document in model.documents | documentFilter:option.code:model.selectedNdpProgram:model.programmeDataElement">
                                 <td class="vertical-center" ng-repeat="header in model.dynamicHeaders">
                                     {{document[header.id]}}
                                 </td>

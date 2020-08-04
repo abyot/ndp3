@@ -32,7 +32,10 @@ docLibrary.controller('HomeController',
         fileInput: null,
         showFileUpload: false,
         dataElements: [],
-        dynamicHeaders: []
+        dynamicHeaders: [],
+        isProgrammeDocument: false,
+        selectedNdpProgram: null,
+        programmeDataElement: null
     };
     
     $scope.model.staticHeaders = [
@@ -66,6 +69,8 @@ docLibrary.controller('HomeController',
         $scope.model.programs = [];
         $scope.model.selectedProgramStage = null;
         $scope.model.selectedOptionSet = null;
+        $scope.model.selectedNdpProgram = null;
+        $scope.model.isProgrammeDocument = false;
         $scope.model.documents = [];
         if (angular.isObject($scope.selectedOrgUnit)) {            
             ProgramFactory.getByOu( $scope.selectedOrgUnit ).then(function(res){
@@ -79,12 +84,14 @@ docLibrary.controller('HomeController',
     $scope.$watch('model.selectedProgram', function() {        
         $scope.model.selectedProgramStage = null;
         $scope.model.selectedOptionSet = null;
+        $scope.model.selectedNdpProgram = null;
+        $scope.model.isProgrammeDocument = false;
         $scope.model.documents = [];
         if( angular.isObject($scope.model.selectedProgram) && $scope.model.selectedProgram.id){
             $scope.loadProgramDetails();
         }
     });
-    
+
     $scope.loadProgramDetails = function (){
         if( $scope.model.selectedProgram && $scope.model.selectedProgram.id && $scope.model.selectedProgram.programStages.length > 0)
         {
@@ -100,11 +107,17 @@ docLibrary.controller('HomeController',
             
             var docDe = $filter('filter')(prDes, {dataElement: {valueType: 'FILE_RESOURCE'}});
             var typeDe = $filter('filter')(prDes, {dataElement: {isDocumentFolder: true}});
+            var progDe = $filter('filter')(prDes, {dataElement: {isProgrammeDocument: true}});
             
             if( docDe.length !== 1 || typeDe.length !== 1 ){
                 NotificationService.showNotifcationDialog($translate.instant("error"), $translate.instant("invalid_document_folder_configuration"));
                 return;
             }
+
+            if( progDe.length === 1 ){
+                $scope.model.isProgrammeDocument = true;
+                $scope.model.programmeDataElement = progDe[0].dataElement;
+            };
 
             $scope.model.fileDataElement = docDe[0].dataElement;
             $scope.model.typeDataElement = typeDe[0].dataElement;
@@ -114,7 +127,7 @@ docLibrary.controller('HomeController',
             $scope.model.dataElements = [];
             angular.forEach(prDes, function(prDe){
                 $scope.model.dataElements[prDe.dataElement.id] = prDe.dataElement;
-                if( prDe.dataElement.valueType !== 'FILE_RESOURCE' && !prDe.dataElement.isDocumentFolder ){
+                if( prDe.dataElement.valueType !== 'FILE_RESOURCE' && !prDe.dataElement.isDocumentFolder && !prDe.dataElement.isProgrammeDocument){
                     $scope.model.dynamicHeaders.push(prDe.dataElement);
                 }
             });
@@ -198,6 +211,15 @@ docLibrary.controller('HomeController',
                         dataElement: $scope.model.fileDataElement.id,
                         value: fileRes.response.fileResource.id
                     }];
+
+                    if( $scope.model.isProgrammeDocument && $scope.model.selectedNdpProgram.code ){
+                        var dv = {
+                            dataElement: $scope.model.programmeDataElement.id,
+                            value: $scope.model.selectedNdpProgram.code
+                        };
+
+                        dataValues.push( dv );
+                    }
 
                     angular.forEach($scope.model.dynamicHeaders, function(header){
                         var value = f[header.id];
