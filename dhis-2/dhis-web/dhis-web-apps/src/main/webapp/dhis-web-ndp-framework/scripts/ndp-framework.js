@@ -30,7 +30,7 @@ if( dhis2.ndp.memoryOnly ) {
 dhis2.ndp.store = new dhis2.storage.Store({
     name: 'dhis2ndp',
     adapters: [dhis2.storage.IndexedDBAdapter, dhis2.storage.DomSessionStorageAdapter, dhis2.storage.InMemoryAdapter],
-    objectStores: ['dataElements', 'dataElementGroups', 'dataElementGroupSets', 'dataSets', 'optionSets', 'categoryCombos', 'attributes', 'ouLevels']
+    objectStores: ['dataElements', 'dataElementGroups', 'dataElementGroupSets', 'dataSets', 'optionSets', 'categoryCombos', 'attributes', 'ouLevels', 'programs']
 });
 
 (function($) {
@@ -128,56 +128,6 @@ function ajax_login()
 // Metadata downloading
 // -----------------------------------------------------------------------------
 
-/*function downloadMetaData()
-{
-    console.log('Loading required meta-data');
-    var def = $.Deferred();
-    var promise = def.promise();
-
-    promise = promise.then( dhis2.ndp.store.open );
-    promise = promise.then( getUserAccessibleDataSets );
-    promise = promise.then( getOrgUnitLevels );
-    promise = promise.then( getSystemSetting );
-    
-    //fetch data elements
-    promise = promise.then( getMetaDataElements );
-    promise = promise.then( filterMissingDataElements );
-    promise = promise.then( getDataElements );
-    
-    //fetch data element groups
-    promise = promise.then( getMetaDataElementGroups );
-    promise = promise.then( filterMissingDataElementGroups );
-    promise = promise.then( getDataElementGroups );
-    
-    //fetch data element groupsets
-    promise = promise.then( getMetaDataElementGroupSets );
-    promise = promise.then( filterMissingDataElementGroupSets );
-    promise = promise.then( getDataElementGroupSets );
-        
-    //fetch data sets
-    promise = promise.then( getMetaDataSets );
-    promise = promise.then( filterMissingDataSets );
-    promise = promise.then( getDataSets );
-    
-    //fetch option sets
-    promise = promise.then( getMetaOptionSets );
-    promise = promise.then( filterMissingOptionSets );
-    promise = promise.then( getOptionSets );
-        
-    //fetch indicator groups
-    promise = promise.then( getMetaCategoryCombos );
-    promise = promise.then( filterMissingCategoryCombos );
-    promise = promise.then( getCategoryCombos );
-    
-    promise.done(function() {        
-        dhis2.tc.metaDataCached = true;
-        dhis2.availability.startAvailabilityCheck();
-        console.log( 'Finished loading meta-data' );
-    });
-
-    def.resolve();    
-}*/
-
 dhis2.ndp.downloadMetaData = function()
 {
     console.log('Loading required meta-data');
@@ -221,7 +171,17 @@ dhis2.ndp.downloadMetaData = function()
         //fetch custom attributes
         .then( getMetaAttributes )
         .then( filterMissingAttributes )
-        .then( getAttributes );
+        .then( getAttributes )
+
+        //fetch programs
+        .then( getMetaPrograms )
+        .then( filterMissingPrograms )
+        .then( getPrograms );
+
+        //fetch tracked entity attributes
+        /*.then( getMetaTrackedEntityAttributes )
+        .then( filterMissingTrackedEntityAttributes )
+        .then( getTrackedEntityAttributes );*/
 };
 
 function getUserAccessibleDataSets(){
@@ -340,3 +300,27 @@ function filterMissingAttributes( objs ){
 function getAttributes( ids ){    
     return dhis2.metadata.getBatches( ids, batchSize, 'attributes', 'attributes', dhis2.ndp.apiUrl + '/attributes.json', 'paging=false&fields=:all,!access,!lastUpdatedBy,!lastUpdated,!created,!href,!user,!translations,!favorites,optionSet[id,displayName,code,options[id,displayName,code,sortOrder]]', 'idb', dhis2.ndp.store, dhis2.metadata.processObject);
 }
+
+function getMetaPrograms(){
+    return dhis2.metadata.getMetaObjectIds('programs', dhis2.ndp.apiUrl + '/programs.json', 'filter=programType:eq:WITH_REGISTRATION&paging=false&fields=id,version');
+}
+
+function filterMissingPrograms( objs ){
+    return dhis2.metadata.filterMissingObjIds('programs', dhis2.ndp.store, objs);
+}
+
+function getPrograms( ids ){
+    return dhis2.metadata.getBatches( ids, batchSize, 'programs', 'programs', dhis2.ndp.apiUrl + '/programs.json', 'paging=false&fields=*,programTrackedEntityAttributes[*,trackedEntityAttribute[*]],categoryCombo[id],attributeValues[value,attribute[id,name,valueType,code]],organisationUnits[id,level],programStages[*,programStageDataElements[id,dataElement[*,attributeValues[value,attribute[id,name,valueType,code]]]]]', 'idb', dhis2.ndp.store, dhis2.metadata.processObject);
+}
+
+/*function getMetaTrackedEntityAttributes(){
+    return dhis2.metadata.getMetaObjectIds('trackedEntityAttributes', dhis2.ndp.apiUrl + '/trackedEntityAttributes.json', 'paging=false&fields=id,version');
+}
+
+function filterMissingTrackedEntityAttributes( objs ){
+    return dhis2.metadata.filterMissingObjIds('trackedEntityAttributes', dhis2.ndp.store, objs);
+}
+
+function getTrackedEntityAttributes( ids ){
+    return dhis2.metadata.getBatches( ids, batchSize, 'trackedEntityAttributes', 'trackedEntityAttributes', dhis2.ndp.apiUrl + '/trackedEntityAttributes.json', 'paging=false&fields=*', 'idb', dhis2.ndp.store, dhis2.metadata.processObject);
+}*/

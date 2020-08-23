@@ -13,12 +13,14 @@ ndpFramework.controller('HomeController',
                 PeriodService,
                 MetaDataFactory,
                 OrgUnitFactory,
-                Analytics) {
+                Analytics,
+                ProjectService) {
    
     $scope.model = {
         metaDataCached: false,
         data: null,
         dataElements: [],
+        dataElementsById: [],
         dataElementGroups: [],
         dataElementGroupSets: [],
         selectedDataElementGroups: [],
@@ -40,10 +42,12 @@ ndpFramework.controller('HomeController',
         ndp: null,
         ndpProgram: null,
         selectedNDP: null,
+        programs: [],
         selectedProgram: null,
         groupSetSize: {},
         physicalPerformance: true,
-        financialPerformance: true
+        financialPerformance: true,
+        showProjectDetails: false
     };
 
     //Get orgunits for the logged in user
@@ -63,8 +67,8 @@ ndpFramework.controller('HomeController',
         {id: 'sdg', title: 'sdg_status', order: 1, view: 'components/home/sdg-status.html'},
         {id: 'ndp', title: 'ndp_status', order: 2, view: 'components/home/ndp-status.html', active: true},
         {id: 'program', title: 'programme_performance', order: 3, view: 'components/home/program-performance.html'},
-        {id: 'sub-program', title: 'sub_program_performance', order: 4, view: 'components/home/sub-program-performance.html'},
-        {id: 'project', title: 'project_status', order: 5, view: 'components/home/project-status.html'},
+        //{id: 'sub-program', title: 'sub_program_performance', order: 4, view: 'components/home/sub-program-performance.html'},
+        //{id: 'project', title: 'project_status', order: 5, view: 'components/home/project-status.html'},
         //{id: 'sector', title: 'sector_performance', order: 5, view: 'components/home/sector-performance.html'},
         //{id: 'vote', title: 'vote_performance', order: 6, view: 'components/home/vote-performance.html'},
         {id: 'subNational', title: 'sub_national_data', order: 6, view: 'components/home/sub-national-data.html'}
@@ -129,14 +133,14 @@ ndpFramework.controller('HomeController',
         }
     });
     
-    $scope.$watch('model.selectedProgram', function(){
+    $scope.$watch('model.selectedNdpProgram', function(){
         $scope.model.selectedDataElementGroupSets = [];
         $scope.model.selectedDataElementGroupSet = null;
         $scope.model.dataElementGroup = [];
         $scope.model.groupSetSize = {};
         $scope.resetDataView();
-        if( angular.isObject($scope.model.selectedProgram) && $scope.model.selectedProgram.id && $scope.model.selectedProgram.code){
-            $scope.model.selectedDataElementGroupSets = $filter('filter')($scope.model.dataElementGroupSets, {ndpProgramme: $scope.model.selectedProgram.code, indicatorGroupSetType: 'objective'});
+        if( angular.isObject($scope.model.selectedNdpProgram) && $scope.model.selectedNdpProgram.id && $scope.model.selectedNdpProgram.code){
+            $scope.model.selectedDataElementGroupSets = $filter('filter')($scope.model.dataElementGroupSets, {ndpProgramme: $scope.model.selectedNdpProgram.code, indicatorGroupSetType: 'objective'});
             angular.forEach($scope.model.selectedDataElementGroupSets, function(degs){
                 var size = 0;
                 angular.forEach(degs.dataElementGroups, function(deg){
@@ -156,130 +160,147 @@ ndpFramework.controller('HomeController',
         MetaDataFactory.getAll('attributes').then(function(attributes){
             
             $scope.model.attributes = attributes;
+            
+            MetaDataFactory.getAll('programs').then(function( programs ){
+                
+                $scope.model.programs = programs;
         
-            MetaDataFactory.getAll('categoryCombos').then(function(categoryCombos){
-                angular.forEach(categoryCombos, function(cc){
-                    $scope.model.categoryCombosById[cc.id] = cc;
-                });
+                MetaDataFactory.getAll('categoryCombos').then(function(categoryCombos){
+                    angular.forEach(categoryCombos, function(cc){
+                        $scope.model.categoryCombosById[cc.id] = cc;
+                    });
 
-                MetaDataFactory.getAll('optionSets').then(function(optionSets){
-                    
-                    $scope.model.ndp = $filter('filter')(optionSets, {code: 'ndp'})[0];
-                    $scope.model.ndpProgram = $filter('filter')(optionSets, {code: 'ndpIIIProgram'})[0];
-
-                    MetaDataFactory.getAll('dataSets').then(function(dataSets){
-
-                        angular.forEach(dataSets, function(ds){
-                            ds.dataElements = ds.dataElements.map(function(de){ return de.id; });
-                            $scope.model.dataSetsById[ds.id] = ds;
+                    MetaDataFactory.getAll('optionSets').then(function(optionSets){
+                        
+                        angular.forEach(optionSets, function(optionSet){
+                            $scope.model.optionSetsById[optionSet.id] = optionSet;
                         });
+                    
+                        $scope.model.ndp = $filter('filter')(optionSets, {code: 'ndp'})[0];
+                        $scope.model.ndpProgram = $filter('filter')(optionSets, {code: 'ndpIIIProgram'})[0];
 
-                        $scope.model.dataSets = dataSets;
+                        
 
-                        MetaDataFactory.getAll('dataElements').then(function(dataElements){
+                        MetaDataFactory.getAll('dataSets').then(function(dataSets){
 
-                            angular.forEach(dataElements, function(de){
-                                var cc = $scope.model.categoryCombosById[de.categoryCombo.id];
-                                de.disaggregation = !cc || cc.isDefault ? '-' : cc.displayName;
-
-                                for(var i=0; i<$scope.model.dataSets.length; i++){
-                                    if( $scope.model.dataSets[i].dataElements.indexOf(de.id) !== -1 ){
-                                        var ds = $scope.model.dataSets[i];
-                                        de.periodType = ds.periodType  === 'FinancialJuly' ? 'Fiscal year' : ds.periodType;
-                                        de.vote = ds.organisationUnits.length > 1 ? ds.organisationUnits[0].code + ' and others' : ds.organisationUnits[0].code;
-                                        break;
-                                    }
-                                }
+                            angular.forEach(dataSets, function(ds){
+                                ds.dataElements = ds.dataElements.map(function(de){ return de.id; });
+                                $scope.model.dataSetsById[ds.id] = ds;
                             });
 
-                            var item = {id: 'dataElements', name: $translate.instant('indicators')};
-                            $scope.model.selectedDictionary = item;
-                            $scope.model.dictionaryItems.push( item );
-                            $scope.model.dataElements = dataElements;
-                            $scope.sortHeader = {id: 'displayName', name: 'name', colSize: "col-sm-1", show: true, fetch: false};
-                            $scope.model.dictionaryHeaders['dataElements'] = [
-                                {id: 'displayName', name: 'name', colSize: "col-sm-1", show: true, fetch: false},
-                                {id: 'code', name: 'code', colSize: "col-sm-1", show: true, fetch: false},
-                                {id: 'disaggregation', name: 'disaggregation', colSize: "col-sm-1", show: true, fetch: false},
-                                {id: 'valueType', name: 'valueType', colSize: "col-sm-1", show: true, fetch: false},
-                                {id: 'periodType', name: 'frequency', colSize: "col-sm-1", show: true, fetch: false},
-                                {id: 'vote', name: 'vote', colSize: 'col-sm-1', show: true, fetch: false}
-                            ];
-                            
-                            angular.forEach($scope.model.attributes, function(att){
-                                if(att['dataElementAttribute']){
-                                    var header = {id: att.id, name: att.name, show: false, fetch: true, colSize: "col-sm-1"};
-                                    $scope.model.dictionaryHeaders['dataElements'].push(header);
-                                }
-                            });
+                            $scope.model.dataSets = dataSets;
 
-                            MetaDataFactory.getAll('dataElementGroups').then(function(dataElementGroups){
+                            MetaDataFactory.getAll('dataElements').then(function(dataElements){
 
-                                $scope.model.dictionaryHeaders['dataElementGroups'] = [
-                                    {id: 'displayName', name: 'name', colSize: "col-sm-1", show: true, fetch: false},                
-                                    {id: 'code', name: '_code', colSize: "col-sm-1", show: true, fetch: false}
-                                ];
+                                angular.forEach(dataElements, function(de){
+                                    $scope.model.dataElementsById[de.id] = de;
+                                    var cc = $scope.model.categoryCombosById[de.categoryCombo.id];
+                                    de.disaggregation = !cc || cc.isDefault ? '-' : cc.displayName;
 
-                                angular.forEach($scope.model.attributes, function(att){
-                                    if(att['dataElementGroupAttribute']){
-                                        var header = {id: att.id, name: att.name, show: false, fetch: true, colSize: "col-sm-1"};
-                                        $scope.model.dictionaryHeaders['dataElementGroups'].push(header);
+                                    for(var i=0; i<$scope.model.dataSets.length; i++){
+                                        if( $scope.model.dataSets[i].dataElements.indexOf(de.id) !== -1 ){
+                                            var ds = $scope.model.dataSets[i];
+                                            de.periodType = ds.periodType  === 'FinancialJuly' ? 'Fiscal year' : ds.periodType;
+                                            de.vote = ds.organisationUnits.length > 1 ? ds.organisationUnits[0].code + ' and others' : ds.organisationUnits[0].code;
+                                            break;
+                                        }
                                     }
                                 });
 
-                                $scope.model.dictionaryItems.push({id: 'dataElementGroups', name: $translate.instant('outcomes_outputs')});
-                                $scope.model.dataElementGroups = dataElementGroups;
-                                $scope.model.ndpDataElementGroupSets = [];
-                                $scope.model.programDataElementGroupSets = [];
-                                MetaDataFactory.getAll('dataElementGroupSets').then(function(dataElementGroupSets){
-                                    angular.forEach(dataElementGroupSets, function(degs){
-                                        if( degs.ndp ){
-                                            degs.domain = degs.ndp;
-                                            degs.domainOrder = 1;
-                                            $scope.model.ndpDataElementGroupSets.push( degs );
-                                        }
-                                        else if( degs.ndpProgramme && $scope.model.ndpProgram && $scope.model.ndpProgram.options){
-                                            degs.domain = $filter('filter')($scope.model.ndpProgram.options, {code: degs.ndpProgramme})[0].displayName;
-                                            degs.domainOrder = degs.ndpProgramme;
-                                            $scope.model.programDataElementGroupSets.push( degs );
-                                        }
-                                    });
+                                var item = {id: 'dataElements', name: $translate.instant('indicators')};
+                                $scope.model.selectedDictionary = item;
+                                $scope.model.dictionaryItems.push( item );
+                                $scope.model.dataElements = dataElements;
+                                $scope.sortHeader = {id: 'displayName', name: 'name', colSize: "col-sm-1", show: true, fetch: false};
+                                $scope.model.dictionaryHeaders['dataElements'] = [
+                                    {id: 'displayName', name: 'name', colSize: "col-sm-1", show: true, fetch: false},
+                                    {id: 'code', name: 'code', colSize: "col-sm-1", show: true, fetch: false},
+                                    {id: 'disaggregation', name: 'disaggregation', colSize: "col-sm-1", show: true, fetch: false},
+                                    {id: 'valueType', name: 'valueType', colSize: "col-sm-1", show: true, fetch: false},
+                                    {id: 'periodType', name: 'frequency', colSize: "col-sm-1", show: true, fetch: false},
+                                    {id: 'vote', name: 'vote', colSize: 'col-sm-1', show: true, fetch: false}
+                                ];
 
-                                    $scope.model.dictionaryHeaders['dataElementGroupSets'] = [
-                                        {id: 'displayName', name: 'name', colSize: "col-sm-3", show: true, fetch: false},                
+                                angular.forEach($scope.model.attributes, function(att){
+                                    if(att['dataElementAttribute']){
+                                        var header = {id: att.id, name: att.name, show: false, fetch: true, colSize: "col-sm-1"};
+                                        $scope.model.dictionaryHeaders['dataElements'].push(header);
+                                    }
+                                });
+
+                                MetaDataFactory.getAll('dataElementGroups').then(function(dataElementGroups){
+
+                                    $scope.model.dictionaryHeaders['dataElementGroups'] = [
+                                        {id: 'displayName', name: 'name', colSize: "col-sm-1", show: true, fetch: false},                
                                         {id: 'code', name: '_code', colSize: "col-sm-1", show: true, fetch: false}
                                     ];
 
                                     angular.forEach($scope.model.attributes, function(att){
-                                        if(att['dataElementGroupSetAttribute']){
+                                        if(att['dataElementGroupAttribute']){
                                             var header = {id: att.id, name: att.name, show: false, fetch: true, colSize: "col-sm-1"};
-                                            $scope.model.dictionaryHeaders['dataElementGroupSets'].push(header);
+                                            $scope.model.dictionaryHeaders['dataElementGroups'].push(header);
                                         }
                                     });
-                                
-                                    $scope.model.dictionaryItems.push({id: 'dataElementGroupSets', name: $translate.instant('goals_objectives_interventions')});
-                                    $scope.model.dataElementGroupSets = dataElementGroupSets;
 
-                                    $scope.model.metaDataCached = true;
-                                    $scope.model.menuTitle = $translate.instant('menu_title');
-                                    $scope.model.selectedMenu = 'NDP';
-                                    
-                                    $scope.model.periods = PeriodService.getPeriods($scope.model.selectedPeriodType, $scope.model.periodOffset, $scope.model.openFuturePeriods);
-                                    
-                                    var selectedPeriodNames = ['2020/21', '2021/22', '2022/23', '2023/24', '2024/25'];
-                                    
-                                    angular.forEach($scope.model.periods, function(pe){
-                                        if(selectedPeriodNames.indexOf(pe.displayName) > -1 ){
-                                           $scope.model.selectedPeriods.push(pe);
-                                        } 
+                                    $scope.model.dictionaryItems.push({id: 'dataElementGroups', name: $translate.instant('outcomes_outputs')});
+                                    $scope.model.dataElementGroups = dataElementGroups;
+                                    $scope.model.ndpDataElementGroupSets = [];
+                                    $scope.model.programDataElementGroupSets = [];
+                                    MetaDataFactory.getAll('dataElementGroupSets').then(function(dataElementGroupSets){
+                                        angular.forEach(dataElementGroupSets, function(degs){
+                                            if( degs.ndp ){
+                                                degs.domain = degs.ndp;
+                                                degs.domainOrder = 1;
+                                                $scope.model.ndpDataElementGroupSets.push( degs );
+                                            }
+                                            else if( degs.ndpProgramme && $scope.model.ndpProgram && $scope.model.ndpProgram.options){
+                                                degs.domain = $filter('filter')($scope.model.ndpProgram.options, {code: degs.ndpProgramme})[0].displayName;
+                                                degs.domainOrder = degs.ndpProgramme;
+                                                $scope.model.programDataElementGroupSets.push( degs );
+                                            }
+                                        });
+
+                                        $scope.model.dictionaryHeaders['dataElementGroupSets'] = [
+                                            {id: 'displayName', name: 'name', colSize: "col-sm-3", show: true, fetch: false},                
+                                            {id: 'code', name: '_code', colSize: "col-sm-1", show: true, fetch: false}
+                                        ];
+
+                                        angular.forEach($scope.model.attributes, function(att){
+                                            if(att['dataElementGroupSetAttribute']){
+                                                var header = {id: att.id, name: att.name, show: false, fetch: true, colSize: "col-sm-1"};
+                                                $scope.model.dictionaryHeaders['dataElementGroupSets'].push(header);
+                                            }
+                                        });
+
+                                        $scope.model.dictionaryItems.push({id: 'dataElementGroupSets', name: $translate.instant('goals_objectives_interventions')});
+                                        $scope.model.dataElementGroupSets = dataElementGroupSets;
+
+                                        $scope.model.metaDataCached = true;
+                                        $scope.model.menuTitle = $translate.instant('menu_title');
+                                        $scope.model.selectedMenu = 'NDP';
+
+                                        $scope.model.periods = PeriodService.getPeriods($scope.model.selectedPeriodType, $scope.model.periodOffset, $scope.model.openFuturePeriods);
+
+                                        var selectedPeriodNames = ['2020/21', '2021/22', '2022/23', '2023/24', '2024/25'];
+
+                                        angular.forEach($scope.model.periods, function(pe){
+                                            if(selectedPeriodNames.indexOf(pe.displayName) > -1 ){
+                                               $scope.model.selectedPeriods.push(pe);
+                                            } 
+                                        });
+                                        
+                                        //set ndp program
+                                        if( $scope.model.ndpProgram && $scope.model.ndpProgram.options ){
+                                            $scope.setNdpProgram( $scope.model.ndpProgram.options[0] );
+                                        }
+                                        
+                                        $scope.model.baseLineTargetActualDimensions = ['bqIaasqpTas', 'Px8Lqkxy2si', 'HKtncMjp06U'];
                                     });
-                                    
-                                    $scope.model.baseLineTargetActualDimensions = ['bqIaasqpTas', 'Px8Lqkxy2si', 'HKtncMjp06U'];
                                 });
                             });
                         });
-                    });
-                });    
+                    });    
+                });
             });
         });    
     });
@@ -316,7 +337,7 @@ ndpFramework.controller('HomeController',
                 }
                 break;
             case 'program':
-                if( !$scope.model.selectedProgram ){
+                if( !$scope.model.selectedNdpProgram ){
                     NotificationService.showNotifcationDialog($translate.instant("error"), $translate.instant("missing_program"));
                     return;
                 }
@@ -446,12 +467,15 @@ ndpFramework.controller('HomeController',
         return res && res.value ? res.value : '';        
     };
     
-    $scope.exportData = function () {
+    $scope.exportData = function ( name ) {
         var blob = new Blob([document.getElementById('exportTable').innerHTML], {
             type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=utf-8"
         });
 
         var reportName = $scope.model.activeHorizontalMenu.title + " .xls";
+        if( name ){
+            reportName = name + ' performance.xls';
+        }
         saveAs(blob, reportName);
     };
     
@@ -498,8 +522,7 @@ ndpFramework.controller('HomeController',
         $scope.model.selectedDataElementGroupSets = [];
         $scope.model.selectedDataElementGroupSet = null;
         $scope.model.selectedDataElementGroup = null;
-        $scope.model.selectedNDP = null;
-        $scope.model.selectedProgram = null;        
+        $scope.model.selectedNDP = null;     
         $scope.resetDataView();
     };
     
@@ -508,5 +531,47 @@ ndpFramework.controller('HomeController',
         $scope.model.reportReady = false;
         $scope.model.dataExists = false;
         $scope.model.dataHeaders = [];
+    };
+    
+    $scope.setNdpProgram = function( program ){
+        console.log('the program:  ', program);
+        $scope.model.selectedNdpProgram = program;        
+        $scope.model.subPrograms = $filter('filter')($scope.model.dataElementGroupSets, {indicatorGroupSetType: 'sub-programme', ndpProgramme: $scope.model.selectedNdpProgram.code});
+        $scope.model.programObjectives = $filter('filter')($scope.model.dataElementGroupSets, {indicatorGroupSetType: 'objective', ndpProgramme: $scope.model.selectedNdpProgram.code});
+        
+        var prs = $filter('filter')($scope.model.programs, {ndpProgramme: $scope.model.selectedNdpProgram.code}, true);        
+        $scope.model.selectedProgram = prs[0] || null;
+         
+        $scope.model.projects = [];
+        if( $scope.model.selectedProgram && $scope.model.selectedProgram.id && $scope.model.selectedProgram.programTrackedEntityAttributes ){            
+            var attributesById = $scope.model.selectedProgram.programTrackedEntityAttributes.reduce(function(map, obj){
+                map[obj.trackedEntityAttribute.id] = obj.trackedEntityAttribute;
+                return map;
+            }, {});
+            ProjectService.getByProgram($scope.selectedOrgUnit, $scope.model.selectedProgram, $scope.model.optionSetsById, attributesById).then(function( data ){
+                $scope.model.projects = data;
+            });
+        }
+    };
+    
+    $scope.getProjectDetails = function( project ){
+        if ( $scope.model.selectedProject && $scope.model.selectedProject.trackedEntityInstance === project.trackedEntityInstance ){
+            $scope.model.showProjectDetails = !$scope.model.showProjectDetails;
+        }
+        else{
+            $scope.model.showProjectDetails = true;
+        }
+        
+        if( project && project.trackedEntityInstance && $scope.model.selectedProgram ){            
+            var attributesById = $scope.model.selectedProgram.programTrackedEntityAttributes.reduce(function(map, obj){
+                map[obj.trackedEntityAttribute.id] = obj.trackedEntityAttribute;
+                return map;
+            }, {});
+            
+              
+            ProjectService.get( project, $scope.model.selectedProgram, $scope.model.optionSetsById, attributesById ).then(function( data ){
+                $scope.model.selectedProject = data;                
+            });
+        }
     };
 });

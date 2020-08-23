@@ -138,6 +138,10 @@ html, body {
     margin-right: 20px;    
 }
 
+.remove-horizontal-spacing {
+    margin-left: -25px;
+}
+
 .small-vertical-spacing{
     margin-top: 5px !important;
 }
@@ -181,7 +185,7 @@ html, body {
 }
 
 .horizontal-menu {
-    color: #333;
+    color: #fff;
 }
 
 .select-list-buttons {
@@ -340,4 +344,12 @@ ul.tree ul li:last-child:before {
 }
 .nav-tabs.nav-justified > li > a:link {
     background: #eee;
+}
+
+.cursor-pointer {
+    cursor: pointer;
+}
+
+.spacer {
+    margin: 15px;    
 }

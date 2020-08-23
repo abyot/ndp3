@@ -3,21 +3,21 @@
         <div class="col-sm-7 green-info-area">
             <div class="row small-vertical-spacing">
                 <div class="col-sm-4">
-                    {{'sub_program'| translate}}
+                    {{'program_objective'| translate}}
                 </div>
                 <div class="col-sm-8">
-                    <ui-select ng-model="model.selectedSubProgram" 
+                    <ui-select ng-model="model.selectedDataElementGroupSet" 
                                theme="select2"                                 
                                style="width:100%;">
                         <ui-select-match allow-clear="true" class="form-control-ui-select" placeholder="{{model.programDataElementGroupSets && model.programDataElementGroupSets.length > 0 ? 'select_or_search' : 'empty'| translate}}">{{$select.selected.displayName|| $select.selected}}</ui-select-match>
-                        <ui-select-choices repeat="degs in model.subPrograms | filter: $select.search | limitTo:maxOptionSize ">
+                        <ui-select-choices repeat="degs in model.programObjectives | filter: $select.search | limitTo:maxOptionSize ">
                             <span ng-bind-html="degs.displayName | highlight: $select.search"></span>
                         </ui-select-choices>
                     </ui-select>
                 </div>
             </div>
             
-            <!--<div class="row small-vertical-spacing">
+            <div class="row small-vertical-spacing">
                 <div class="col-sm-4">
                     {{'performance'| translate}}
                 </div>
@@ -31,7 +31,7 @@
                         <span>{{'financial' | translate}}</span>
                     </label>                    
                 </div>
-            </div>-->
+            </div>
             <div class="row bottomright">
                 <div class="col-sm-12">
                     <button type="button"

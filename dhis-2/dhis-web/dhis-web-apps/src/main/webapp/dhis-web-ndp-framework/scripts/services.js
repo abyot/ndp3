@@ -10,7 +10,7 @@ var ndpFrameworkServices = angular.module('ndpFrameworkServices', ['ngResource']
     var store = new dhis2.storage.Store({
         name: "dhis2ndp",
         adapters: [dhis2.storage.IndexedDBAdapter, dhis2.storage.DomSessionStorageAdapter, dhis2.storage.InMemoryAdapter],
-        objectStores: ['dataElements', 'dataElementGroups', 'dataElementGroupSets', 'dataSets', 'optionSets', 'categoryCombos', 'attributes', 'ouLevels']
+        objectStores: ['dataElements', 'dataElementGroups', 'dataElementGroupSets', 'dataSets', 'optionSets', 'categoryCombos', 'attributes', 'ouLevels', 'programs']
     });
     return{
         currentStore: store
@@ -389,6 +389,68 @@ var ndpFrameworkServices = angular.module('ndpFrameworkServices', ['ngResource']
             }, function(response){
                 console.error(response);
                 return response.data;
+            });
+            return promise;
+        }
+    };
+})
+
+.service('ProjectService', function($http, CommonUtils, OptionSetService){
+    return {
+        getByProgram: function(orgUnit, program, optionSets, attributesById){
+            var url = dhis2.ndp.apiUrl + '/trackedEntityInstances.json?ouMode=DESCENDANTS&order=created:desc&paging=false&ou=' + orgUnit.id + '&program=' + program.id;
+            var promise = $http.get( url ).then(function(response){
+                var teis = response.data && response.data.trackedEntityInstances ? response.data.trackedEntityInstances : [];
+                var projects = [];                
+                angular.forEach(teis, function(tei){
+                    if( tei.attributes ){
+                        var project = {
+                            orgUnit: tei.orgUnit,
+                            trackedEntityInstance: tei.trackedEntityInstance
+                        };
+                        angular.forEach(tei.attributes, function(att){                            
+                            var val = att.value;
+                            var attribute = attributesById[att.attribute];
+                            if( attribute && attribute.optionSetValue ){
+                                val = OptionSetService.getName(optionSets[attribute.optionSet.id].options, String(val));
+                            }
+                            
+                            project[att.attribute] = val;
+                        });
+                        projects.push( project );
+                    }
+                });
+                
+                return projects;
+            }, function(response){
+                CommonUtils.errorNotifier(response);
+            });
+            return promise;
+        },
+        get: function( project, optionSets, attributesById ){
+            var url = dhis2.ndp.apiUrl + '/trackedEntityInstances/' + project.trackedEntityInstance +'.json?fields=*';
+            var promise = $http.get( url ).then(function(response){
+                
+                var tei = response.data;      
+                
+                if( tei && tei.attributes ){
+                    angular.forEach(tei.attributes, function(att){
+                        var attribute = attributesById[att.attribute];
+                        if( attribute && attribute.optionSetValue ){
+                            att.value = OptionSetService.getName(optionSets[attribute.optionSet.id].options, String(att.value));
+                        }
+                    });
+                }
+                
+                if( tei.enrollments ){
+                    angular.forEach(tei.enrollments, function(en){
+                        
+                    });
+                }
+                
+                return tei;
+            }, function(response){
+                CommonUtils.errorNotifier(response);
             });
             return promise;
         }

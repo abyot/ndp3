@@ -36,7 +36,7 @@ var d2Services = angular.module('d2Services', ['ngResource'])
         var locale = 'en';
 
         var promise = $http.get( DHIS2URL + '/systemSettings?key=keyUiLocale&key=keyCalendar&key=keyDateFormat&key=multiOrganisationUnitForms').then(function (response) {
-            SessionStorageService.set('USER_PROFILE', response.data);
+            SessionStorageService.set('SYSTEM_SETTING', response.data);
             if (response.data && response.data.settings && response.data.keyUiLocale) {
                 locale = response.data.keyUiLocale;
             }
@@ -49,7 +49,7 @@ var d2Services = angular.module('d2Services', ['ngResource'])
     };
     return function () {
         var deferred = $q.defer(), translations;
-        var userProfile = SessionStorageService.get('USER_PROFILE');
+        var userProfile = SessionStorageService.get('SYSTEM_SETTING');
         if (userProfile && userProfile.keyUiLocale) {
             getTranslationStrings(userProfile.keyUiLocale).then(function (response) {
                 translations = response.keys;
@@ -263,7 +263,7 @@ var d2Services = angular.module('d2Services', ['ngResource'])
 })
 
 /* service for common utils */
-.service('CommonUtils', function($q, $translate, $filter, SessionStorageService, DateUtils, OptionSetService, CurrentSelection, FileService, DialogService, OrgUnitService){
+.service('CommonUtils', function($translate, SessionStorageService, DateUtils, OptionSetService, CurrentSelection, FileService, DialogService){
 
     return {
         formatDataValue: function(event, val, obj, optionSets, destination){
@@ -350,17 +350,21 @@ var d2Services = angular.module('d2Services', ['ngResource'])
             }
             return false;            	
         },
-        userHasWriteAccess: function( dataSetId ){
-            var dataSets = SessionStorageService.get('ACCESSIBLE_DATASETS');
-            if (dataSets && dataSets.dataSets && dataSets.dataSets.length) {
-                dataSets = dataSets.dataSets;
-                for (var i = 0; i < dataSets.length; i++) {
-                    if (dataSets[i].id === dataSetId && dataSets[i].access && dataSets[i].access.data && dataSets[i].access.data.write) {
+        userHasWriteAccess: function( storage, objectId ){
+            var objs = SessionStorageService.get(storage);
+            if (objs && objs.length) {
+                for (var i = 0; i < objs.length; i++) {
+                    if (objs[i].id === objectId && objs[i].access && objs[i].access.data && objs[i].access.data.write) {
                         return true;
                     }
                 }
             }
             return false;
+        },
+        getUsername: function(){            
+            var userProfile = SessionStorageService.get('USER_PROFILE');
+            var username = userProfile && userProfile.userCredentials && userProfile.userCredentials.username ? userProfile.userCredentials.username : '';
+            return username;
         },
         getSum: function( op1, op2 ){
             op1 = dhis2.validation.isNumber(op1) ? parseInt(op1) : 0;
@@ -511,50 +515,6 @@ var d2Services = angular.module('d2Services', ['ngResource'])
             }
             var selectedOuMode = ouModes[0];            
             return {ouModes: ouModes, selectedOuMode: selectedOuMode};
-        },
-        getChildrenIds: function( orgUnit, level ){
-            var def = $q.defer();
-            OrgUnitService.get( orgUnit.id, level ).then(function( json ){
-                var orgUnitsById = {};
-                var orgUnits = [];
-                angular.forEach(json.organisationUnits, function(ou){
-                    ou.path = ou.path.substring(1, ou.path.length);
-                    ou.path = ou.path.split("/");
-                    orgUnitsById[ou.id] = ou;
-                    orgUnits.push( ou );
-                });
-                
-                def.resolve({orgUnits: orgUnits, orgUnitsById: orgUnitsById});
-                
-                /*var childrenIds = [];
-                var children = json.organisationUnits;
-                var childrenByIds = [];
-                var allChildren = [];
-                angular.forEach(children, function(c){
-                    c.path = c.path.substring(1, c.path.length);
-                    c.path = c.path.split("/");
-                    childrenByIds[c.id] = c;
-                    if( c.level <= 3 ){
-                        allChildren.push( c );
-                    }
-                });                    
-                
-                if( orgUnit.l === 1 ){
-                    angular.forEach($filter('filter')(children, {level: 3}), function(c){
-                        childrenIds.push(c.id);                        
-                    });
-                }
-                else if ( orgUnit.l === 2 ){
-                    childrenIds = orgUnit.c;
-                }
-                else {
-                    childrenIds = [orgUnit.id];
-                }
-
-                def.resolve( {childrenIds: childrenIds, allChildren: allChildren, children: $filter('filter')(children, {parent: {id: orgUnit.id}}), descendants: $filter('filter')(children, {level: 3}), childrenByIds: childrenByIds } );*/
-            });
-            
-            return def.promise;
         },
         processDataSet: function( ds ){
             var dataElements = [];
