@@ -760,6 +760,11 @@ public class HibernateTrackedEntityInstanceStore
             }
         }
 
+        if ( params.hasProgramStage() )
+        {
+            sql += " psi.programstageid = " + params.getProgramStage().getId() + " and ";
+        }
+
         if ( params.hasAssignedUsers() )
         {
             sql += " (au.uid in (" + getQuotedCommaDelimitedString( params.getAssignedUsers() ) + ")) and ";
@@ -814,6 +819,11 @@ public class HibernateTrackedEntityInstanceStore
             {
                 hql += " psi.dueDate >= '" + start + "' and psi.dueDate <= '" + end + "' " + "and psi.status = '" + EventStatus.SKIPPED.name() + "' and ";
             }
+        }
+
+        if ( params.hasProgramStage() )
+        {
+            hql += " psi.programStage.uid = " + params.getProgramStage().getUid() + " and ";
         }
 
         if ( params.hasAssignedUsers() )
