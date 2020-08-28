@@ -178,7 +178,6 @@ ndpFramework.controller('HomeController',
                     
                         $scope.model.ndp = $filter('filter')(optionSets, {code: 'ndp'})[0];
                         $scope.model.ndpProgram = $filter('filter')(optionSets, {code: 'ndpIIIProgram'})[0];
-
                         
 
                         MetaDataFactory.getAll('dataSets').then(function(dataSets){
