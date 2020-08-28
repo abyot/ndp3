@@ -5,13 +5,25 @@
 <div class="vertical-spacing category-menu">
     <table class="table table-striped dhis2-table-hover table-bordered">
         <tr>
-            <td ng-click="model.selectedMenu = 'NDP'">{{'program_structure' | translate}}</td>
+            <td ng-click="model.selectedMenu = 'NDP'">{{'ndp_program_structure' | translate}}</td>
         </tr>
         <tr>
             <td ng-click="model.selectedMenu = 'DICTIONARY'">{{'indicator_dictionary' | translate}}</td>
         </tr>
         <tr>
             <td ng-click="model.selectedMenu = 'DOCUMENT'">{{'document_library' | translate}}</td>
+        </tr>
+        <tr>
+            <td ng-click="goToMenu('dhis-web-dashboard/index.html')">{{'dashboard' | translate}}</td>
+        </tr>
+        <tr>
+            <td ng-click="goToMenu('dhis-web-pivot/index.html')">{{'pivot' | translate}}</td>
+        </tr>
+        <tr>
+            <td ng-click="goToMenu('dhis-web-data-visualizer/index.html')">{{'charts' | translate}}</td>
+        </tr>
+        <tr>
+            <td ng-click="goToMenu('dhis-web-maps/index.html')">{{'gis' | translate}}</td>
         </tr>
     </table>
 </div>

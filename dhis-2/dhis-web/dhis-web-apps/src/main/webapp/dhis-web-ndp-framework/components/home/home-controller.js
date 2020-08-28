@@ -64,14 +64,14 @@ ndpFramework.controller('HomeController',
     
     
     $scope.model.horizontalMenus = [
-        {id: 'sdg', title: 'sdg_status', order: 1, view: 'components/home/sdg-status.html'},
-        {id: 'ndp', title: 'ndp_status', order: 2, view: 'components/home/ndp-status.html', active: true},
+        {id: 'sdg', title: 'sdg', order: 1, view: 'components/home/sdg-status.html'},
+        {id: 'ndp', title: 'ndp_key_results', order: 2, view: 'components/home/ndp-status.html', active: true},
         {id: 'program', title: 'programme_performance', order: 3, view: 'components/home/program-performance.html'},
         //{id: 'sub-program', title: 'sub_program_performance', order: 4, view: 'components/home/sub-program-performance.html'},
         //{id: 'project', title: 'project_status', order: 5, view: 'components/home/project-status.html'},
-        //{id: 'sector', title: 'sector_performance', order: 5, view: 'components/home/sector-performance.html'},
+        {id: 'sdp', title: 'sdp', order: 5, view: 'components/home/sector-performance.html'},
         //{id: 'vote', title: 'vote_performance', order: 6, view: 'components/home/vote-performance.html'},
-        {id: 'subNational', title: 'sub_national_data', order: 6, view: 'components/home/sub-national-data.html'}
+        {id: 'subNational', title: 'lgdp', order: 6, view: 'components/home/sub-national-data.html'}
     ];
 
     $scope.model.activeHorizontalMenu = $scope.model.horizontalMenus[1];
@@ -534,7 +534,6 @@ ndpFramework.controller('HomeController',
     };
     
     $scope.setNdpProgram = function( program ){
-        console.log('the program:  ', program);
         $scope.model.selectedNdpProgram = program;        
         $scope.model.subPrograms = $filter('filter')($scope.model.dataElementGroupSets, {indicatorGroupSetType: 'sub-programme', ndpProgramme: $scope.model.selectedNdpProgram.code});
         $scope.model.programObjectives = $filter('filter')($scope.model.dataElementGroupSets, {indicatorGroupSetType: 'objective', ndpProgramme: $scope.model.selectedNdpProgram.code});
@@ -573,5 +572,9 @@ ndpFramework.controller('HomeController',
                 $scope.model.selectedProject = data;                
             });
         }
+    };
+    
+    $scope.goToMenu = function( menuLink ){
+        window.location.href = '../' + menuLink;
     };
 });
