@@ -17,6 +17,19 @@ var ndpFrameworkServices = angular.module('ndpFrameworkServices', ['ngResource']
     };
 })
 
+/* Context menu for grid*/
+.service('SelectedMenuService', function () {
+    this.selectedMenu = null;
+
+    this.setSelectedMenu = function (selectedMenu) {
+        this.selectedMenu = selectedMenu;
+    };
+
+    this.getSelectedMenu= function () {
+        return this.selectedMenu;
+    };
+})
+
 .service('PeriodService', function(CalendarService){
     
     this.getPeriods = function(periodType, periodOffset, futurePeriods){
@@ -357,7 +370,7 @@ var ndpFrameworkServices = angular.module('ndpFrameworkServices', ['ngResource']
     };        
 })
 
-.service('Analytics', function($http){
+.service('Analytics', function($http, CommonUtils){
     return {
         getData: function( url ){
             url = dhis2.ndp.apiUrl + '/analytics?' + url;
@@ -387,7 +400,7 @@ var ndpFrameworkServices = angular.module('ndpFrameworkServices', ['ngResource']
                 }
                 return {data: reportData, metaData: data.metaData};
             }, function(response){
-                console.error(response);
+                CommonUtils.errorNotifier(response);
                 return response.data;
             });
             return promise;

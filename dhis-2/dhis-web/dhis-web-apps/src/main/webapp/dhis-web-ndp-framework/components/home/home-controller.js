@@ -9,6 +9,7 @@ ndpFramework.controller('HomeController',
                 $modal,
                 $filter,
                 NotificationService,
+                SelectedMenuService,
                 orderByFilter,
                 PeriodService,
                 MetaDataFactory,
@@ -28,6 +29,7 @@ ndpFramework.controller('HomeController',
         baseLineTargetActualDimensions: [],
         dataSetsById: {},
         categoryCombosById: {},
+        optionSets: [],
         optionSetsById: [],
         dictionaryItems: [],
         attributes: [],
@@ -61,7 +63,6 @@ ndpFramework.controller('HomeController',
         });
         $scope.selectedOrgUnit = $scope.orgUnits[0] ? $scope.orgUnits[0] : null;
     });
-    
     
     $scope.model.horizontalMenus = [
         {id: 'sdg', title: 'sdg', order: 1, view: 'components/home/sdg-status.html'},
@@ -171,6 +172,8 @@ ndpFramework.controller('HomeController',
                     });
 
                     MetaDataFactory.getAll('optionSets').then(function(optionSets){
+                        
+                        $scope.model.optionSets = optionSets;
                         
                         angular.forEach(optionSets, function(optionSet){
                             $scope.model.optionSetsById[optionSet.id] = optionSet;
@@ -294,6 +297,57 @@ ndpFramework.controller('HomeController',
                                         }
                                         
                                         $scope.model.baseLineTargetActualDimensions = ['bqIaasqpTas', 'Px8Lqkxy2si', 'HKtncMjp06U'];
+                                        
+                                        var ndpMenus = [], order = 0;
+                                        angular.forEach($scope.model.ndp.options, function(op){
+                                            op.order = order;
+                                            order++;
+                                            ndpMenus.push( op );
+                                        })
+                                        
+                                        $scope.model.menuItems = [
+                                            {
+                                                id: 'navigation',
+                                                order: 0,
+                                                displayName: $translate.instant('navigation'),
+                                                bold: true,
+                                                show: true,
+                                                children: [
+                                                    {
+                                                        id: 'SDG',
+                                                        displayName: $translate.instant('sdg'),
+                                                        order: 0,
+                                                        path: "sdg",
+                                                        children: []
+                                                    },
+                                                    {
+                                                        id: 'NDP',
+                                                        displayName: $translate.instant('ndps'),
+                                                        order: 1,
+                                                        children: ndpMenus,
+                                                        hasChildren: true
+                                                    },
+                                                    {
+                                                        id: 'SEC',
+                                                        displayName: $translate.instant('sectors'),
+                                                        order: 2,
+                                                        children: []
+                                                    },
+                                                    {
+                                                        id: 'MDA',
+                                                        displayName: $translate.instant('mdas'),
+                                                        order: 3,
+                                                        children: []
+                                                    },
+                                                    {
+                                                        id: 'LOG',
+                                                        displayName: $translate.instant('lgs'),
+                                                        order: 4,
+                                                        children: []
+                                                    }
+                                                ]
+                                            }                                            
+                                        ];
                                     });
                                 });
                             });
@@ -572,6 +626,102 @@ ndpFramework.controller('HomeController',
             });
         }
     };
+    
+    //expand/collapse of navigation menu
+    $scope.expandCollapse = function(menu) {
+        
+        if( menu.hasChildren ){            
+            menu.show = !menu.show;
+            
+            //Get children menu
+            angular.forEach(menu.children, function(child){
+                
+                if( menu.id === 'NDP'){
+                
+                    var objectives = $filter('filter')($scope.model.dataElementGroupSets, {ndp: child.code, indicatorGroupSetType: 'objective'}, true);
+                    var goals = $filter('filter')($scope.model.dataElementGroupSets, {ndp: child.code, indicatorGroupSetType: 'goal'}, true);
+                    var programs = $filter('filter')($scope.model.optionSets, {ndp: child.code, code: 'program'}, true);
+                    var interventions = $filter('filter')($scope.model.dataElementGroupSets, {ndp: child.code, indicatorGroupSetType: 'intervention'}, true);
+                    
+                    child.children = [];
+                    if( objectives.length > 0 ){
+                        child.hasChildren = true;
+                        child.children.push( {
+                            id: 'OBJ',
+                            code: 'objective',
+                            ndp: child.code,
+                            order: 1,                            
+                            displayName: $translate.instant('objectives'),
+                            children: []
+                        } );
+                    }
+
+                    if( goals.length > 0 ){
+                        child.hasChildren = true;
+                        child.children.push( {
+                            id: 'GOL',
+                            code: 'goal',
+                            ndp: child.code,
+                            order: 0,
+                            displayName: $translate.instant('goals'),
+                            children: []
+                        } ); 
+                    }
+
+                    if( programs.length > 0 ){
+                        child.hasChildren = true;
+                        child.children.push( {
+                            id: 'PRG',
+                            code: 'objective',
+                            ndp: child.code,
+                            order: 2,
+                            displayName: $translate.instant('programmes'),
+                            children: []
+                        } );
+                        
+                        child.children.push( {
+                            id: 'PRJ',
+                            code: 'project',
+                            ndp: child.code,
+                            order: 3,
+                            displayName: $translate.instant('projects'),
+                            chilren: [],
+                            show: false
+                        } );
+                    }
+                    
+                    if( interventions.length > 0 ){
+                        child.hasChildren = true;
+                        child.children.push( {
+                            id: 'INV',
+                            code: 'intervention',                            
+                            ndp: child.code,
+                            order: 4,
+                            displayName: $translate.instant('interventions'),
+                            children: []
+                        } );
+                    }
+                }
+                           
+            });
+        }
+        else{
+            menu.show = !menu.show;
+        }
+    };
+
+    $scope.setSelectedMenu = function( menu ){
+        
+        if( $scope.model.selectedMenu && $scope.model.selectedMenu.id === menu.id ){
+            $scope.model.selectedMenu = null;
+        }
+        else{
+            $scope.model.selectedMenu = menu;
+        }
+
+        SelectedMenuService.setSelectedMenu($scope.model.selectedMenu);
+    };
+
     
     $scope.goToMenu = function( menuLink ){
         window.location.href = '../' + menuLink;

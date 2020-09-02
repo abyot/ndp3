@@ -6,9 +6,16 @@ html, body {
     overflow: auto;
     font-size: 100% !important;
 }
+#leftBar {
+    padding: 10px 0;
+    margin-top: 4px;
+    border-radius: 3px;
+    height: 100%;
+    width: 260px;
+}
 
 #mainPage {
-    margin: 70px 5px 5px 245px;
+    margin: 70px 5px 5px 270px;
 }
 
 .not-for-screen {
@@ -56,15 +63,17 @@ html, body {
     }
 }
 
-#leftBar {
-    padding: 10px 0;
-    margin-top: 4px;
-    border-radius: 3px;
-    height: 100%;
+.category-menu {
+    background-color: #fff;
+    height: 100vh;
 }
 
 .menu-title  {
     margin: 8px;
+}
+
+.menu-spacing {
+    margin-top: 30px;
 }
 
 .vertical-spacing {
@@ -167,10 +176,43 @@ html, body {
 
 .blue-info-area {
     border: 1px solid #729fcf;
-    background-color: #BBD1EE;
+    background-color: #BBD1EE !important;
     padding: 10px;
     border-radius: 3px;
     margin-bottom: 10px;
+}
+
+.blue-info-header-area {
+    border: 1px solid #729fcf;
+    background-color: #BBD1EE !important;
+    border-radius: 3px;
+}
+    
+.report-filter {
+    border-color: #BBD1EE;
+}
+
+.custom-panel {
+    color: #000;
+    background-color: #BBD1EE;
+    border-color: #BBD1EE;
+    border-style: none;
+    border-radius: 0;
+    border-style: none !important;
+    border-radius: 0 !important;
+    webkit-box-shadow: none !important;
+    -moz-box-shadow: none !important;
+    -o-box-shadow: none !important;
+    box-shadow: none !important;
+    padding: 6px 0;
+}
+
+.report-filter-no-radius {
+    background-color: #d0eBd0;
+}
+
+.remove-bottom-margin {
+    margin-bottom: 0 !important;
 }
 
 .yellow-info-area {
@@ -296,25 +338,25 @@ ul.tree ul:before {
 ul.tree li {
     margin:0;
     padding:0 12px; /* indentation + 2 */
-    line-height:20px; /* default list item `line-height` */
+    line-height:24px; /* default list item `line-height` */
     position:relative;
 }
 
 ul.tree ul li:before {
     content:"";
     display:block;
-    width:10px; /* same with indentation */
+    width:12px; /* same with indentation */
     height:0;
     border-top:1px dotted;
     position:absolute;
-    top:10px;
+    top:12px;
     left:0;
 }
 
 ul.tree ul li:last-child:before {
     background:white; /* same with body background */
     height:auto;
-    top:10px; /* (line-height/2) */
+    top:12px; /* (line-height/2) */
     bottom:0;
 }
 
@@ -325,7 +367,7 @@ ul.tree ul li:last-child:before {
     cursor:pointer;
 }
 
-.selected-org-unit {
+.selected-org-unit, .selected-menu {
     font-weight: bold;
     color: #FF8000;
 }

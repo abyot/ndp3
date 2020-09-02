@@ -1,8 +1,24 @@
 <div class="menu-title">
-    <h4>{{model.menuTitle}}</h4>
+    <h4>{{'menu' | translate}}</h4>
 </div>
 
 <div class="vertical-spacing category-menu">
+    <div data-stop-propagation="true">
+        <script type="text/ng-template" id="treeMenu.html">
+            <span class="tree-menu-button" ng-click="expandCollapse(menuItem)" ng-show="menuItem.show && menuItem.children.length > 0"><i class="fa fa-minus-square-o"></i></span>
+            <span class="tree-menu-button" ng-click="expandCollapse(menuItem)" ng-show="(!menuItem.show && menuItem.children.length > 0) || (!menuItem.show && menuItem.hasChildren)"><i class="fa fa-plus-square-o"></i></span>
+            <span class="tree-menu-button" ng-click="setSelectedMenu(menuItem)" ng-class="{'selected-menu' : menuItem.id === model.selectedMenu.id, 'bold': menuItem.bold}">{{menuItem.displayName}}</span>
+            <ul class="tree" id="tree" ng-show="menuItem.show">
+                <li ng-repeat="menuItem in menuItem.children | orderBy:'order'" ng-include="'treeMenu.html'"></li>
+            </ul>
+        </script>
+        <ul class="tree" id="tree">
+            <li ng-repeat="menuItem in model.menuItems | orderBy:'order'" ng-include="'treeMenu.html'"></li>
+        </ul>
+    </div>
+</div>
+
+<!--<div class="vertical-spacing category-menu">
     <table class="table table-striped dhis2-table-hover table-bordered">
         <tr>
             <td ng-click="model.selectedMenu = 'NDP'">{{'ndp_program_structure' | translate}}</td>
@@ -26,4 +42,4 @@
             <td ng-click="goToMenu('dhis-web-maps/index.html')">{{'gis' | translate}}</td>
         </tr>
     </table>
-</div>
+</div>-->

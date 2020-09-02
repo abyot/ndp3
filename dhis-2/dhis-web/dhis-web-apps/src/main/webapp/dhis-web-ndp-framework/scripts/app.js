@@ -30,6 +30,9 @@ var ndpFramework = angular.module('ndpFramework',
     $routeProvider.when('/home', {
         templateUrl:'components/home/home.html',
         controller: 'HomeController'
+    }).when('/sdg', {
+        templateUrl:'components/sdg/sdg-status.html',
+        controller: 'SDGController'
     }).otherwise({
         redirectTo : '/home'
     });  
