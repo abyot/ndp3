@@ -408,7 +408,7 @@ var ndpFrameworkServices = angular.module('ndpFrameworkServices', ['ngResource']
     };
 })
 
-.service('ProjectService', function($http, CommonUtils, OptionSetService){
+.service('ProjectService', function($http, DateUtils, CommonUtils, OptionSetService){
     return {
         getByProgram: function(orgUnit, program, optionSets, attributesById){
             var url = dhis2.ndp.apiUrl + '/trackedEntityInstances.json?ouMode=DESCENDANTS&order=created:desc&paging=false&ou=' + orgUnit.id + '&program=' + program.id;
@@ -440,7 +440,7 @@ var ndpFrameworkServices = angular.module('ndpFrameworkServices', ['ngResource']
             });
             return promise;
         },
-        get: function( project, optionSets, attributesById ){
+        get: function( project, optionSets, attributesById, dataElementsById ){
             var url = dhis2.ndp.apiUrl + '/trackedEntityInstances/' + project.trackedEntityInstance +'.json?fields=*';
             var promise = $http.get( url ).then(function(response){
                 
@@ -455,9 +455,21 @@ var ndpFrameworkServices = angular.module('ndpFrameworkServices', ['ngResource']
                     });
                 }
                 
+                //formatDataValue: function(event, val, obj, optionSets, destination){
                 if( tei.enrollments ){
                     angular.forEach(tei.enrollments, function(en){
-                        
+                        en.enrollmentDate = DateUtils.formatFromApiToUser(en.enrollmentDate);
+                        angular.forEach(en.events, function(ev){
+                            ev.eventDate = DateUtils.formatFromApiToUser(ev.eventDate);
+                            angular.forEach(ev.dataValues, function(dv){
+                                var de = dataElementsById[dv.dataElement];
+                                var val = dv.value;
+                                if ( de ){
+                                    val = CommonUtils.formatDataValue(ev, val, de, optionSets, 'USER');
+                                }                                
+                                ev[dv.dataElement] = val;
+                            });
+                        });
                     });
                 }
                 

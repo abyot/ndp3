@@ -128,7 +128,7 @@ html, body {
 }
 
 .bold {
-    font-weight: bold;
+    font-weight: bold !important;
 }
 
 .italic {
@@ -220,6 +220,10 @@ html, body {
     background-color: #faebc4;/*#F4CD6C;*/
     padding: 10px;
     border-radius: 3px;
+}
+
+.yellow-background {
+    background-color: #faebc4 !important;
 }
 
 .add-small-left-padding {
@@ -394,4 +398,11 @@ ul.tree ul li:last-child:before {
 
 .spacer {
     margin: 15px;    
+}
+
+.milestone-info-area {
+    /*border: 1px solid #cad5e5;
+    padding: 10px;
+    border-radius: 3px;*/
+    margin-top: 10px;
 }

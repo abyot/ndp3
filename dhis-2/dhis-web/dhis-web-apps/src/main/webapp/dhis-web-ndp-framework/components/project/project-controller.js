@@ -101,6 +101,9 @@ ndpFramework.controller('ProjectController',
     });
         
     $scope.setNdpProgram = function( program ){
+        $scope.model.attributesById = [];
+        $scope.model.dataElementsById = [];
+        
         if( $scope.model.selectedNdpProgram && $scope.model.selectedNdpProgram.id === program.id ){
             $scope.model.selectedNdpProgram = null;
         }
@@ -115,13 +118,23 @@ ndpFramework.controller('ProjectController',
 
             $scope.model.projects = [];
             if( $scope.model.selectedProgram && $scope.model.selectedProgram.id && $scope.model.selectedProgram.programTrackedEntityAttributes ){            
-                var attributesById = $scope.model.selectedProgram.programTrackedEntityAttributes.reduce(function(map, obj){
+                $scope.model.attributesById = $scope.model.selectedProgram.programTrackedEntityAttributes.reduce(function(map, obj){
                     map[obj.trackedEntityAttribute.id] = obj.trackedEntityAttribute;
                     return map;
                 }, {});
-                ProjectService.getByProgram($scope.selectedOrgUnit, $scope.model.selectedProgram, $scope.model.optionSetsById, attributesById).then(function( data ){
+           
+                angular.forEach($scope.model.selectedProgram.programStages, function(stage){
+                    angular.forEach(stage.programStageDataElements, function(prstDe){
+                        var de = prstDe.dataElement;
+                        if( de ){
+                            $scope.model.dataElementsById[de.id] = de;
+                        }                    
+                    });
+                });
+            
+            
+                ProjectService.getByProgram($scope.selectedOrgUnit, $scope.model.selectedProgram, $scope.model.optionSetsById, $scope.model.attributesById ).then(function( data ){
                     $scope.model.projects = data;
-                    console.log('projects:  ', $scope.model.projects);
                 });
             }
         }
@@ -135,17 +148,9 @@ ndpFramework.controller('ProjectController',
             $scope.model.showProjectDetails = true;
         }
         
-        if( project && project.trackedEntityInstance && $scope.model.selectedProgram ){            
-            var attributesById = $scope.model.selectedProgram.programTrackedEntityAttributes.reduce(function(map, obj){
-                map[obj.trackedEntityAttribute.id] = obj.trackedEntityAttribute;
-                return map;
-            }, {});
-            
-              
-            ProjectService.get( project, $scope.model.selectedProgram, $scope.model.optionSetsById, attributesById ).then(function( data ){
+        if( project && project.trackedEntityInstance && $scope.model.selectedProgram ){              
+            ProjectService.get( project, $scope.model.selectedProgram, $scope.model.optionSetsById, $scope.model.attributesById , $scope.model.dataElementsById ).then(function( data ){
                 $scope.model.selectedProject = data;
-                
-                console.log('project details:  ', $scope.model.selectedProject);
             });
         }
     };
