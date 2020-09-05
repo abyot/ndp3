@@ -449,13 +449,14 @@ var ndpFrameworkServices = angular.module('ndpFrameworkServices', ['ngResource']
                 if( tei && tei.attributes ){
                     angular.forEach(tei.attributes, function(att){
                         var attribute = attributesById[att.attribute];
-                        if( attribute && attribute.optionSetValue ){
-                            att.value = OptionSetService.getName(optionSets[attribute.optionSet.id].options, String(att.value));
+                        var val = att.value;
+                        if( attribute ){
+                            val = CommonUtils.formatDataValue(null, val, attribute, optionSets, 'USER');
                         }
+                        att.value = val;
                     });
                 }
                 
-                //formatDataValue: function(event, val, obj, optionSets, destination){
                 if( tei.enrollments ){
                     angular.forEach(tei.enrollments, function(en){
                         en.enrollmentDate = DateUtils.formatFromApiToUser(en.enrollmentDate);
