@@ -52,9 +52,7 @@
                 </thead>
                 <tbody ng-repeat="project in model.projects" ng-click="getProjectDetails(project)">
                     <tr>
-                        <td ng-class="{'yellow-background': model.showProjectDetails && model.selectedProject.trackedEntityInstance === project.trackedEntityInstance}" 
-                            class="vertical-center" 
-                            ng-repeat="att in model.selectedProgram.programTrackedEntityAttributes | filter: {displayInList: true}"> 
+                        <td class="vertical-center" ng-repeat="att in model.selectedProgram.programTrackedEntityAttributes | filter: {displayInList: true}">
                             <span ng-switch="att.valueType">
                                 <span ng-switch-when="BOOLEAN">
                                     <span ng-if="project[att.trackedEntityAttribute.id] === 'true'">{{'yes'| translate}}</span>
@@ -70,57 +68,95 @@
                             </span>
                         </td>
                     </tr>
-                    <tr ng-if="model.showProjectDetails && model.selectedProject.trackedEntityInstance === project.trackedEntityInstance ">
-                        <td class="yellow-background" colspan="{{(model.selectedProgram.programTrackedEntityAttributes | filter: {displayInList: true}).length}}">
-                            <div class="yellow-info-area" >
-                                <h5 class="bold">{{'details' | translate}}</h5>
-                                <div class="row col-sm-12" ng-repeat="enrollment in model.selectedProject.enrollments">
-                                    <table class="table table-responsive">
-                                        <tr>
-                                            <th class="col-sm-1">{{model.selectedProgram.enrollmentDateLabel}}</th>
-                                            <th class="col-sm-1">{{'vote' | translate}}</th>
-                                            <th class="col-sm-1">{{'remark' | translate}}</th>
-                                        </tr>
-                                        <tr>
-                                            <td class="col-sm-1">{{enrollment.enrollmentDate}}</td>
-                                            <td class="col-sm-1">{{enrollment.orgUnitName}}</td>
-                                            <td class="col-sm-1">
-                                                <span ng-repeat="note in enrollment.notes">
-                                                    {{note.value}}<br>
-                                                </span>
-                                            </td>
-                                        </tr>
-                                    </table>
-                                    
+                    <tr class="project-details" ng-if="model.showProjectDetails && model.selectedProject.trackedEntityInstance === project.trackedEntityInstance ">
+                        <td colspan="100%">
+                            <table class="table table-responsive green-background">
+                                <tr>
+                                    <td colspan="100%">
+                                        <span class="bold">{{'details' | translate}}</span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="col-sm-1" ng-repeat="att in model.selectedProgram.programTrackedEntityAttributes">
+                                        <span class="bold">{{att.trackedEntityAttribute.displayName}}</span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="vertical-center" ng-repeat="att in model.selectedProgram.programTrackedEntityAttributes">
+                                        <span ng-switch="att.valueType">
+                                            <span ng-switch-when="BOOLEAN">
+                                                <span ng-if="project[att.trackedEntityAttribute.id] === 'true'">{{'yes'| translate}}</span>
+                                                <span ng-if="project[att.trackedEntityAttribute.id] === 'false'">{{ 'no' | translate}}</span>
+                                            </span>
+                                            <span ng-switch-when="TRUE_ONLY">
+                                                <span ng-if="project[att.trackedEntityAttribute.id] === 'true'"><i class="fa fa-check"></i></span>
+                                            </span>
+                                            <span ng-switch-when="ORGANISATION_UNIT">
+                                                {{trackedEntity[gridColumn.id] && orgUnitNames[trackedEntity[gridColumn.id]] ? orgUnitNames[trackedEntity[gridColumn.id]] : trackedEntity[gridColumn.id]}}
+                                            </span>
+                                            <span ng-switch-default>{{project[att.trackedEntityAttribute.id]}}</span>
+                                        </span>
+                                    </td>
+                                </tr>
+                            </table>
+                            <div ng-repeat="enrollment in model.selectedProject.enrollments">
+                                <table class="table table-responsive yellow-background">
+                                    <tr>
+                                        <th class="col-sm-1">{{model.selectedProgram.enrollmentDateLabel}}</th>
+                                        <th class="col-sm-1">{{'vote' | translate}}</th>
+                                        <th class="col-sm-1">{{'remark' | translate}}</th>
+                                    </tr>
+                                    <tr>
+                                        <td class="col-sm-1">{{enrollment.enrollmentDate}}</td>
+                                        <td class="col-sm-1">{{enrollment.orgUnitName}}</td>
+                                        <td class="col-sm-1">
+                                            <span ng-repeat="note in enrollment.notes">
+                                                {{note.value}}<br>
+                                            </span>
+                                        </td>
+                                    </tr>
+                                </table>
+
+                                <div ng-if="model.selectedProgram.programStages.length > 0">
+                                    <h5 class="bold">{{'milestones' | translate}}</h5>
                                     <div class="milestone-info-area" 
                                          ng-repeat="stage in model.selectedProgram.programStages"
                                          ng-init="events = (enrollment.events | filter: {programStage: stage.id})">
-                                        <span class="bold">{{stage.displayName}}</span><span ng-if="events.length === 0">: {{'milestone_has_no_information' | translate}}</span>
-                                        <table class="table table-responsive" ng-if="events.length > 0">
-                                            <tr>
-                                                <th class="col-sm-1">
-                                                    {{stage.executionDateLabel ? stage.executionDateLabel : 'start_date' | translate}}
-                                                </th>
-                                                <th class="col-sm-1" ng-repeat="pstDe in stage.programStageDataElements">
-                                                    {{pstDe.dataElement.displayName}}
-                                                </th>
-                                                <th class="col-sm-1">
-                                                    {{'remark' | translate}}
-                                                </th>
-                                            </tr>
-                                            <tr ng-repeat="ev in events">
-                                                <td class="col-sm-1">
-                                                   {{ev.eventDate}} 
-                                                </td>
-                                                <td class="col-sm-1" ng-repeat="pstDe in stage.programStageDataElements">
-                                                    {{ev[pstDe.dataElement.id]}}
-                                                </td>                                                
-                                                <td class="col-sm-1">
-                                                    <span ng-repeat="note in ev.notes">
-                                                        {{note.value}}<br>
-                                                    </span>
-                                                </td>
-                                            </tr>
+                                        <span class="bold">{{stage.displayName}}</span>
+                                        <table class="table table-responsive yellow-background">
+                                            <tbody ng-if="events.length > 0">
+                                                <tr>
+                                                    <th class="col-sm-1">
+                                                        {{stage.executionDateLabel ? stage.executionDateLabel : 'start_date' | translate}}
+                                                    </th>
+                                                    <th class="col-sm-1" ng-repeat="pstDe in stage.programStageDataElements">
+                                                        {{pstDe.dataElement.displayName}}
+                                                    </th>
+                                                    <th class="col-sm-1">
+                                                        {{'remark' | translate}}
+                                                    </th>
+                                                </tr>
+                                                <tr ng-repeat="ev in events">
+                                                    <td class="col-sm-1">
+                                                       {{ev.eventDate}}
+                                                    </td>
+                                                    <td class="col-sm-1" ng-repeat="pstDe in stage.programStageDataElements">
+                                                        {{ev[pstDe.dataElement.id]}}
+                                                    </td>
+                                                    <td class="col-sm-1">
+                                                        <span ng-repeat="note in ev.notes">
+                                                            {{note.value}}<br>
+                                                        </span>
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                            <tbody ng-if="events.length === 0">
+                                                <tr>
+                                                    <td colspan="100%">
+                                                        {{'milestone_has_no_information' | translate}}
+                                                    </td>
+                                                </tr>
+                                            </tbody>
                                         </table>
                                     </div>
                                 </div>

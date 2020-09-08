@@ -87,7 +87,8 @@ html, body {
 
 .dhis2-table-hover > tbody > tr:hover > td, .table-hover > tbody > tr:hover > th {
     /*background-color: #dfe9f4 !important;*/
-    background-color: #b8c8e0 !important;
+    /*background-color: #b8c8e0 !important;*/
+    background-color: #fff !important;
     cursor: pointer;
 }
 
@@ -224,6 +225,11 @@ html, body {
 
 .yellow-background {
     background-color: #faebc4 !important;
+}
+
+.green-background {
+    background-color: green !important;
+    color: #fff;
 }
 
 .add-small-left-padding {
