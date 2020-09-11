@@ -36,9 +36,9 @@ ndpFramework.controller('ProgrammeController',
     };
     
     $scope.model.horizontalMenus = [        
-        {id: 'performance', title: 'ndp_result', order: 3, view: 'components/programme/performance.html', active: true},
-        {id: 'dashboard', title: 'dashboard', order: 4, view: 'components/programme/dashboard.html'},
-        {id: 'library', title: 'library', order: 1, view: 'components/programme/plans.html'}
+        {id: 'performance', title: 'ndp_results', order: 1, view: 'components/programme/performance.html', active: true},
+        {id: 'dashboard', title: 'dashboards', order: 2, view: 'components/programme/dashboard.html'},
+        {id: 'library', title: 'library', order: 3, view: 'components/programme/library.html'}
     ];
     
     //Get orgunits for the logged in user

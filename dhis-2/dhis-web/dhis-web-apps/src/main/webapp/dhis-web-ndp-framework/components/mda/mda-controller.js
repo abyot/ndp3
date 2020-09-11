@@ -11,10 +11,9 @@ ndpFramework.controller('MDAController',
     };
     
     $scope.model.horizontalMenus = [
-        {id: 'plan', title: 'plans', order: 1, view: 'components/mda/plans.html'},
-        {id: 'report', title: 'reports', order: 2, view: 'components/mda/reports.html'},
-        {id: 'performance', title: 'performance', order: 3, view: 'components/mda/performance.html', active: true},
-        {id: 'dashboard', title: 'dashboard', order: 4, view: 'components/mda/dashboard.html'}
+        {id: 'performance', title: 'results', order: 1, view: 'components/mda/performance.html', active: true},
+        {id: 'dashboard', title: 'dashboards', order: 2, view: 'components/mda/dashboard.html'},
+        {id: 'library', title: 'library', order: 3, view: 'components/mda/library.html'}
     ];
     
 });

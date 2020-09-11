@@ -16,7 +16,21 @@
             <li ng-repeat="menuItem in model.menuItems | orderBy:'order'" ng-include="'treeMenu.html'"></li>
         </ul>
     </div>
+    
+    <br>
+    <table class="table dhis2-table-hover table-bordered menu-vertical-spacing">        
+        <tr>
+            <td ng-click="model.selectedMenu = 'DICTIONARY'">{{'indicator_dictionary' | translate}}</td>
+        </tr>
+        <tr>
+            <td ng-click="model.selectedMenu = 'DOCUMENT'">{{'document_library' | translate}}</td>
+        </tr>
+        <tr>
+            <td ng-click="model.selectedMenu = 'FAQ'">{{'faqs' | translate}}</td>
+        </tr>
+    </table>
 </div>
+
 
 <!--<div class="vertical-spacing category-menu">
     <table class="table table-striped dhis2-table-hover table-bordered">

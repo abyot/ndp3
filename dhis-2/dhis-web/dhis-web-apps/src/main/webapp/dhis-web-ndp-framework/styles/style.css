@@ -417,3 +417,7 @@ ul.tree ul li:last-child:before {
     color: #428bca;
     font-size: 1.4em;
 }
+
+.menu-vertical-spacing {
+    margin-top: 60px;
+}

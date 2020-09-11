@@ -35,11 +35,10 @@ ndpFramework.controller('InterventionController',
         selectedPeriodType: 'FinancialJuly'
     };
     
-    $scope.model.horizontalMenus = [
-        {id: 'plan', title: 'plans', order: 1, view: 'components/intervention/plans.html'},
-        {id: 'report', title: 'reports', order: 2, view: 'components/intervention/reports.html'},
-        {id: 'performance', title: 'performance', order: 3, view: 'components/intervention/performance.html', active: true},
-        {id: 'dashboard', title: 'dashboard', order: 4, view: 'components/intervention/dashboard.html'}
+    $scope.model.horizontalMenus = [        
+        {id: 'performance', title: 'ndp_results', order: 3, view: 'components/intervention/performance.html', active: true},
+        {id: 'dashboard', title: 'dashboards', order: 4, view: 'components/intervention/dashboard.html'},
+        {id: 'library', title: 'library', order: 1, view: 'components/intervention/library.html'}
     ];
     
     //Get orgunits for the logged in user
