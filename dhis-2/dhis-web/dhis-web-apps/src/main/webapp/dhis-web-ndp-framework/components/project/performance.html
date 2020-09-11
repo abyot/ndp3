@@ -55,8 +55,9 @@
                         <td class="vertical-center" ng-repeat="att in model.selectedProgram.programTrackedEntityAttributes | filter: {displayInList: true}">
                             <span ng-switch="att.valueType">
                                 <span ng-switch-when="BOOLEAN">
-                                    <span ng-if="project[att.trackedEntityAttribute.id] === 'true'">{{'yes'| translate}}</span>
-                                    <span ng-if="project[att.trackedEntityAttribute.id] === 'false'">{{ 'no' | translate}}</span>
+                                    <!--<span ng-if="project[att.trackedEntityAttribute.id] === 'true'">{{'yes'| translate}}</span>
+                                    <span ng-if="project[att.trackedEntityAttribute.id] === 'false'">{{ 'no' | translate}}</span>-->
+                                    <span ng-if="project[att.trackedEntityAttribute.id] === 'true'"><i class="fa fa-check"></i></span>
                                 </span>
                                 <span ng-switch-when="TRUE_ONLY">
                                     <span ng-if="project[att.trackedEntityAttribute.id] === 'true'"><i class="fa fa-check"></i></span>
@@ -85,8 +86,9 @@
                                     <td class="vertical-center" ng-repeat="att in model.selectedProgram.programTrackedEntityAttributes">
                                         <span ng-switch="att.valueType">
                                             <span ng-switch-when="BOOLEAN">
-                                                <span ng-if="project[att.trackedEntityAttribute.id] === 'true'">{{'yes'| translate}}</span>
-                                                <span ng-if="project[att.trackedEntityAttribute.id] === 'false'">{{ 'no' | translate}}</span>
+                                                <!--<span ng-if="project[att.trackedEntityAttribute.id] === 'true'">{{'yes'| translate}}</span>
+                                                <span ng-if="project[att.trackedEntityAttribute.id] === 'false'">{{ 'no' | translate}}</span>-->
+                                                <span ng-if="project[att.trackedEntityAttribute.id] === 'true'"><i class="fa fa-check"></i></span>
                                             </span>
                                             <span ng-switch-when="TRUE_ONLY">
                                                 <span ng-if="project[att.trackedEntityAttribute.id] === 'true'"><i class="fa fa-check"></i></span>
