@@ -210,7 +210,7 @@ ndpFramework.controller('GoalController',
                                 groupSet.span++;
                                 group.span++;
 
-                                currRow.push({val: $scope.model.metaData.items[de.id].name, span: 1});
+                                currRow.push({val: $scope.model.metaData.items[de.id].name, span: 1, info: de.id});
                                 angular.forEach($scope.model.dataHeaders, function(dh){
                                     currRow.push({val: $scope.filterData(dh, de.id), span: 1});
                                 });
@@ -280,6 +280,22 @@ ndpFramework.controller('GoalController',
             reportName = name + ' performance.xls';
         }
         saveAs(blob, reportName);
+    };
+    
+    $scope.getIndicatorDictionary = function(item) {        
+        var modalInstance = $modal.open({
+            templateUrl: 'components/dictionary/details-modal.html',
+            controller: 'DictionaryController',
+            resolve: {
+                dictionaryItem: function(){
+                    return item;
+                }
+            }
+        });
+
+        modalInstance.result.then(function () {            
+            
+        });
     };
     
     $scope.resetDataView = function(){

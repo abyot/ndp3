@@ -412,3 +412,8 @@ ul.tree ul li:last-child:before {
     border-radius: 3px;*/
     margin-top: 10px;
 }
+
+.info-icon {
+    color: #428bca;
+    font-size: 1.4em;
+}

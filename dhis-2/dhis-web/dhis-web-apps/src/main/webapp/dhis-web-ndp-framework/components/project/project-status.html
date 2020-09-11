@@ -1,7 +1,7 @@
 <div ng-controller="ProjectController">
     <div class="list-group col-sm-2 hideInPrint">
         <a ng-repeat="option in model.ndpProgram.options" class="list-group-item cursor-pointer" ng-class="{true: 'active'} [option.id === model.selectedNdpProgram.id]" ng-click="setNdpProgram(option)">
-            {{option.code}} {{option.displayName}}
+            {{option.displayName}}
         </a>
     </div>
     

@@ -83,6 +83,9 @@
                     <tr ng-repeat="row in model.finalData">
                         <td class="vertical-center" ng-repeat="col in row" rowspan="{{col.span}}">
                             {{col.val}}
+                            <span ng-if="col.info" ng-click="getIndicatorDictionary(col.info)">
+                                <i class="fa fa-info-circle info-icon cursor-pointer" aria-hidden="true" title="{{'indicator_dictionary' | translate}}"></i>
+                            </span>
                         </td>
                     </tr>
                 </tbody>
