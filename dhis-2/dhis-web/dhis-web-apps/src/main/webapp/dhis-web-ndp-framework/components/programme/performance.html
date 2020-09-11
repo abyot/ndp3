@@ -1,5 +1,3 @@
-
-
 <div class="small-vertical-spacing hideInPrint">
     <div class="selection-group">
         <div class="col-sm-7 green-info-area">
@@ -59,7 +57,7 @@
                     </tr>
                     <tr>
                         <th>{{'objective'| translate}}</th>
-                        <th>{{'outcomes_outputs'| translate}}</th>
+                        <th>{{'outcomes'| translate}}</th>
                         <th>{{'indicator'| translate}}</th>
                         <th class="center" ng-repeat="header in model.dataHeaders">
                             {{model.metaData.items[header.dimensionId].name}}
@@ -69,7 +67,10 @@
                 <tbody>
                     <tr ng-repeat="row in model.finalData">
                         <td class="vertical-center" ng-repeat="col in row" rowspan="{{col.span}}">
-                            {{col.val}}
+                            {{col.val}} 
+                            <span ng-if="col.info">
+                                <i class="fa fa-info-circle info-icon cursor-pointer" aria-hidden="true" title="{{'indicator_dictionary' | translate}}"></i>
+                            </span>
                         </td>
                     </tr>
                 </tbody>

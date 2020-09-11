@@ -35,11 +35,10 @@ ndpFramework.controller('ProgrammeController',
         selectedPeriodType: 'FinancialJuly'
     };
     
-    $scope.model.horizontalMenus = [
-        {id: 'plan', title: 'plans', order: 1, view: 'components/programme/plans.html'},
-        {id: 'report', title: 'reports', order: 2, view: 'components/programme/reports.html'},
-        {id: 'performance', title: 'performance', order: 3, view: 'components/programme/performance.html', active: true},
-        {id: 'dashboard', title: 'dashboard', order: 4, view: 'components/programme/dashboard.html'}
+    $scope.model.horizontalMenus = [        
+        {id: 'performance', title: 'ndp_result', order: 3, view: 'components/programme/performance.html', active: true},
+        {id: 'dashboard', title: 'dashboard', order: 4, view: 'components/programme/dashboard.html'},
+        {id: 'library', title: 'library', order: 1, view: 'components/programme/plans.html'}
     ];
     
     //Get orgunits for the logged in user
@@ -225,8 +224,7 @@ ndpFramework.controller('ProgrammeController',
                         var generateRow = function(group, deg){
                             angular.forEach(deg.dataElements, function(de){
                                 groupSet.span++;
-                                group.span++;
-
+                                group.span++;                                
                                 currRow.push({val: $scope.model.metaData.items[de.id].name, span: 1});
                                 angular.forEach($scope.model.dataHeaders, function(dh){
                                     currRow.push({val: $scope.filterData(dh, de.id), span: 1});
