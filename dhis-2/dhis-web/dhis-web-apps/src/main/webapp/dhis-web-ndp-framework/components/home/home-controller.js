@@ -663,7 +663,7 @@ ndpFramework.controller('HomeController',
                             code: 'goal',
                             ndp: child.code,
                             order: 0,
-                            displayName: $translate.instant('goals'),
+                            displayName: $translate.instant('goal'),
                             children: []
                         } ); 
                     }
