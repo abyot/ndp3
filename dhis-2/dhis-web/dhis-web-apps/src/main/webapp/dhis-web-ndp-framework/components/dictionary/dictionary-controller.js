@@ -80,8 +80,6 @@ ndpFramework.controller('DictionaryController',
                                     $scope.model.dictionaryHeaders.push(header);
                                 }
                             });
-                            
-                            console.log('attibutes:  ', $scope.model.attributes);
                         });
                     });
                 });    

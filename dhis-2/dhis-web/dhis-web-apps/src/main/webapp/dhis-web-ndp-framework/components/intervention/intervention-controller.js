@@ -147,6 +147,7 @@ ndpFramework.controller('InterventionController',
     });
         
     $scope.setNdpProgram = function( program ){
+        $scope.resetView();
         if( $scope.model.selectedNdpProgram && $scope.model.selectedNdpProgram.id === program.id ){
             $scope.model.selectedNdpProgram = null;
         }
@@ -164,7 +165,12 @@ ndpFramework.controller('InterventionController',
     
     $scope.resetView = function(horizontalMenu){
         $scope.model.activeHorizontalMenu = horizontalMenu;
-        
+        $scope.model.dataElementGroup = [];
+        $scope.model.selectedDataElementGroupSets = [];
+        $scope.model.objectives = [];
+        $scope.model.interventions = [];
+        $scope.model.selectedIntervention = null;
+        $scope.model.selectedObjective = null;
         $scope.resetDataView();
     };
     

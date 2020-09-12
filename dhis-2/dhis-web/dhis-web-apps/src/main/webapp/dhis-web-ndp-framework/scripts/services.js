@@ -370,6 +370,34 @@ var ndpFrameworkServices = angular.module('ndpFrameworkServices', ['ngResource']
     };        
 })
 
+.service('SectorService', function($http, CommonUtils){
+    return {
+        getAll: function(){
+            var filter = 'paging=false&fields=id,displayName,organisationUnitGroups[id,displayName,code,organisationUnits[id,displayName,code,dataSets[dataSetElements[dataElement[dataElementGroups[groupSets[id]]]]]]],attributeValues[value,attribute[id,code,valueType]]';
+            var url = dhis2.ndp.apiUrl + '/organisationUnitGroupSets.json?' + filter;
+            var promise = $http.get( url ).then(function(response){
+                var sectors = [];
+                if( response && response.data && response.data.organisationUnitGroupSets){
+                    var ogss = response.data.organisationUnitGroupSets;
+                    angular.forEach(ogss, function(ogs){
+                        ogs = dhis2.metadata.processMetaDataAttribute( ogs );
+                        if( ogs.isSector && ogs.organisationUnitGroups.length > 0 ){
+                            angular.forEach(ogs.organisationUnitGroups, function(og){
+                                sectors.push( og );
+                            });
+                        }
+                    });                    
+                }                
+                return sectors;
+            }, function(response){
+                CommonUtils.errorNotifier(response);
+                return response.data;
+            });
+            return promise;
+        }
+    };
+})
+
 .service('Analytics', function($http, CommonUtils){
     return {
         getData: function( url ){
