@@ -24,6 +24,7 @@ ndpFramework.controller('InterventionController',
         optionSetsById: [],
         optionSets: [],
         interventions: [],
+        objectives: [],
         dataElementGroup: [],
         selectedDataElementGroupSets: [],
         dataElementGroups: [],
@@ -53,15 +54,40 @@ ndpFramework.controller('InterventionController',
         $scope.selectedOrgUnit = $scope.orgUnits[0] ? $scope.orgUnits[0] : null;
     });
     
-    $scope.getInterventions = function(){
+    $scope.getObjectives = function(){
+        $scope.model.objectives = [];
         $scope.model.dataElementGroup = [];
         angular.forEach($scope.model.selectedDataElementGroupSets, function(degs){
+            if ( degs.programObjective && $scope.model.objectives.indexOf(degs.programObjective) === -1 ){
+                $scope.model.objectives.push( degs.programObjective );
+            }
             angular.forEach(degs.dataElementGroups, function(deg){
                 $scope.model.dataElementGroup.push( $filter('filter')($scope.model.dataElementGroups, {id: deg.id})[0] );
             });
         });
     };
     
+    $scope.$watch('model.selectedObjective', function(){
+        $scope.model.dataElementGroup = [];
+        $scope.resetDataView();
+        if( $scope.model.selectedObjective ){
+            $scope.model.selectedDataElementGroupSets = $filter('filter')($scope.model.dataElementGroupSets, {programObjective: $scope.model.selectedObjective});
+            angular.forEach($scope.model.selectedDataElementGroupSets, function(degs){
+                angular.forEach(degs.dataElementGroups, function(deg){
+                    $scope.model.dataElementGroup.push( $filter('filter')($scope.model.dataElementGroups, {id: deg.id})[0] );
+                });
+            });
+        }
+        else{
+            $scope.model.selectedDataElementGroupSets = angular.copy( $scope.model.interventions );
+            angular.forEach($scope.model.interventions, function(degs){
+                angular.forEach(degs.dataElementGroups, function(deg){
+                    $scope.model.dataElementGroup.push( $filter('filter')($scope.model.dataElementGroups, {id: deg.id})[0] );
+                });
+            });
+        }
+    });
+
     $scope.$watch('model.selectedIntervention', function(){
         $scope.model.dataElementGroup = [];
         $scope.resetDataView();
@@ -78,9 +104,9 @@ ndpFramework.controller('InterventionController',
                     $scope.model.dataElementGroup.push( $filter('filter')($scope.model.dataElementGroups, {id: deg.id})[0] );
                 });
             });
-        }        
+        }
     });
-    
+
     MetaDataFactory.getAll('optionSets').then(function(optionSets){
         
         $scope.model.optionSets = optionSets;
@@ -95,7 +121,9 @@ ndpFramework.controller('InterventionController',
 
             MetaDataFactory.getAll('dataElementGroupSets').then(function(dataElementGroupSets){
 
-                $scope.model.dataElementGroupSets = dataElementGroupSets;
+                $scope.model.selectedMenu = SelectedMenuService.getSelectedMenu();
+
+                $scope.model.dataElementGroupSets = $filter('filter')(dataElementGroupSets, {ndp: $scope.model.selectedMenu.ndp, indicatorGroupSetType: $scope.model.selectedMenu.code}, true);
 
                 $scope.model.periods = PeriodService.getPeriods($scope.model.selectedPeriodType, $scope.model.periodOffset, $scope.model.openFuturePeriods);
 
@@ -106,8 +134,6 @@ ndpFramework.controller('InterventionController',
                        $scope.model.selectedPeriods.push(pe);
                     } 
                 });
-
-                $scope.model.selectedMenu = SelectedMenuService.getSelectedMenu();
 
                 if( $scope.model.selectedMenu && $scope.model.selectedMenu.ndp && $scope.model.selectedMenu.code ){                    
                     $scope.model.ndpProgram = $filter('filter')($scope.model.optionSets, {ndp: $scope.model.selectedMenu.ndp, code: 'program'}, true)[0];
@@ -131,7 +157,7 @@ ndpFramework.controller('InterventionController',
         if( $scope.model.selectedNdpProgram && $scope.model.selectedNdpProgram.code ){
             $scope.model.interventions = $filter('filter')($scope.model.dataElementGroupSets, {ndp: $scope.model.selectedMenu.ndp, indicatorGroupSetType: $scope.model.selectedMenu.code, ndpProgramme: $scope.model.selectedNdpProgram.code}, true);            
             $scope.model.selectedDataElementGroupSets = angular.copy( $scope.model.interventions );
-            $scope.getInterventions();
+            $scope.getObjectives();
         }
         
     };

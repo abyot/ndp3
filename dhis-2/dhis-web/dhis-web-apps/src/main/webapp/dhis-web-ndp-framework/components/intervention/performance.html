@@ -7,12 +7,12 @@
                     {{'objectives'| translate}}
                 </div>
                 <div class="col-sm-8">
-                    <ui-select ng-model="model.selectedIntervention" 
+                    <ui-select ng-model="model.selectedObjective"
                                theme="select2"                                 
                                style="width:100%;">
-                        <ui-select-match allow-clear="true" class="form-control-ui-select" placeholder="{{model.interventions && model.interventions.length > 0 ? 'select_or_search' : 'empty'| translate}}">{{$select.selected.displayName|| $select.selected}}</ui-select-match>
-                        <ui-select-choices repeat="degs in model.interventions | filter: $select.search | limitTo:maxOptionSize | orderBy: ['displayName']">
-                            <span ng-bind-html="degs.displayName | highlight: $select.search"></span>
+                        <ui-select-match allow-clear="true" class="form-control-ui-select" placeholder="{{model.objectives && model.objectives.length > 0 ? 'select_or_search' : 'empty'| translate}}">{{$select.selected.displayName|| $select.selected}}</ui-select-match>
+                        <ui-select-choices repeat="obj in model.objectives | filter: $select.search | limitTo:maxOptionSize | orderBy">
+                            <span ng-bind-html="obj | highlight: $select.search"></span>
                         </ui-select-choices>
                     </ui-select>
                 </div>
@@ -24,10 +24,11 @@
                 </div>
                 <div class="col-sm-8">
                     <ui-select ng-model="model.selectedIntervention" 
+                               ng-disabled="!model.selectedObjective"
                                theme="select2"                                 
                                style="width:100%;">
-                        <ui-select-match allow-clear="true" class="form-control-ui-select" placeholder="{{model.interventions && model.interventions.length > 0 ? 'select_or_search' : 'empty'| translate}}">{{$select.selected.displayName|| $select.selected}}</ui-select-match>
-                        <ui-select-choices repeat="degs in model.interventions | filter: $select.search | limitTo:maxOptionSize | orderBy: ['displayName']">
+                        <ui-select-match allow-clear="true" class="form-control-ui-select" placeholder="{{model.selectedDataElementGroupSets && model.selectedDataElementGroupSets.length > 0 ? 'select_or_search' : 'empty'| translate}}">{{$select.selected.displayName|| $select.selected}}</ui-select-match>
+                        <ui-select-choices repeat="degs in model.selectedDataElementGroupSets | filter: $select.search | limitTo:maxOptionSize | orderBy: ['displayName']">
                             <span ng-bind-html="degs.displayName | highlight: $select.search"></span>
                         </ui-select-choices>
                     </ui-select>
@@ -37,6 +38,7 @@
                 <div class="col-sm-12">
                     <button type="button"
                             class="btn btn-primary"
+                            ng-disabled="!model.selectedObjective"
                             ng-click="getAnalyticsData()">
                         {{'display_report'| translate}}
                     </button>
