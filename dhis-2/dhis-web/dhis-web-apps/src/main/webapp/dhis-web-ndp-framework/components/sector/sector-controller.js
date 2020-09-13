@@ -103,9 +103,9 @@ ndpFramework.controller('SectorController',
 
                 MetaDataFactory.getAll('dataElementGroupSets').then(function(dataElementGroupSets){
 
+                    $scope.model.dataElementGroupSets = dataElementGroupSets;
+                    
                     $scope.model.selectedMenu = SelectedMenuService.getSelectedMenu();
-
-                    $scope.model.dataElementGroupSets = $filter('filter')(dataElementGroupSets, {ndp: $scope.model.selectedMenu.ndp, indicatorGroupSetType: $scope.model.selectedMenu.code}, true);
 
                     $scope.model.periods = PeriodService.getPeriods($scope.model.selectedPeriodType, $scope.model.periodOffset, $scope.model.openFuturePeriods);
 

@@ -373,8 +373,8 @@ var ndpFrameworkServices = angular.module('ndpFrameworkServices', ['ngResource']
 .service('SectorService', function($http, CommonUtils){
     return {
         getAll: function(){
-            var filter = 'paging=false&fields=id,displayName,organisationUnitGroups[id,displayName,code,organisationUnits[id,displayName,code,dataSets[dataSetElements[dataElement[dataElementGroups[groupSets[id]]]]]]],attributeValues[value,attribute[id,code,valueType]]';
-            var url = dhis2.ndp.apiUrl + '/organisationUnitGroupSets.json?' + filter;
+            var filter = '?paging=false&fields=id,displayName,organisationUnitGroups[id,displayName,code,organisationUnits[id,displayName,code,dataSets[dataSetElements[dataElement[dataElementGroups[groupSets[id]]]]]]],attributeValues[value,attribute[id,code,valueType]]';
+            var url = dhis2.ndp.apiUrl + '/organisationUnitGroupSets.json' + filter;
             var promise = $http.get( url ).then(function(response){
                 var sectors = [];
                 if( response && response.data && response.data.organisationUnitGroupSets){
@@ -389,6 +389,17 @@ var ndpFrameworkServices = angular.module('ndpFrameworkServices', ['ngResource']
                     });                    
                 }                
                 return sectors;
+            }, function(response){
+                CommonUtils.errorNotifier(response);
+                return response.data;
+            });
+            return promise;
+        },
+        getByVote: function( id ){
+            var filter = '?paging=false&fields=id,displayName,code,dataSets[dataSetElements[dataElement[dataElementGroups[groupSets[id]]]]],attributeValues[value,attribute[id,code,valueType]]';
+            var url = dhis2.ndp.apiUrl + '/organisationUnits/' + id + '.json' + filter;
+            var promise = $http.get( url ).then(function(response){
+                return response.data;
             }, function(response){
                 CommonUtils.errorNotifier(response);
                 return response.data;

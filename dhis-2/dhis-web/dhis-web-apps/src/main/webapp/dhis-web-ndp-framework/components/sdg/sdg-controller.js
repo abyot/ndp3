@@ -72,10 +72,7 @@ ndpFramework.controller('SDGController',
             angular.forEach($scope.model.selectedSdgGoal.dataElementGroups, function(deg){
                 $scope.model.dataElementGroup.push( $filter('filter')($scope.model.dataElementGroups, {id: deg.id})[0] );
             });
-            
-            console.log('selectedSdgGoal:  ', $scope.model.selectedSdgGoal);
-            console.log('goals:  ', $scope.model.selectedDataElementGroupSets);
-            console.log('targets:  ', $scope.model.dataElementGroup);
+
         }
         /*else{
             $scope.model.selectedDataElementGroupSets = angular.copy( $scope.model.sdgGoals );
