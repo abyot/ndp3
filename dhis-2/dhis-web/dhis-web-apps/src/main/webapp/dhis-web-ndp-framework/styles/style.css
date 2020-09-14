@@ -148,6 +148,10 @@ html, body {
     margin-right: 20px;    
 }
 
+.long-horizontal-spacing {
+    margin-left: 40px;    
+}
+
 .remove-horizontal-spacing {
     margin-left: -25px;
 }

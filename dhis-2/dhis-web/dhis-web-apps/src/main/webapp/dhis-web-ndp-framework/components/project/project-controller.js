@@ -17,6 +17,7 @@ ndpFramework.controller('ProjectController',
     
     $scope.model = {
         metaDataCached: false,
+        showOnlyCoreProject: false,
         data: null,
         reportReady: false,
         dataExists: false,
