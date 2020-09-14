@@ -447,6 +447,149 @@ var ndpFrameworkServices = angular.module('ndpFrameworkServices', ['ngResource']
     };
 })
 
+.service('EventService', function($http, $q, DHIS2URL, CommonUtils, DateUtils, FileService, OptionSetService) {
+    
+    var bytesToSize = function ( bytes ){
+        var sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
+        if (bytes === 0) return '0 Byte';
+        var i = parseInt(Math.floor(Math.log(bytes) / Math.log(1024)));
+        return Math.round(bytes / Math.pow(1024, i), 2) + ' ' + sizes[i];
+    };
+    
+    var skipPaging = "&skipPaging=true";
+    
+    var getByOrgUnitAndProgram = function(orgUnit, ouMode, program, typeDataElement, fileDataElement, optionSets, dataElementById){
+        var url = DHIS2URL + '/events.json?' + 'orgUnit=' + orgUnit + '&ouMode='+ ouMode + '&program=' + program + skipPaging;
+
+        /*if( startDate && endDate ){
+            url += '&startDate=' + startDate + '&endDate=' + endDate;
+        }
+
+        if( attributeCategoryUrl && !attributeCategoryUrl.default ){
+            url += '&attributeCc=' + attributeCategoryUrl.cc + '&attributeCos=' + attributeCategoryUrl.cp;
+        }
+        
+        if( categoryOptionCombo ){
+            url += '&coc=' + categoryOptionCombo;
+        }*/
+
+        var promise = $http.get( url ).then(function(response){
+            var events = response.data && response.data.events ? response.data.events : [];
+            var documents = [];
+            if( response && response.data && response.data.events ){                
+                angular.forEach(events, function(ev){
+                    var doc = {
+                        dateUploaded: DateUtils.formatFromApiToUser(ev.eventDate),
+                        uploadedBy: ev.storedBy,
+                        event: ev.event
+                    };
+
+                    if( ev.dataValues ){
+                        angular.forEach(ev.dataValues, function(dv){
+                            if( dv.dataElement === typeDataElement.id ){
+                                doc.folder = dv.value;
+                            }
+                            else if( dv.dataElement === fileDataElement.id ){
+                                doc.value = dv.value;
+                                FileService.get( dv.value ).then(function(res){
+                                    doc.name = res.displayName || '';
+                                    doc.size = bytesToSize( res.contentLength || 0 );
+                                    doc.type = res.contentType || 'undefined';
+                                    doc.path = '/events/files?dataElementUid=' + dv.dataElement + '&eventUid=' + ev.event;
+                                });
+                            }
+                            else{
+                                var val = dv.value;
+                                var de = dataElementById[dv.dataElement];
+
+                                if( de && de.optionSetValue ){
+                                    val = OptionSetService.getName(optionSets[de.optionSet.id].options, String(val));
+                                }
+
+                                doc[dv.dataElement] = val;
+                            }
+                        });
+                    }
+                    documents.push( doc );
+                });
+            }
+            return documents;
+            
+        }, function(response){
+            CommonUtils.errorNotifier(response);
+        });
+        
+        return promise;
+    };
+    
+    var get = function(eventUid){            
+        var promise = $http.get(DHIS2URL + '/events/' + eventUid + '.json').then(function(response){               
+            return response.data;
+        });            
+        return promise;
+    };
+    
+    var create = function(dhis2Event){    
+        var promise = $http.post(DHIS2URL + '/events.json', dhis2Event).then(function(response){
+            return response.data;           
+        });
+        return promise;            
+    };
+    
+    var deleteEvent = function(dhis2Event){
+        var promise = $http.delete(DHIS2URL + '/events/' + dhis2Event.event).then(function(response){
+            return response.data;               
+        });
+        return promise;           
+    };
+    
+    var update = function(dhis2Event){   
+        var promise = $http.put(DHIS2URL + '/events/' + dhis2Event.event, dhis2Event).then(function(response){
+            return response.data;         
+        });
+        return promise;
+    };
+    return {        
+        get: get,        
+        create: create,
+        deleteEvent: deleteEvent,
+        update: update,
+        getByOrgUnitAndProgram: getByOrgUnitAndProgram,
+        getForMultipleOptionCombos: function( orgUnit, mode, pr, attributeCategoryUrl, optionCombos, startDate, endDate ){
+            var def = $q.defer();            
+            var promises = [], events = [];            
+            angular.forEach(optionCombos, function(oco){
+                promises.push( getByOrgUnitAndProgram( orgUnit, mode, pr, attributeCategoryUrl, oco.id, startDate, endDate) );
+            });
+            
+            $q.all(promises).then(function( _events ){
+                angular.forEach(_events, function(evs){
+                    events = events.concat( evs );
+                });
+                
+                def.resolve(events);
+            });
+            return def.promise;
+        },
+        getForMultiplePrograms: function( orgUnit, mode, programs, attributeCategoryUrl, startDate, endDate ){
+            var def = $q.defer();            
+            var promises = [], events = [];            
+            angular.forEach(programs, function(pr){
+                promises.push( getByOrgUnitAndProgram( orgUnit, mode, pr.id, attributeCategoryUrl, null, startDate, endDate) );                
+            });
+            
+            $q.all(promises).then(function( _events ){
+                angular.forEach(_events, function(evs){
+                    events = events.concat( evs );
+                });
+                
+                def.resolve(events);
+            });
+            return def.promise;
+        }
+    };    
+})
+
 .service('ProjectService', function($http, DateUtils, CommonUtils, OptionSetService){
     return {
         getByProgram: function(orgUnit, program, optionSets, attributesById){

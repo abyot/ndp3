@@ -38,5 +38,4 @@ var docLibraryFilters = angular.module('docLibraryFilters', [])
             });
         }
     };
-})
-;
+});

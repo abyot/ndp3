@@ -7,13 +7,14 @@ ndpFramework.controller('ProjectController',
         $translate,
         $modal,
         $filter,
+        $window,
         NotificationService,
         SelectedMenuService,
-        orderByFilter,
-        PeriodService,
+        DHIS2URL,
         MetaDataFactory,
         OrgUnitFactory,
-        ProjectService) {
+        ProjectService,
+        EventService) {
     
     $scope.model = {
         metaDataCached: false,
@@ -26,6 +27,7 @@ ndpFramework.controller('ProjectController',
         optionSets: [],
         objectives: [],
         dataElementGroup: [],
+        documentPrograms: [],
         selectedDataElementGroupSets: [],
         dataElementGroups: [],
         selectedNdpProgram: null,
@@ -91,16 +93,85 @@ ndpFramework.controller('ProjectController',
         });
         
         MetaDataFactory.getAll('programs').then(function(programs){
-            $scope.model.programs = programs;
+            $scope.model.programs = $filter('filter')(programs, {programType: 'WITH_REGISTRATION'}, true);
+            $scope.model.documentPrograms = $filter('filter')(programs, {programType: 'WITHOUT_REGISTRATION'}, true);
+
             $scope.model.selectedMenu = SelectedMenuService.getSelectedMenu();
 
             if( $scope.model.selectedMenu && $scope.model.selectedMenu.ndp && $scope.model.selectedMenu.code ){                    
                 $scope.model.ndpProgram = $filter('filter')($scope.model.optionSets, {ndp: $scope.model.selectedMenu.ndp, code: 'program'}, true)[0];
             }
+            
+            $scope.fetchDocuments();
         });
     });
-        
+    
+    $scope.fetchDocuments = function(){
+
+        var pushedHeaders = [], pushedDataElements = [];
+        $scope.model.dynamicHeaders = [];
+        $scope.model.dataElements = [];
+        $scope.model.documents = [];
+        angular.forEach($scope.model.documentPrograms, function(program){
+            
+            var selectedProgramStage = program.programStages[0];
+
+            var prDes = selectedProgramStage.programStageDataElements;
+
+            var docDe = $filter('filter')(prDes, {dataElement: {valueType: 'FILE_RESOURCE'}});
+            var typeDe = $filter('filter')(prDes, {dataElement: {isDocumentFolder: true}});
+            var progDe = $filter('filter')(prDes, {dataElement: {isProgrammeDocument: true}});
+            
+            if( docDe.length !== 1 || typeDe.length !== 1 ){
+                NotificationService.showNotifcationDialog($translate.instant("error"), $translate.instant("invalid_document_folder_configuration"));
+                return;
+            }
+
+            if( progDe.length === 1 ){
+                $scope.model.isProgrammeDocument = true;
+                $scope.model.programmeDataElement = progDe[0].dataElement;
+            };
+
+            $scope.model.fileDataElement = docDe[0].dataElement;
+            $scope.model.typeDataElement = typeDe[0].dataElement;
+            $scope.model.selectedOptionSet = $scope.model.optionSetsById[$scope.model.typeDataElement.optionSet.id];
+
+            angular.forEach(prDes, function(prDe){
+                if ( pushedDataElements.indexOf(prDe.dataElement.id) === -1 ){
+                    $scope.model.dataElements[prDe.dataElement.id] = prDe.dataElement;
+                }
+                
+                if( prDe.dataElement.valueType !== 'FILE_RESOURCE' && !prDe.dataElement.isDocumentFolder && !prDe.dataElement.isProgrammeDocument){
+                    if( pushedHeaders.indexOf( prDe.dataElement.id ) === -1 ){
+                        $scope.model.dynamicHeaders.push(prDe.dataElement);
+                    }
+                }
+            });
+            
+            EventService.getByOrgUnitAndProgram($scope.selectedOrgUnit.id, 
+            'DESCENDANTS', 
+            program.id, 
+            $scope.model.typeDataElement, 
+            $scope.model.fileDataElement,
+            $scope.model.optionSetsById,
+            $scope.model.dataElements).then(function(events){
+                $scope.model.documents = $scope.model.documents.concat( events );
+            });
+        });
+    };
+  
+    $scope.downloadFile = function(path, e){
+        if( path ){
+            $window.open(DHIS2URL + path, '_blank', '');
+        }
+        if(e){
+            e.stopPropagation();
+            e.preventDefault();
+        }
+    };
+  
     $scope.setNdpProgram = function( program ){
+        
         $scope.model.attributesById = [];
         $scope.model.dataElementsById = [];
         

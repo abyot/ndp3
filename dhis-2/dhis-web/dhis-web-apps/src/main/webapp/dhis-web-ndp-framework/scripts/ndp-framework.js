@@ -302,7 +302,7 @@ function getAttributes( ids ){
 }
 
 function getMetaPrograms(){
-    return dhis2.metadata.getMetaObjectIds('programs', dhis2.ndp.apiUrl + '/programs.json', 'filter=programType:eq:WITH_REGISTRATION&paging=false&fields=id,version');
+    return dhis2.metadata.getMetaObjectIds('programs', dhis2.ndp.apiUrl + '/programs.json', 'paging=false&fields=id,version');
 }
 
 function filterMissingPrograms( objs ){
