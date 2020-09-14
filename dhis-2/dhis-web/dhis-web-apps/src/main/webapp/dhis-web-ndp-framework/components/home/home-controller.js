@@ -329,7 +329,7 @@ ndpFramework.controller('HomeController',
                                                     },
                                                     {
                                                         id: 'SEC',
-                                                        displayName: $translate.instant('sectors'),
+                                                        displayName: $translate.instant('ssp'),
                                                         order: 2,
                                                         children: []
                                                     },

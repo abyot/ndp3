@@ -182,7 +182,7 @@ ndpFramework.controller('SDGController',
     
     $scope.getAnalyticsData = function(){
 
-        $scope.model.data = null;
+        /*$scope.model.data = null;
         var analyticsUrl = '';
         
         if( !$scope.selectedOrgUnit || !$scope.selectedOrgUnit.id ){
@@ -275,7 +275,7 @@ ndpFramework.controller('SDGController',
                     $scope.model.finalData = parsedRow;
                 }
             });
-        }
+        }*/
     };
     
     $scope.showOrgUnitTree = function(){
