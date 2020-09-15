@@ -722,6 +722,15 @@ ndpFramework.controller('HomeController',
         SelectedMenuService.setSelectedMenu($scope.model.selectedMenu);
     };
 
+    $scope.setBottomMenu = function(menu){
+        if( $scope.model.selectedMenu && $scope.model.selectedMenu.id === menu){
+            $scope.model.selectedMenu = null;
+        }
+        else{
+            $scope.model.selectedMenu = {id: menu};
+        }
+    };
+
     
     $scope.goToMenu = function( menuLink ){
         window.location.href = '../' + menuLink;

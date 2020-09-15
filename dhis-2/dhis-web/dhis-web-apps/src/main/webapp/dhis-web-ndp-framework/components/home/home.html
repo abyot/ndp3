@@ -67,7 +67,9 @@
                     <!--<div ng-include="'components/log/log-status.html'"></div>-->
                     <div ng-include="'components/mda/mda-status.html'"></div>
                 </span>
-                
+                <span ng-switch-when="DICTIONARY">
+                    <div ng-include="'components/home/dictionary.html'"></div>
+                </span>
             </div>
         </form>
 
