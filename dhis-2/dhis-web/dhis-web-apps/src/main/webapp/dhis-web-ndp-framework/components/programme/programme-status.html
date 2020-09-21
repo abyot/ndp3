@@ -13,10 +13,39 @@
                 </tab>
             </tabset>
         </div>
-        <div ng-if="!model.selectedNdpProgram">
-            <div class="alert alert-warning">
+
+        <div ng-if="!model.selectedNdpProgram && model.ndpObjectives.length > 0 && model.ndpProgrammes.length > 0">
+            <!--<div class="alert alert-warning">
                 {{'please_select_program'| translate}}
-            </div>
+            </div>-->
+            <table class="table table-bordered table-responsive table-striped">
+                <thead>
+                    <tr>
+                        <th colspan="2" class="center">
+                            {{'ndp3_program_alignment' | translate}}                           
+                        </th>
+                    </tr>
+                    <tr>
+                        <th>
+                            {{'objectives' | translate}}
+                        </th>
+                        <th>
+                            {{'programmes' | translate}}
+                        </th>
+                    </tr>
+                </thead>
+                <tbody ng-repeat="objective in model.ndpObjectives" ng-init="objectivePrograms = (model.ndpProgrammes | filter: {ndpObjective: objective.code})">
+                    <tr ng-repeat="objectiveProgram in objectivePrograms">
+                        <td class="vertical-center" rowspan="{{objectivePrograms.length}}" ng-if="$index===0">
+                            {{objective.displayName}}
+                        </td>
+                        <td class="vertical-center">
+                            {{objectiveProgram.displayName}}
+                        </td>
+                    </tr>
+                </tbody>
+                
+            </table>
         </div>
     </div>
 </div>

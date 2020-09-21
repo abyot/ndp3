@@ -24,6 +24,8 @@ ndpFramework.controller('ProgrammeController',
         optionSetsById: [],
         optionSets: [],
         objectives: [],
+        ndpObjectives: [],
+        ndpProgrammes: [],
         dataElementGroup: [],
         selectedDataElementGroupSets: [],
         dataElementGroups: [],
@@ -96,7 +98,7 @@ ndpFramework.controller('ProgrammeController',
             MetaDataFactory.getAll('dataElementGroupSets').then(function(dataElementGroupSets){
 
                 $scope.model.dataElementGroupSets = dataElementGroupSets;
-
+                
                 $scope.model.periods = PeriodService.getPeriods($scope.model.selectedPeriodType, $scope.model.periodOffset, $scope.model.openFuturePeriods);
 
                 var selectedPeriodNames = ['2020/21', '2021/22', '2022/23', '2023/24', '2024/25'];
@@ -109,8 +111,15 @@ ndpFramework.controller('ProgrammeController',
 
                 $scope.model.selectedMenu = SelectedMenuService.getSelectedMenu();
 
-                if( $scope.model.selectedMenu && $scope.model.selectedMenu.ndp && $scope.model.selectedMenu.code ){                    
+                if( $scope.model.selectedMenu && $scope.model.selectedMenu.ndp && $scope.model.selectedMenu.code ){
+
                     $scope.model.ndpProgram = $filter('filter')($scope.model.optionSets, {ndp: $scope.model.selectedMenu.ndp, code: 'program'}, true)[0];
+                    $scope.model.ndpObjectives = $filter('filter')($scope.model.dataElementGroupSets, {ndp: $scope.model.selectedMenu.ndp, indicatorGroupSetType: 'objective'}, true);
+                    $scope.model.ndpProgrammes = $filter('filter')($scope.model.dataElementGroupSets, {ndp: $scope.model.selectedMenu.ndp, indicatorGroupSetType: 'programme'}, true);
+                    
+                    $scope.model.ndpObjectives = $scope.model.ndpObjectives.filter(function(obj){
+                        return !obj.ndpProgramme;
+                    });
                 }
 
                 $scope.model.baseLineTargetActualDimensions = ['bqIaasqpTas', 'Px8Lqkxy2si', 'HKtncMjp06U'];

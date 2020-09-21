@@ -74,7 +74,11 @@ ndpFramework.controller('ObjectiveController',
                     $scope.model.dataElementGroup.push( $filter('filter')($scope.model.dataElementGroups, {id: deg.id})[0] );
                 });
             });
-        }        
+        }
+    });
+    
+    $scope.$on('MENU', function(){
+        $scope.populateMenu();
     });
     
     $scope.$watch('model.selectedKra', function(){
@@ -115,30 +119,38 @@ ndpFramework.controller('ObjectiveController',
                    $scope.model.selectedPeriods.push(pe);
                 } 
             });
-
-            $scope.model.selectedMenu = SelectedMenuService.getSelectedMenu();
-    
-            if( $scope.model.selectedMenu && $scope.model.selectedMenu.ndp && $scope.model.selectedMenu.code ){  
-                var objs = $filter('filter')($scope.model.dataElementGroupSets, {ndp: $scope.model.selectedMenu.ndp, indicatorGroupSetType: $scope.model.selectedMenu.code}, true);
-                
-                $scope.model.objectives = objs.filter(function(obj){
-                    return !obj.ndpProgramme;
-                });
-                
-                $scope.model.selectedDataElementGroupSets = angular.copy( $scope.model.objectives );
-
-                if( $scope.model.objectives && $scope.model.objectives.length === 1 ){
-                    $scope.model.selectedObjective = $scope.model.objectives[0];
-                }
-                else{
-                    $scope.getObjectives();
-                }
-            }
+            
+            $scope.populateMenu();
 
             $scope.model.baseLineTargetActualDimensions = ['bqIaasqpTas', 'Px8Lqkxy2si', 'HKtncMjp06U'];
 
         });
     });
+    
+    $scope.populateMenu = function(){
+        
+        $scope.model.selectedMenu = SelectedMenuService.getSelectedMenu();        
+        $scope.model.selectedObjective = null;
+        $scope.model.selectedKra = null;
+        $scope.model.objectives = [];
+        $scope.model.selectedDataElementGroupSets = [];
+        
+        if( $scope.model.selectedMenu && $scope.model.selectedMenu.ndp && $scope.model.selectedMenu.code ){  
+            var objs = $filter('filter')($scope.model.dataElementGroupSets, {ndp: $scope.model.selectedMenu.ndp, indicatorGroupSetType: $scope.model.selectedMenu.code}, true);
+            $scope.model.objectives = objs.filter(function(obj){
+                return !obj.ndpProgramme;
+            });
+
+            $scope.model.selectedDataElementGroupSets = angular.copy( $scope.model.objectives );
+
+            if( $scope.model.objectives && $scope.model.objectives.length === 1 ){
+                $scope.model.selectedObjective = $scope.model.objectives[0];
+            }
+            else{
+                $scope.getObjectives();
+            }
+        }
+    };
     
     $scope.getPeriods = function(mode){
         if( mode === 'NXT'){
@@ -161,7 +173,7 @@ ndpFramework.controller('ObjectiveController',
         }
         
         if( $scope.model.dataElementGroup.length === 0 || !$scope.model.dataElementGroup ){
-            NotificationService.showNotifcationDialog($translate.instant("error"), $translate.instant("missing_objective"));
+            NotificationService.showNotifcationDialog($translate.instant("error"), $translate.instant("missing_objective_or_kra"));
         }
         
         if( $scope.model.dataElementGroup && $scope.model.dataElementGroup.length > 0 && $scope.model.selectedPeriods.length > 0){

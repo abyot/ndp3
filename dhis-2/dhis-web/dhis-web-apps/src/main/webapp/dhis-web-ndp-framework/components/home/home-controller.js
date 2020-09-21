@@ -64,7 +64,7 @@ ndpFramework.controller('HomeController',
         $scope.selectedOrgUnit = $scope.orgUnits[0] ? $scope.orgUnits[0] : null;
     });
     
-    $scope.model.horizontalMenus = [
+    /*$scope.model.horizontalMenus = [
         {id: 'sdg', title: 'sdg', order: 1, view: 'components/home/sdg-status.html'},
         {id: 'ndp', title: 'ndp_key_results', order: 2, view: 'components/home/ndp-status.html', active: true},
         {id: 'program', title: 'programme_performance', order: 3, view: 'components/home/program-performance.html'},
@@ -154,7 +154,7 @@ ndpFramework.controller('HomeController',
                 $scope.model.groupSetSize[degs.id] = size;
             });
         }
-    });
+    });*/
     
     dhis2.ndp.downloadMetaData().then(function(){
         
@@ -162,212 +162,145 @@ ndpFramework.controller('HomeController',
             
             $scope.model.attributes = attributes;
             
-            MetaDataFactory.getAll('programs').then(function( programs ){
-                
-                $scope.model.programs = programs;
+            
         
-                MetaDataFactory.getAll('categoryCombos').then(function(categoryCombos){
-                    angular.forEach(categoryCombos, function(cc){
-                        $scope.model.categoryCombosById[cc.id] = cc;
+            MetaDataFactory.getAll('categoryCombos').then(function(categoryCombos){
+                angular.forEach(categoryCombos, function(cc){
+                    $scope.model.categoryCombosById[cc.id] = cc;
+                });
+
+                MetaDataFactory.getAll('optionSets').then(function(optionSets){
+
+                    $scope.model.optionSets = optionSets;
+
+                    angular.forEach(optionSets, function(optionSet){
+                        $scope.model.optionSetsById[optionSet.id] = optionSet;
                     });
-
-                    MetaDataFactory.getAll('optionSets').then(function(optionSets){
-                        
-                        $scope.model.optionSets = optionSets;
-                        
-                        angular.forEach(optionSets, function(optionSet){
-                            $scope.model.optionSetsById[optionSet.id] = optionSet;
-                        });
                     
-                        $scope.model.ndp = $filter('filter')(optionSets, {code: 'ndp'})[0];
-                        $scope.model.ndpProgram = $filter('filter')(optionSets, {code: 'ndpIIIProgram'})[0];
+                    $scope.model.ndp = $filter('filter')(optionSets, {code: 'ndp'})[0];
+                    $scope.model.ndpProgram = $filter('filter')(optionSets, {code: 'ndpIIIProgram'})[0];
+
+
+                    MetaDataFactory.getAll('dataSets').then(function(dataSets){
+
+                        angular.forEach(dataSets, function(ds){
+                            ds.dataElements = ds.dataElements.map(function(de){ return de.id; });
+                            $scope.model.dataSetsById[ds.id] = ds;
+                        });
+
+                        $scope.model.dataSets = dataSets;
                         
+                        MetaDataFactory.getAll('dataElementGroupSets').then(function( dataElementGroupSets ){
+                            $scope.model.dataElementGroupSets = dataElementGroupSets;
+                            MetaDataFactory.getAll('dataElementGroupSets').then(function(dataElementGroups){
+                                $scope.model.dataElementGroups = dataElementGroups;
+                                
+                                MetaDataFactory.getAll('dataElements').then(function(dataElements){
 
-                        MetaDataFactory.getAll('dataSets').then(function(dataSets){
+                                    angular.forEach(dataElements, function(de){
+                                        $scope.model.dataElementsById[de.id] = de;
+                                        var cc = $scope.model.categoryCombosById[de.categoryCombo.id];
+                                        de.disaggregation = !cc || cc.isDefault ? '-' : cc.displayName;
 
-                            angular.forEach(dataSets, function(ds){
-                                ds.dataElements = ds.dataElements.map(function(de){ return de.id; });
-                                $scope.model.dataSetsById[ds.id] = ds;
-                            });
-
-                            $scope.model.dataSets = dataSets;
-
-                            MetaDataFactory.getAll('dataElements').then(function(dataElements){
-
-                                angular.forEach(dataElements, function(de){
-                                    $scope.model.dataElementsById[de.id] = de;
-                                    var cc = $scope.model.categoryCombosById[de.categoryCombo.id];
-                                    de.disaggregation = !cc || cc.isDefault ? '-' : cc.displayName;
-
-                                    for(var i=0; i<$scope.model.dataSets.length; i++){
-                                        if( $scope.model.dataSets[i].dataElements.indexOf(de.id) !== -1 ){
-                                            var ds = $scope.model.dataSets[i];
-                                            de.periodType = ds.periodType  === 'FinancialJuly' ? 'Fiscal year' : ds.periodType;
-                                            de.vote = ds.organisationUnits.length > 1 ? ds.organisationUnits[0].code + ' and others' : ds.organisationUnits[0].code;
-                                            break;
+                                        for(var i=0; i<$scope.model.dataSets.length; i++){
+                                            if( $scope.model.dataSets[i].dataElements.indexOf(de.id) !== -1 ){
+                                                var ds = $scope.model.dataSets[i];
+                                                de.periodType = ds.periodType  === 'FinancialJuly' ? 'Fiscal year' : ds.periodType;
+                                                de.vote = ds.organisationUnits.length > 1 ? ds.organisationUnits[0].code + ' and others' : ds.organisationUnits[0].code;
+                                                break;
+                                            }
                                         }
-                                    }
-                                });
+                                    });
 
-                                var item = {id: 'dataElements', name: $translate.instant('indicators')};
-                                $scope.model.selectedDictionary = item;
-                                $scope.model.dictionaryItems.push( item );
-                                $scope.model.dataElements = dataElements;
-                                $scope.sortHeader = {id: 'displayName', name: 'name', colSize: "col-sm-1", show: true, fetch: false};
-                                $scope.model.dictionaryHeaders['dataElements'] = [
-                                    {id: 'displayName', name: 'name', colSize: "col-sm-1", show: true, fetch: false},
-                                    {id: 'code', name: 'code', colSize: "col-sm-1", show: true, fetch: false},
-                                    {id: 'disaggregation', name: 'disaggregation', colSize: "col-sm-1", show: true, fetch: false},
-                                    {id: 'valueType', name: 'valueType', colSize: "col-sm-1", show: true, fetch: false},
-                                    {id: 'periodType', name: 'frequency', colSize: "col-sm-1", show: true, fetch: false},
-                                    {id: 'vote', name: 'vote', colSize: 'col-sm-1', show: true, fetch: false}
-                                ];
-
-                                angular.forEach($scope.model.attributes, function(att){
-                                    if(att['dataElementAttribute']){
-                                        var header = {id: att.id, name: att.name, show: false, fetch: true, colSize: "col-sm-1"};
-                                        $scope.model.dictionaryHeaders['dataElements'].push(header);
-                                    }
-                                });
-
-                                MetaDataFactory.getAll('dataElementGroups').then(function(dataElementGroups){
-
-                                    $scope.model.dictionaryHeaders['dataElementGroups'] = [
-                                        {id: 'displayName', name: 'name', colSize: "col-sm-1", show: true, fetch: false},                
-                                        {id: 'code', name: '_code', colSize: "col-sm-1", show: true, fetch: false}
+                                    var item = {id: 'dataElements', name: $translate.instant('indicators')};
+                                    $scope.model.selectedDictionary = item;
+                                    $scope.model.dictionaryItems.push( item );
+                                    $scope.model.dataElements = dataElements;
+                                    $scope.sortHeader = {id: 'displayName', name: 'name', colSize: "col-sm-1", show: true, fetch: false};
+                                    $scope.model.dictionaryHeaders['dataElements'] = [
+                                        {id: 'displayName', name: 'name', colSize: "col-sm-1", show: true, fetch: false},
+                                        {id: 'code', name: 'code', colSize: "col-sm-1", show: true, fetch: false},
+                                        {id: 'disaggregation', name: 'disaggregation', colSize: "col-sm-1", show: true, fetch: false},
+                                        {id: 'valueType', name: 'valueType', colSize: "col-sm-1", show: true, fetch: false},
+                                        {id: 'periodType', name: 'frequency', colSize: "col-sm-1", show: true, fetch: false},
+                                        {id: 'vote', name: 'vote', colSize: 'col-sm-1', show: true, fetch: false}
                                     ];
 
                                     angular.forEach($scope.model.attributes, function(att){
-                                        if(att['dataElementGroupAttribute']){
+                                        if(att['dataElementAttribute']){
                                             var header = {id: att.id, name: att.name, show: false, fetch: true, colSize: "col-sm-1"};
-                                            $scope.model.dictionaryHeaders['dataElementGroups'].push(header);
+                                            $scope.model.dictionaryHeaders['dataElements'].push(header);
                                         }
                                     });
 
-                                    $scope.model.dictionaryItems.push({id: 'dataElementGroups', name: $translate.instant('outcomes_outputs')});
-                                    $scope.model.dataElementGroups = dataElementGroups;
-                                    $scope.model.ndpDataElementGroupSets = [];
-                                    $scope.model.programDataElementGroupSets = [];
-                                    MetaDataFactory.getAll('dataElementGroupSets').then(function(dataElementGroupSets){
-                                        angular.forEach(dataElementGroupSets, function(degs){
-                                            if( degs.ndp ){
-                                                degs.domain = degs.ndp;
-                                                degs.domainOrder = 1;
-                                                $scope.model.ndpDataElementGroupSets.push( degs );
-                                            }
-                                            else if( degs.ndpProgramme && $scope.model.ndpProgram && $scope.model.ndpProgram.options){
-                                                degs.domain = $filter('filter')($scope.model.ndpProgram.options, {code: degs.ndpProgramme})[0].displayName;
-                                                degs.domainOrder = degs.ndpProgramme;
-                                                $scope.model.programDataElementGroupSets.push( degs );
-                                            }
-                                        });
+                                    $scope.model.metaDataCached = true;
+                                    $scope.model.menuTitle = $translate.instant('menu_title');
 
-                                        $scope.model.dictionaryHeaders['dataElementGroupSets'] = [
-                                            {id: 'displayName', name: 'name', colSize: "col-sm-3", show: true, fetch: false},                
-                                            {id: 'code', name: '_code', colSize: "col-sm-1", show: true, fetch: false}
-                                        ];
-
-                                        angular.forEach($scope.model.attributes, function(att){
-                                            if(att['dataElementGroupSetAttribute']){
-                                                var header = {id: att.id, name: att.name, show: false, fetch: true, colSize: "col-sm-1"};
-                                                $scope.model.dictionaryHeaders['dataElementGroupSets'].push(header);
-                                            }
-                                        });
-
-                                        $scope.model.dictionaryItems.push({id: 'dataElementGroupSets', name: $translate.instant('goals_objectives_interventions')});
-                                        $scope.model.dataElementGroupSets = dataElementGroupSets;
-
-                                        $scope.model.metaDataCached = true;
-                                        $scope.model.menuTitle = $translate.instant('menu_title');
-                                        $scope.model.selectedMenu = 'NDP';
-
-                                        $scope.model.periods = PeriodService.getPeriods($scope.model.selectedPeriodType, $scope.model.periodOffset, $scope.model.openFuturePeriods);
-
-                                        var selectedPeriodNames = ['2020/21', '2021/22', '2022/23', '2023/24', '2024/25'];
-
-                                        angular.forEach($scope.model.periods, function(pe){
-                                            if(selectedPeriodNames.indexOf(pe.displayName) > -1 ){
-                                               $scope.model.selectedPeriods.push(pe);
-                                            } 
-                                        });
-                                        
-                                        //set ndp program
-                                        if( $scope.model.ndpProgram && $scope.model.ndpProgram.options ){
-                                            $scope.setNdpProgram( $scope.model.ndpProgram.options[0] );
-                                        }
-                                        
-                                        $scope.model.baseLineTargetActualDimensions = ['bqIaasqpTas', 'Px8Lqkxy2si', 'HKtncMjp06U'];
-                                        
-                                        var ndpMenus = [], order = 0;
-                                        angular.forEach($scope.model.ndp.options, function(op){
-                                            op.order = order;
-                                            order++;
-                                            ndpMenus.push( op );
-                                        })
-                                        
-                                        $scope.model.menuItems = [
-                                            {
-                                                id: 'navigation',
-                                                order: 0,
-                                                displayName: $translate.instant('navigation'),
-                                                bold: true,
-                                                show: true,
-                                                children: [
-                                                    {
-                                                        id: 'SDG',
-                                                        displayName: $translate.instant('sdg'),
-                                                        order: 0,
-                                                        path: "sdg",
-                                                        children: []
-                                                    },
-                                                    {
-                                                        id: 'NDP',
-                                                        displayName: $translate.instant('ndps'),
-                                                        order: 1,
-                                                        children: ndpMenus,
-                                                        hasChildren: true
-                                                    },
-                                                    {
-                                                        id: 'SEC',
-                                                        displayName: $translate.instant('ssp'),
-                                                        order: 2,
-                                                        children: []
-                                                    },
-                                                    {
-                                                        id: 'MDA',
-                                                        displayName: $translate.instant('mdas'),
-                                                        order: 3,
-                                                        children: []
-                                                    },
-                                                    {
-                                                        id: 'LOG',
-                                                        displayName: $translate.instant('lgs'),
-                                                        order: 4,
-                                                        children: []
-                                                    }
-                                                ]
-                                            }                                            
-                                        ];
+                                    var ndpMenus = [], order = 0;
+                                    angular.forEach($scope.model.ndp.options, function(op){
+                                        op.order = order;
+                                        order++;
+                                        ndpMenus.push( op );
                                     });
+
+                                    $scope.model.menuItems = [
+                                        {
+                                            id: 'navigation',
+                                            order: 0,
+                                            displayName: $translate.instant('navigation'),
+                                            bold: true,
+                                            show: true,
+                                            children: [
+                                                {
+                                                    id: 'SDG',
+                                                    domain: 'SDG',
+                                                    displayName: $translate.instant('sdg'),
+                                                    order: 0,
+                                                    path: "sdg",
+                                                    children: []
+                                                },
+                                                {
+                                                    id: 'NDP',
+                                                    domain: 'NDP',
+                                                    displayName: $translate.instant('ndps'),
+                                                    order: 1,
+                                                    children: ndpMenus,
+                                                    hasChildren: true
+                                                },
+                                                {
+                                                    id: 'SEC',
+                                                    domain: 'SEC',
+                                                    displayName: $translate.instant('ssp'),
+                                                    order: 2,
+                                                    children: []
+                                                },
+                                                {
+                                                    id: 'MDA',
+                                                    domain: 'MDA',
+                                                    displayName: $translate.instant('mdas'),
+                                                    order: 3,
+                                                    children: []
+                                                },
+                                                {
+                                                    id: 'LOG',
+                                                    domain: 'LOG',
+                                                    displayName: $translate.instant('lgs'),
+                                                    order: 4,
+                                                    children: []
+                                                }
+                                            ]
+                                        }                                            
+                                    ];
                                 });
-                            });
+                            });  
                         });
-                    });    
-                });
+                    });
+                });    
             });
+
         });    
     });
     
-    $scope.getPeriods = function(mode){
-        if( mode === 'NXT'){
-            $scope.model.periodOffset = $scope.model.periodOffset + 1;
-            $scope.model.periods = PeriodService.getPeriods($scope.model.selectedPeriodType, $scope.model.periodOffset, $scope.model.openFuturePeriods);
-        }
-        else{
-            $scope.model.periodOffset = $scope.model.periodOffset - 1;
-            $scope.model.periods = PeriodService.getPeriods($scope.model.selectedPeriodType, $scope.model.periodOffset, $scope.model.openFuturePeriods);
-        }    
-    };
     
     $scope.showCategoryDetail = function(){
         
@@ -376,120 +309,6 @@ ndpFramework.controller('HomeController',
     $scope.sortItems = function(header){        
         $scope.reverse = ($scope.sortHeader && $scope.sortHeader.id === header.id) ? !$scope.reverse : false;
         $scope.sortHeader = header;       
-    };
-    
-    $scope.getAnalyticsData = function(){
-
-        $scope.model.data = null;
-        var analyticsUrl = '';
-        switch( $scope.model.activeHorizontalMenu.id ){
-            case 'ndp':
-                if( !$scope.model.selectedNDP ){
-                    NotificationService.showNotifcationDialog($translate.instant("error"), $translate.instant("missing_ndp"));
-                    return;
-                }
-                break;
-            case 'program':
-                if( !$scope.model.selectedNdpProgram ){
-                    NotificationService.showNotifcationDialog($translate.instant("error"), $translate.instant("missing_program"));
-                    return;
-                }
-                break;
-            case 'sub-program':
-                if( !$scope.model.selectedSubProgram ){
-                    NotificationService.showNotifcationDialog($translate.instant("error"), $translate.instant("missing_sub-program"));
-                    return;
-                }
-            default:
-                //NotificationService.showNotifcationDialog($translate.instant("error"), $translate.instant("missing_horizontal_menu"));
-        }
-        
-        if( !$scope.selectedOrgUnit || !$scope.selectedOrgUnit.id ){
-            NotificationService.showNotifcationDialog($translate.instant("error"), $translate.instant("missing_vote"));
-        }
-
-        if( $scope.model.dataElementGroup && $scope.model.selectedPeriods.length > 0){
-            analyticsUrl += '&filter=ou:'+ $scope.selectedOrgUnit.id +'&displayProperty=NAME&includeMetadataDetails=true';
-            analyticsUrl += '&dimension=Duw5yep8Vae:' + $.map($scope.model.baseLineTargetActualDimensions, function(dm){return dm;}).join(';');
-            analyticsUrl += '&dimension=pe:' + $.map($scope.model.selectedPeriods, function(pe){return pe.id;}).join(';');
-
-            var des = [];
-            angular.forEach($scope.model.dataElementGroup, function(deg){
-                angular.forEach(deg.dataElements, function(de){
-                    des.push( de.id );
-                });
-            });
-
-            analyticsUrl += '&dimension=dx:' + des.join(';');
-
-            Analytics.getData( analyticsUrl ).then(function(data){
-                $scope.model.selectedPeriods = orderByFilter( $scope.model.selectedPeriods, '-id').reverse();
-                $scope.model.data = data.data;
-                $scope.model.metaData = data.metaData;
-                $scope.model.reportReady = true;
-                $scope.model.reportStarted = false;
-                $scope.model.dataHeaders = [];
-                angular.forEach($scope.model.selectedPeriods, function(pe){
-                    var colSpan = 0;
-                    var d = $filter('filter')($scope.model.data, {pe: pe.id});
-                    pe.hasData = d && d.length > 0;
-                    angular.forEach($scope.model.baseLineTargetActualDimensions, function(dm){
-                        var d = $filter('filter')($scope.model.data, {Duw5yep8Vae: dm, pe: pe.id});
-                        if( d && d.length > 0 ){
-                            colSpan++;
-                            $scope.model.dataHeaders.push({periodId: pe.id, dimensionId: dm, dimension: 'Duw5yep8Vae'});
-                        }
-                    });                    
-                    pe.colSpan = colSpan;
-                });
-
-                if( Object.keys( $scope.model.data ).length === 0 ){
-                    $scope.model.dataExists = false;
-                    return;
-                }
-                else{
-                    $scope.model.dataExists = true;
-                    $scope.model.finalData = [];
-                    var currRow = [], parsedRow = [];
-                    angular.forEach($scope.model.selectedDataElementGroupSets, function(degs){
-                        var groupSet = {val: degs.displayName, span: 0};
-                        currRow.push(groupSet);
-
-                        var generateRow = function(group, deg){
-                            angular.forEach(deg.dataElements, function(de){
-                                groupSet.span++;
-                                group.span++;
-
-                                currRow.push({val: $scope.model.metaData.items[de.id].name, span: 1});
-                                angular.forEach($scope.model.dataHeaders, function(dh){
-                                    currRow.push({val: $scope.filterData(dh, de.id), span: 1});
-                                });
-                                parsedRow.push(currRow);
-                                currRow = [];
-                            });
-                        };
-
-                        angular.forEach(degs.dataElementGroups, function(deg){
-                            if( $scope.model.selectedDataElementGroup && $scope.model.selectedDataElementGroup.id ){
-                                if ( deg.id === $scope.model.selectedDataElementGroup.id ){
-                                    var group = {val: deg.displayName, span: 0};
-                                    currRow.push(group);
-                                    var _deg = $filter('filter')($scope.model.dataElementGroups, {id: deg.id})[0];
-                                    generateRow(group, _deg);
-                                }
-                            }
-                            else{
-                                var group = {val: deg.displayName, span: 0};
-                                currRow.push(group);
-                                var _deg = $filter('filter')($scope.model.dataElementGroups, {id: deg.id})[0];
-                                generateRow(group, _deg);
-                            }
-                        });
-                    });
-                    $scope.model.finalData = parsedRow;
-                }
-            });
-        }        
     };
     
     $scope.showOrgUnitTree = function(){
@@ -512,26 +331,8 @@ ndpFramework.controller('HomeController',
                 $scope.resetDataView();
             }
         }); 
-    };
-    
-    $scope.filterData = function(header, dataElement){
-        if(!header || !$scope.model.data || !header.periodId || !header.dimensionId || !dataElement) return;
-        var res = $filter('filter')($scope.model.data, {dx: dataElement, Duw5yep8Vae: header.dimensionId, pe: header.periodId})[0];
-        return res && res.value ? res.value : '';        
-    };
-    
-    $scope.exportData = function ( name ) {
-        var blob = new Blob([document.getElementById('exportTable').innerHTML], {
-            type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=utf-8"
-        });
-
-        var reportName = $scope.model.activeHorizontalMenu.title + " .xls";
-        if( name ){
-            reportName = name + ' performance.xls';
-        }
-        saveAs(blob, reportName);
-    };
-    
+    };    
+       
     $scope.showDetails = function( item ){
         var modalInstance = $modal.open({
             templateUrl: 'views/details-modal.html',
@@ -586,47 +387,7 @@ ndpFramework.controller('HomeController',
         $scope.model.dataHeaders = [];
     };
     
-    $scope.setNdpProgram = function( program ){
-        $scope.model.selectedNdpProgram = program;        
-        $scope.model.subPrograms = $filter('filter')($scope.model.dataElementGroupSets, {indicatorGroupSetType: 'sub-programme', ndpProgramme: $scope.model.selectedNdpProgram.code});
-        $scope.model.programObjectives = $filter('filter')($scope.model.dataElementGroupSets, {indicatorGroupSetType: 'objective', ndpProgramme: $scope.model.selectedNdpProgram.code});
-        
-        var prs = $filter('filter')($scope.model.programs, {ndpProgramme: $scope.model.selectedNdpProgram.code}, true);        
-        $scope.model.selectedProgram = prs[0] || null;
-         
-        $scope.model.projects = [];
-        if( $scope.model.selectedProgram && $scope.model.selectedProgram.id && $scope.model.selectedProgram.programTrackedEntityAttributes ){            
-            var attributesById = $scope.model.selectedProgram.programTrackedEntityAttributes.reduce(function(map, obj){
-                map[obj.trackedEntityAttribute.id] = obj.trackedEntityAttribute;
-                return map;
-            }, {});
-            ProjectService.getByProgram($scope.selectedOrgUnit, $scope.model.selectedProgram, $scope.model.optionSetsById, attributesById).then(function( data ){
-                $scope.model.projects = data;
-            });
-        }
-    };
-    
-    $scope.getProjectDetails = function( project ){
-        if ( $scope.model.selectedProject && $scope.model.selectedProject.trackedEntityInstance === project.trackedEntityInstance ){
-            $scope.model.showProjectDetails = !$scope.model.showProjectDetails;
-        }
-        else{
-            $scope.model.showProjectDetails = true;
-        }
-        
-        if( project && project.trackedEntityInstance && $scope.model.selectedProgram ){            
-            var attributesById = $scope.model.selectedProgram.programTrackedEntityAttributes.reduce(function(map, obj){
-                map[obj.trackedEntityAttribute.id] = obj.trackedEntityAttribute;
-                return map;
-            }, {});
-            
-              
-            ProjectService.get( project, $scope.model.selectedProgram, $scope.model.optionSetsById, attributesById ).then(function( data ){
-                $scope.model.selectedProject = data;                
-            });
-        }
-    };
-    
+   
     //expand/collapse of navigation menu
     $scope.expandCollapse = function(menu) {
         
@@ -647,7 +408,8 @@ ndpFramework.controller('HomeController',
                     if( objectives.length > 0 ){
                         child.hasChildren = true;
                         child.children.push( {
-                            id: 'OBJ',
+                            id: child.code + '-OBJ',
+                            domain: 'OBJ',
                             code: 'objective',
                             ndp: child.code,
                             order: 1,                            
@@ -659,7 +421,8 @@ ndpFramework.controller('HomeController',
                     if( goals.length > 0 ){
                         child.hasChildren = true;
                         child.children.push( {
-                            id: 'GOL',
+                            id: child.code + '-GOL',
+                            domain: 'GOL',
                             code: 'goal',
                             ndp: child.code,
                             order: 0,
@@ -671,7 +434,8 @@ ndpFramework.controller('HomeController',
                     if( programs.length > 0 ){
                         child.hasChildren = true;
                         child.children.push( {
-                            id: 'PRG',
+                            id: child.code + '-PRG',
+                            domain: 'PRG',
                             code: 'objective',
                             ndp: child.code,
                             order: 2,
@@ -680,7 +444,8 @@ ndpFramework.controller('HomeController',
                         } );
                         
                         child.children.push( {
-                            id: 'PRJ',
+                            id: child.code + '-PRJ',
+                            domain: 'PRJ',
                             code: 'project',
                             ndp: child.code,
                             order: 3,
@@ -693,7 +458,8 @@ ndpFramework.controller('HomeController',
                     if( interventions.length > 0 ){
                         child.hasChildren = true;
                         child.children.push( {
-                            id: 'INV',
+                            id: child.code + '-INV',
+                            domain: 'INV',
                             code: 'intervention',                            
                             ndp: child.code,
                             order: 4,
@@ -711,15 +477,15 @@ ndpFramework.controller('HomeController',
     };
 
     $scope.setSelectedMenu = function( menu ){
-        
         if( $scope.model.selectedMenu && $scope.model.selectedMenu.id === menu.id ){
             $scope.model.selectedMenu = null;
         }
         else{
             $scope.model.selectedMenu = menu;
         }
-
         SelectedMenuService.setSelectedMenu($scope.model.selectedMenu);
+        
+        $scope.$broadcast('MENU', $scope.model.selectedMenu);
     };
 
     $scope.setBottomMenu = function(menu){
