@@ -19,13 +19,13 @@
     
     <br>
     <table class="table dhis2-table-hover table-bordered menu-vertical-spacing">        
-        <tr ng-class="{'selected-menu' : 'DICTIONARY' === model.selectedMenu.id, 'bold': menuItem.bold}">
+        <tr ng-class="{'selected-menu' : 'DICTIONARY' === model.selectedMenu.domain, 'bold': menuItem.bold}">
             <td ng-click="setBottomMenu('DICTIONARY')">{{'indicator_dictionary' | translate}}</td>
         </tr>
-        <tr ng-class="{'selected-menu' : 'DOCUMENT' === model.selectedMenu.id, 'bold': menuItem.bold}">
+        <tr ng-class="{'selected-menu' : 'DOCUMENT' === model.selectedMenu.domain, 'bold': menuItem.bold}">
             <td ng-click="setBottomMenu('DOCUMENT')">{{'document_library' | translate}}</td>
         </tr>
-        <tr ng-class="{'selected-menu' : 'FAQ' === model.selectedMenu.id, 'bold': menuItem.bold}">
+        <tr ng-class="{'selected-menu' : 'FAQ' === model.selectedMenu.domain, 'bold': menuItem.bold}">
             <td ng-click="setBottomMenu('FAQ')">{{'faqs' | translate}}</td>
         </tr>
     </table>

@@ -59,7 +59,14 @@ ndpFramework.controller('DictionaryController',
                                     var ds = dataSets[i];
                                     if( ds && ds.dataElements.indexOf(de.id) !== -1 ){
                                         de.periodType = ds.periodType  === 'FinancialJuly' ? 'Fiscal year' : ds.periodType;
-                                        de.vote = ds.organisationUnits.length > 1 ? ds.organisationUnits[0].code + ' and others' : ds.organisationUnits[0].code;
+                                        //de.vote = ds.organisationUnits.length > 1 ? ds.organisationUnits[0].code + ' and others' : ds.organisationUnits[0].code;
+                                        de.vote = ds.organisationUnits.map(function(ou){
+                                            return ou.code;
+                                        });
+                                        if( de.vote && de.vote.length > 0 ){
+                                            de.vote = de.vote.sort();
+                                            de.vote = de.vote.join(', ');
+                                        }
                                         break;
                                     }
                                 }

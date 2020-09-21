@@ -8,14 +8,10 @@ ndpFramework.controller('HomeController',
                 $translate,
                 $modal,
                 $filter,
-                NotificationService,
                 SelectedMenuService,
                 orderByFilter,
-                PeriodService,
                 MetaDataFactory,
-                OrgUnitFactory,
-                Analytics,
-                ProjectService) {
+                OrgUnitFactory) {
    
     $scope.model = {
         metaDataCached: false,
@@ -206,7 +202,14 @@ ndpFramework.controller('HomeController',
                                             if( $scope.model.dataSets[i].dataElements.indexOf(de.id) !== -1 ){
                                                 var ds = $scope.model.dataSets[i];
                                                 de.periodType = ds.periodType  === 'FinancialJuly' ? 'Fiscal year' : ds.periodType;
-                                                de.vote = ds.organisationUnits.length > 1 ? ds.organisationUnits[0].code + ' and others' : ds.organisationUnits[0].code;
+                                                de.vote = ds.organisationUnits.map(function(ou){
+                                                    return ou.code;
+                                                });
+
+                                                if( de.vote && de.vote.length > 0 ){
+                                                    de.vote = de.vote.sort();
+                                                    de.vote = de.vote.join(', ');
+                                                }
                                                 break;
                                             }
                                         }
@@ -492,11 +495,11 @@ ndpFramework.controller('HomeController',
     };
 
     $scope.setBottomMenu = function(menu){
-        if( $scope.model.selectedMenu && $scope.model.selectedMenu.id === menu){
+        if( $scope.model.selectedMenu && $scope.model.selectedMenu.domain === menu){
             $scope.model.selectedMenu = null;
         }
         else{
-            $scope.model.selectedMenu = {id: menu};
+            $scope.model.selectedMenu = {domain: menu};
         }
     };
 
