@@ -276,6 +276,9 @@ ndpFramework.controller('ProgrammeController',
                 },
                 selectedOrgUnit: function(){
                     return $scope.selectedOrgUnit;
+                },
+                validOrgUnits: function(){
+                    return null;
                 }
             }
         });

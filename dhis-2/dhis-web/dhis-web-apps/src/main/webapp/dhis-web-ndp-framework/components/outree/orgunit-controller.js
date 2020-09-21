@@ -8,10 +8,12 @@ ndpFramework.controller('OuTreeController',
                 $modalInstance,
                 orgUnits,
                 selectedOrgUnit,
+                validOrgUnits,
                 OrgUnitFactory){ 
                 
     $scope.orgUnits = orgUnits;
     $scope.selectedOrgUnit = selectedOrgUnit;
+    $scope.validOrgUnits = validOrgUnits;
     
     //expand/collapse of search orgunit tree
     $scope.expandCollapse = function(orgUnit) {

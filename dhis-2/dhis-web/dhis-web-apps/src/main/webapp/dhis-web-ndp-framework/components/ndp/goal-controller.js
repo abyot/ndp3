@@ -252,6 +252,9 @@ ndpFramework.controller('GoalController',
                 },
                 selectedOrgUnit: function(){
                     return $scope.selectedOrgUnit;
+                },
+                validOrgUnits: function(){
+                    return null;
                 }
             }
         });

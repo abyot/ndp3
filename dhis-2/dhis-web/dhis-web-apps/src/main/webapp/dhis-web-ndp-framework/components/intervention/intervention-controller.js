@@ -300,6 +300,9 @@ ndpFramework.controller('InterventionController',
                 },
                 selectedOrgUnit: function(){
                     return $scope.selectedOrgUnit;
+                },
+                validOrgUnits: function(){
+                    return null;
                 }
             }
         });

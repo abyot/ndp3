@@ -321,6 +321,9 @@ ndpFramework.controller('HomeController',
                 },
                 selectedOrgUnit: function(){
                     return $scope.selectedOrgUnit;
+                },
+                validOrgUnits: function(){
+                    return null;
                 }
             }
         });

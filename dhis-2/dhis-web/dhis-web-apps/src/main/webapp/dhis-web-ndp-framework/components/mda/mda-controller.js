@@ -15,7 +15,7 @@ ndpFramework.controller('MDAController',
         MetaDataFactory,
         OrgUnitFactory,
         Analytics,
-        SectorService) {
+        OrgUnitGroupSetService) {
     
     $scope.model = {
         metaDataCached: false,
@@ -56,12 +56,12 @@ ndpFramework.controller('MDAController',
                 o.hasChildren = o.children && o.children.length > 0 ? true : false;
             });
         });
-        $scope.selectedOrgUnit = $scope.orgUnits[0] ? $scope.orgUnits[0] : null;
+        $scope.selectedOrgUnit = null;
     });
     
     $scope.$watch('selectedOrgUnit', function(){
         if( angular.isObject($scope.selectedOrgUnit) && $scope.selectedOrgUnit.id){
-            SectorService.getByVote( $scope.selectedOrgUnit.id ).then(function(data){
+            OrgUnitGroupSetService.getByVote( $scope.selectedOrgUnit.id ).then(function(data){
                 $scope.model.selectedVote = data;
                 $scope.getInterventions();
             });
@@ -109,9 +109,8 @@ ndpFramework.controller('MDAController',
         }
     });
     
-    SectorService.getAll().then(function(sectors){
-        $scope.model.sectors = sectors;
-        
+    OrgUnitGroupSetService.getMdas().then(function(mdas){
+        $scope.model.mdas = mdas;        
         MetaDataFactory.getAll('optionSets').then(function(optionSets){
         
             $scope.model.optionSets = optionSets;
@@ -331,6 +330,9 @@ ndpFramework.controller('MDAController',
                 },
                 selectedOrgUnit: function(){
                     return $scope.selectedOrgUnit;
+                },
+                validOrgUnits: function(){
+                    return $scope.model.mdas;
                 }
             }
         });

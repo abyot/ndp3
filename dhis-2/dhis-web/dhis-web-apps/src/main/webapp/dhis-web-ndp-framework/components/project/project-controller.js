@@ -249,6 +249,9 @@ ndpFramework.controller('ProjectController',
                 },
                 selectedOrgUnit: function(){
                     return $scope.selectedOrgUnit;
+                },
+                validOrgUnits: function(){
+                    return null;
                 }
             }
         });

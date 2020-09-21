@@ -15,7 +15,7 @@ ndpFramework.controller('LOGController',
         MetaDataFactory,
         OrgUnitFactory,
         Analytics,
-        SectorService) {
+        OrgUnitGroupSetService) {
     
     $scope.model = {
         metaDataCached: false,
@@ -56,12 +56,12 @@ ndpFramework.controller('LOGController',
                 o.hasChildren = o.children && o.children.length > 0 ? true : false;
             });
         });
-        $scope.selectedOrgUnit = $scope.orgUnits[0] ? $scope.orgUnits[0] : null;
+        $scope.selectedOrgUnit = null;
     });
     
     $scope.$watch('selectedOrgUnit', function(){
         if( angular.isObject($scope.selectedOrgUnit) && $scope.selectedOrgUnit.id){
-            SectorService.getByVote( $scope.selectedOrgUnit.id ).then(function(data){
+            OrgUnitGroupSetService.getByVote( $scope.selectedOrgUnit.id ).then(function(data){
                 $scope.model.selectedVote = data;
                 $scope.getInterventions();
             });
@@ -109,8 +109,9 @@ ndpFramework.controller('LOGController',
         }
     });
     
-    SectorService.getAll().then(function(sectors){
-        $scope.model.sectors = sectors;
+    OrgUnitGroupSetService.getLgs().then(function(lgs){        
+        
+        $scope.model.lgs = lgs;
         
         MetaDataFactory.getAll('optionSets').then(function(optionSets){
         
@@ -331,6 +332,9 @@ ndpFramework.controller('LOGController',
                 },
                 selectedOrgUnit: function(){
                     return $scope.selectedOrgUnit;
+                },
+                validOrgUnits: function(){
+                    return $scope.model.lgs;
                 }
             }
         });

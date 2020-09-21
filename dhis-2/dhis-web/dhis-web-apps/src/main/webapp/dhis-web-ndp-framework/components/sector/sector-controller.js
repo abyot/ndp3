@@ -13,9 +13,8 @@ ndpFramework.controller('SectorController',
         orderByFilter,
         PeriodService,
         MetaDataFactory,
-        OrgUnitFactory,
         Analytics,
-        SectorService) {
+        OrgUnitGroupSetService) {
     
     $scope.model = {
         metaDataCached: false,
@@ -86,7 +85,7 @@ ndpFramework.controller('SectorController',
         }
     });
     
-    SectorService.getAll().then(function(sectors){
+    OrgUnitGroupSetService.getSectors().then(function(sectors){
         $scope.model.sectors = sectors;
         
         MetaDataFactory.getAll('optionSets').then(function(optionSets){

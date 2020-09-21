@@ -3296,7 +3296,7 @@ var d2Services = angular.module('d2Services', ['ngResource'])
     return {
         getChildren: function(uid){
             if( orgUnit !== uid ){
-                orgUnitPromise = $http.get( DHIS2URL + '/organisationUnits/'+ uid + '.json?fields=id,path,children[id,displayName,level,children[id]]&paging=false' ).then(function(response){
+                orgUnitPromise = $http.get( DHIS2URL + '/organisationUnits/'+ uid + '.json?fields=id,path,organisationUnitGroups[attributeValues[value,attribute[code]]],children[id,displayName,level,organisationUnitGroups[attributeValues[value,attribute[code]]],children[id]]&paging=false' ).then(function(response){
                     orgUnit = uid;
                     return response.data;
                 });
@@ -3314,7 +3314,7 @@ var d2Services = angular.module('d2Services', ['ngResource'])
         },
         getViewTreeRoot: function(){
             if(!rootOrgUnitPromise){
-                var url = DHIS2URL + '/me.json?fields=organisationUnits[id,displayName,level,path,children[id,displayName,level,children[id]]],dataViewOrganisationUnits[id,displayName,level,path,children[id,displayName,level,children[id]]]&paging=false';
+                var url = DHIS2URL + '/me.json?fields=organisationUnits[id,displayName,level,path,organisationUnitGroups[attributeValues[value,attribute[code]]],children[id,displayName,level,children[id]]],dataViewOrganisationUnits[id,displayName,level,path,organisationUnitGroups[attributeValues[value,attribute[code]]],children[id,displayName,level,children[id]]]&paging=false';
                 rootOrgUnitPromise = $http.get( url ).then(function(response){
                     response.data.organisationUnits = response.data.dataViewOrganisationUnits && response.data.dataViewOrganisationUnits.length > 0 ? response.data.dataViewOrganisationUnits : response.data.organisationUnits;
                     delete response.data.dataViewOrganisationUnits;
