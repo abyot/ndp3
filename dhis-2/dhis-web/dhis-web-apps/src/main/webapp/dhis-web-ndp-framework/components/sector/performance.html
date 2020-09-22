@@ -27,7 +27,7 @@
                                ng-disabled="!model.selectedObjective"
                                theme="select2"                                 
                                style="width:100%;">
-                        <ui-select-match allow-clear="true" class="form-control-ui-select" placeholder="{{model.selectedDataElementGroupSets && model.selectedDataElementGroupSets.length > 0 ? 'select_or_search' : 'empty'| translate}}">{{$select.selected.displayName|| $select.selected}}</ui-select-match>
+                        <ui-select-match allow-clear="true" class="form-control-ui-select" placeholder="{{model.selectedDataElementGroupSets && model.selectedDataElementGroupSets.length > 0 ? 'all' : 'empty'| translate}}">{{$select.selected.displayName|| $select.selected}}</ui-select-match>
                         <ui-select-choices repeat="degs in model.selectedDataElementGroupSets | filter: $select.search | limitTo:maxOptionSize | orderBy: ['displayName']">
                             <span ng-bind-html="degs.displayName | highlight: $select.search"></span>
                         </ui-select-choices>
@@ -52,7 +52,7 @@
 </div>
 <div class="row" ng-if="model.reportReady">
     <div class="col-sm-12" ng-if="model.dataExists">
-        <span class="long-horizontal-spacing hideInPrint">
+        <span class=" hideInPrint">
             <span class="dropdown">
                 <label class="btn btn-default dropdown-toggle" data-toggle="dropdown" ng-attr-title="{{'download_as'| translate}}"><i class="fa fa-download"></i></label>
                 <ul class="dropdown-menu">
