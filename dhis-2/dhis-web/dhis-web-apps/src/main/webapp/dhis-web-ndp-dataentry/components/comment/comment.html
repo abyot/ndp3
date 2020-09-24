@@ -1,0 +1,45 @@
+<div class="modal-header page">
+    <h3>{{'explanation'| translate}}</h3>
+</div>
+<div class="modal-body page">
+    <h5>
+        {{selectedDataElement.displayFormName}}
+        <span ng-if="!selectedCategoryCombo.isDefault">  - {{selectedCategoryOptionCombo.displayName}}</span>
+    </h5>
+    <table class="table table-bordered table-responsive table-striped">
+        <thead>
+            <tr>
+                <th class="col-sm-1">
+                    {{'dimension' | translate}}
+                </th>
+                <th class="col-sm-1">
+                    {{'value' | translate}}
+                </th>
+                <th class="col-sm-10">
+                    {{'explanation' | translate}}
+                </th>
+            </tr>
+        </thead>
+        <tr ng-repeat="aoc in selectedAttributeCategoryCombo.categoryOptionCombos">
+            <td class="col-sm-1">
+                {{aoc.displayName}}
+            </td>
+            <td class="col-sm-1">
+                {{dataValues[selectedDataElement.id][selectedCategoryOptionCombo.id][aoc.id].value}}
+            </td>
+            <td class="col-sm-10">
+                <textarea rows="4" 
+                        name="foo"                                                          
+                        ng-model="dataValues[selectedDataElement.id][selectedCategoryOptionCombo.id][aoc.id].comment" 
+                        class="form-control" 
+                        ng-disabled="!dataValues[selectedDataElement.id][selectedCategoryOptionCombo.id][aoc.id].value"
+                        ng-class="getInputNotifcationClass(selectedDataElement.id, selectedCategoryOptionCombo.id, aoc.id)"                                                           
+                        d2-blur="saveComment(selectedDataElement.id, selectedCategoryOptionCombo.id, aoc)">
+                </textarea>
+            </td>
+        </tr>
+    </table>
+</div>
+<div class="modal-footer page">
+    <button class="btn btn-default" data-ng-click="close()">{{'close'| translate}}</button>
+</div>
