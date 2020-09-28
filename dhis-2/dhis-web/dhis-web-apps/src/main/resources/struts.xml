@@ -24,5 +24,11 @@
         </action>
     </package>
 
+    <package name="dhis-web-ndp-dataentry" extends="dhis-web-commons" namespace="/dhis-web-ndp-dataentry">
+        <action name="index" class="org.hisp.dhis.commons.action.NoAction">
+            <result name="success" type="redirect">index.html</result>
+        </action>
+    </package>
+
   <!-- INJECT BUNDLED APPS HERE -->
 </struts>
