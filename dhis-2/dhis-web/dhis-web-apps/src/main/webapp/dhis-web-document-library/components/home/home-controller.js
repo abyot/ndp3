@@ -6,7 +6,6 @@
 docLibrary.controller('HomeController',
         function($scope,
                 $translate,
-                $modal,
                 $filter,
                 $window,
                 ModalService,
@@ -301,7 +300,7 @@ docLibrary.controller('HomeController',
             e.preventDefault();
         }
     };
-    
+
     $scope.deleteFile = function(document, e){
         
         var modalOptions = {
@@ -327,7 +326,5 @@ docLibrary.controller('HomeController',
                 e.preventDefault();
             }
         });
-        
     };
-
 });

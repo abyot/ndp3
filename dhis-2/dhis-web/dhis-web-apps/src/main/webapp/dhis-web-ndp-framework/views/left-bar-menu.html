@@ -23,7 +23,7 @@
             <td ng-click="setBottomMenu('DICTIONARY')">{{'indicator_dictionary' | translate}}</td>
         </tr>
         <tr ng-class="{'selected-menu' : 'DOCUMENT' === model.selectedMenu.domain, 'bold': menuItem.bold}">
-            <td ng-click="setBottomMenu('DOCUMENT')">{{'document_library' | translate}}</td>
+            <td ng-click="goToMenu('../dhis-web-document-library')">{{'document_library' | translate}}</td>
         </tr>
         <tr ng-class="{'selected-menu' : 'FAQ' === model.selectedMenu.domain, 'bold': menuItem.bold}">
             <td ng-click="setBottomMenu('FAQ')">{{'faqs' | translate}}</td>

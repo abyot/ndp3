@@ -312,7 +312,7 @@ ndpFramework.controller('ProgrammeController',
     $scope.getIndicatorDictionary = function(item) {        
         var modalInstance = $modal.open({
             templateUrl: 'components/dictionary/details-modal.html',
-            controller: 'DictionaryController',
+            controller: 'DictionaryDetailsController',
             resolve: {
                 dictionaryItem: function(){
                     return item;
