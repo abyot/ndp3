@@ -6,58 +6,20 @@
 ndpFramework.controller('HomeController',
         function($scope,
                 $translate,
-                $modal,
                 $filter,
                 SelectedMenuService,
-                MetaDataFactory,
-                OrgUnitFactory) {
+                MetaDataFactory) {
    
     $scope.model = {
         metaDataCached: false,
-        data: null,
-        dataElements: [],
-        dataElementsById: [],
         dataElementGroups: [],
         dataElementGroupSets: [],
-        selectedDataElementGroups: [],
-        selectedDataElementGroupSets: [],
-        baseLineTargetActualDimensions: [],
-        dataSetsById: {},
-        categoryCombosById: {},
         optionSets: [],
         optionSetsById: [],
-        dictionaryItems: [],
-        attributes: [],
-        selectedPeriods: [],
-        periods: [],
-        periodOffset: 0,
-        openFuturePeriods: 10,
-        selectedPeriodType: 'FinancialJuly',
-        selectedDataElementGroup: null,
-        selectedDictionary: null,
-        dictionaryHeaders: {},
         ndp: null,
-        ndpProgram: null,
-        selectedNDP: null,
         programs: [],
-        selectedProgram: null,
-        groupSetSize: {},
-        physicalPerformance: true,
-        financialPerformance: true,
-        showProjectDetails: false
+        selectedProgram: null
     };
-
-    //Get orgunits for the logged in user
-    OrgUnitFactory.getViewTreeRoot().then(function(response) {
-        $scope.orgUnits = response.organisationUnits;
-        angular.forEach($scope.orgUnits, function(ou){
-            ou.show = true;
-            angular.forEach(ou.children, function(o){
-                o.hasChildren = o.children && o.children.length > 0 ? true : false;
-            });
-        });
-        $scope.selectedOrgUnit = $scope.orgUnits[0] ? $scope.orgUnits[0] : null;
-    });
 
     dhis2.ndp.downloadMetaData().then(function(){
 
@@ -70,7 +32,6 @@ ndpFramework.controller('HomeController',
             });
 
             $scope.model.ndp = $filter('filter')(optionSets, {code: 'ndp'})[0];
-            $scope.model.ndpProgram = $filter('filter')(optionSets, {code: 'ndpIIIProgram'})[0];
 
             MetaDataFactory.getAll('dataElementGroupSets').then(function( dataElementGroupSets ){
                 $scope.model.dataElementGroupSets = dataElementGroupSets;
@@ -79,7 +40,6 @@ ndpFramework.controller('HomeController',
                     $scope.model.dataElementGroups = dataElementGroups;
 
                     $scope.model.metaDataCached = true;
-                    $scope.model.menuTitle = $translate.instant('menu_title');
 
                     var ndpMenus = [], order = 0;
                     angular.forEach($scope.model.ndp.options, function(op){
@@ -140,23 +100,6 @@ ndpFramework.controller('HomeController',
             });
         });
     });
-
-    $scope.resetView = function(horizontalMenu){
-        $scope.model.activeHorizontalMenu = horizontalMenu;
-        $scope.model.selectedDataElementGroupSets = [];
-        $scope.model.selectedDataElementGroupSet = null;
-        $scope.model.selectedDataElementGroup = null;
-        $scope.model.selectedNDP = null;     
-        $scope.resetDataView();
-    };
-    
-    $scope.resetDataView = function(){
-        $scope.model.data = null;
-        $scope.model.reportReady = false;
-        $scope.model.dataExists = false;
-        $scope.model.dataHeaders = [];
-    };
-    
    
     //expand/collapse of navigation menu
     $scope.expandCollapse = function(menu) {
