@@ -19,6 +19,9 @@
     
     <br>
     <table class="table dhis2-table-hover table-bordered menu-vertical-spacing">        
+        <tr ng-class="{'selected-menu' : 'COMPLETENESS' === model.selectedMenu.domain, 'bold': menuItem.bold}">
+            <td ng-click="setBottomMenu('COMPLETENESS')">{{'data_completeness' | translate}}</td>
+        </tr>
         <tr ng-class="{'selected-menu' : 'DICTIONARY' === model.selectedMenu.domain, 'bold': menuItem.bold}">
             <td ng-click="setBottomMenu('DICTIONARY')">{{'indicator_dictionary' | translate}}</td>
         </tr>
@@ -30,30 +33,3 @@
         </tr>
     </table>
 </div>
-
-
-<!--<div class="vertical-spacing category-menu">
-    <table class="table table-striped dhis2-table-hover table-bordered">
-        <tr>
-            <td ng-click="model.selectedMenu = 'NDP'">{{'ndp_program_structure' | translate}}</td>
-        </tr>
-        <tr>
-            <td ng-click="model.selectedMenu = 'DICTIONARY'">{{'indicator_dictionary' | translate}}</td>
-        </tr>
-        <tr>
-            <td ng-click="model.selectedMenu = 'DOCUMENT'">{{'document_library' | translate}}</td>
-        </tr>
-        <tr>
-            <td ng-click="goToMenu('dhis-web-dashboard/index.html')">{{'dashboard' | translate}}</td>
-        </tr>
-        <tr>
-            <td ng-click="goToMenu('dhis-web-pivot/index.html')">{{'pivot' | translate}}</td>
-        </tr>
-        <tr>
-            <td ng-click="goToMenu('dhis-web-data-visualizer/index.html')">{{'charts' | translate}}</td>
-        </tr>
-        <tr>
-            <td ng-click="goToMenu('dhis-web-maps/index.html')">{{'gis' | translate}}</td>
-        </tr>
-    </table>
-</div>-->

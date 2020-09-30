@@ -375,7 +375,7 @@ var d2Services = angular.module('d2Services', ['ngResource'])
             op1 = dhis2.validation.isNumber(op1) ? parseInt(op1) : 0;
             op2 = dhis2.validation.isNumber(op2) ? parseInt(op2) : 0;        
             if( op1 === 0){
-                return "";
+                return "0%";
             }
             if( op2 === 0 ){
                 return $translate.instant('missing_target');

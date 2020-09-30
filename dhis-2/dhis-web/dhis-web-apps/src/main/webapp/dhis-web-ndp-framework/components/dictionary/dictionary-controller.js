@@ -132,6 +132,18 @@ ndpFramework.controller('DictionaryController',
         });
     });
     
+    $scope.getAttributeCompleteness = function( item ){
+        var size = 0;
+        
+        angular.forEach($scope.model.dictionaryHeaders['dataElements'], function(header){
+            if( item[header.id] ){
+                size++;
+            }
+        });
+        
+        return size + ' / ' + $scope.model.dictionaryHeaders['dataElements'].length;
+    };
+    
     $scope.showCategoryDetail = function(){
     };
     
@@ -142,8 +154,8 @@ ndpFramework.controller('DictionaryController',
        
     $scope.showDetails = function( item ){
         var modalInstance = $modal.open({
-            templateUrl: 'views/details-modal.html',
-            controller: 'DetailsController',
+            templateUrl: 'components/dictionary/details-modal.html',
+            controller: 'DictionaryDetailsController',
             resolve: {
                 gridColumns: function () {
                     return $scope.model.dictionaryHeaders[$scope.model.selectedDictionary.id];

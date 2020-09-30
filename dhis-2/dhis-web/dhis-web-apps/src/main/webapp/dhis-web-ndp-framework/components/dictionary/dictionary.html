@@ -38,12 +38,18 @@
                                 <span ng-class="{true: 'alert-danger'} [sortHeader.id === header.id && reverse]"><i class="fa fa-sort-desc fa-stack-1x"></i></span>
                             </span>
                         </th>
+                        <th class="col-sm-1" ng-click="sortItems(header)" >
+                            {{'completeness' | translate}}
+                        </th>
                     </tr>
                 </thead>
                 <tbody>
-                    <tr ng-repeat="item in model[model.selectedDictionary.id]| orderBy:sortHeader.id:reverse | multiColumnFilter:model.filterText" ng-click="showDetails(item)">
+                    <tr ng-repeat="item in model[model.selectedDictionary.id]| orderBy:sortHeader.id:reverse | multiColumnFilter:model.filterText" ng-click="showDetails(item.id)">
                         <td ng-repeat="header in model.dictionaryHeaders[model.selectedDictionary.id]| filter: {show: true}">
                             {{item[header.id]}}
+                        </td>
+                        <td class="col-sm-1">
+                            {{getAttributeCompleteness(item)}}
                         </td>
                     </tr>
                 </tbody>

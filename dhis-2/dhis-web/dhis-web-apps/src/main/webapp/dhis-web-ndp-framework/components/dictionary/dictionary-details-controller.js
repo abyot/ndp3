@@ -9,6 +9,7 @@ ndpFramework.controller('DictionaryDetailsController',
             MetaDataFactory){
     
     $scope.dictionaryItem = dictionaryItem;
+    console.log('dictionaryItem:  ', dictionaryItem);
     $scope.model = {
         dataElementsById: [],
         dataSetsById: {},

@@ -36,7 +36,7 @@ ndpFramework.controller('HomeController',
             MetaDataFactory.getAll('dataElementGroupSets').then(function( dataElementGroupSets ){
                 $scope.model.dataElementGroupSets = dataElementGroupSets;
 
-                MetaDataFactory.getAll('dataElementGroupSets').then(function(dataElementGroups){
+                MetaDataFactory.getAll('dataElementGroups').then(function(dataElementGroups){
                     $scope.model.dataElementGroups = dataElementGroups;
 
                     $scope.model.metaDataCached = true;
