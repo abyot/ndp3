@@ -1,61 +1,88 @@
 <div ng-controller="DictionaryController">
 
-    <div ng-if="model.selectedDictionary">
+    <h2>
+        {{'indicator_list'| translate}}
+    </h2>
 
-        <h2>
-            <span ng-show="model.selectedDictionary">{{model.selectedDictionary.name}} </span>{{'list'| translate}}
-        </h2>
 
-        <span class="hideInPrint">
-            <span ng-if="model[model.selectedDictionary.id].length > 0">
-                <span class="dropdown">
-                    <label class="btn btn-default dropdown-toggle" data-toggle="dropdown" ng-attr-title="{{'download_as'| translate}}"><i class="fa fa-download"></i></label>
-                    <ul class="dropdown-menu">
-                        <li><h6 class="dropdown-header">{{'download_as'| translate}}</h6></li>
-                        <li class="divider"></li>
-                        <li><a href filename="{{model.selectedDictionary.name}}-dictionary.csv" ng-click="exportData()">{{'csv'| translate}}</a></li>
-                        <li><a href filename="{{model.selectedDictionary.name}}-dictionary.pdf" onclick="javascript:window.print()">{{'pdf'| translate}}</a></li>
-                    </ul>
-                </span>
-                <label class="btn btn-default horizontal-spacing" ng-click="showHideColumns()" ng-attr-title="{{'show_hide_columns'| translate}}">
-                    <i class="fa fa-table label-font"></i>
-                </label>
-            </span>
+    <span class="hideInPrint"v ng-if="model.dataElements.length > 0">
+        <span class="dropdown">
+            <label class="btn btn-default dropdown-toggle" data-toggle="dropdown" ng-attr-title="{{'download_as'| translate}}"><i class="fa fa-download"></i></label>
+            <ul class="dropdown-menu">
+                <li><h6 class="dropdown-header">{{'download_as'| translate}}</h6></li>
+                <li class="divider"></li>
+                <li><a href filename="indicator-dictionary.csv" ng-click="exportData()">{{'csv'| translate}}</a></li>
+                <li><a href filename="indicator-dictionary.pdf" onclick="javascript:window.print()">{{'pdf'| translate}}</a></li>
+            </ul>
         </span>
-        <div id="exportTable">
-            <table class="listTable dhis2-table-striped-border dhis2-table-hover">
-                <thead>
-                    <tr>
-                        <th colspan="100%" class="hideInPrint">
-                            <input type="text" ng-model="model.filterText" class="form-control" placeholder="{{'filter_by_name_code'| translate}}">
-                        </th>
-                    </tr>
-                    <tr>
-                        <th ng-click="sortItems(header)" ng-class="header.colSize" ng-repeat="header in model.dictionaryHeaders[model.selectedDictionary.id]| filter: {show: true}">
-                            {{header.name| translate}}
-                            <span class="fa-stack hideInPrint">
-                                <span ng-class="{true: 'alert-danger'} [sortHeader.id === header.id && !reverse]"><i class="fa fa-sort-asc fa-stack-1x"></i></span>
-                                <span ng-class="{true: 'alert-danger'} [sortHeader.id === header.id && reverse]"><i class="fa fa-sort-desc fa-stack-1x"></i></span>
-                            </span>
-                        </th>
-                        <th class="col-sm-1" ng-click="sortItems(header)" >
-                            {{'completeness' | translate}}
-                        </th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr ng-repeat="item in model[model.selectedDictionary.id]| orderBy:sortHeader.id:reverse | multiColumnFilter:model.filterText" ng-click="showDetails(item.id)">
-                        <td ng-repeat="header in model.dictionaryHeaders[model.selectedDictionary.id]| filter: {show: true}">
-                            {{item[header.id]}}
-                        </td>
-                        <td class="col-sm-1">
-                            {{getAttributeCompleteness(item)}}
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-
+        <label class="btn btn-default horizontal-spacing" ng-click="showHideColumns()" ng-attr-title="{{'show_hide_columns'| translate}}">
+            <i class="fa fa-table label-font"></i>
+        </label>
+        <label class="long-horizontal-spacing">
+            {{'total_no_indicators' | translate}} = {{model.dataElements.length}}
+        </label>
+    </span>
+    <div id="exportTable">
+        <table class="listTable dhis2-table-striped-border dhis2-table-hover">
+            <thead>
+                <tr>
+                    <th colspan="100%">
+                        <ui-select ng-model="model.selectedNDP"
+                               theme="select2"
+                               style="width:100%;">
+                            <ui-select-match allow-clear="true" class="form-control-ui-select" placeholder="{{model.ndp && model.ndp.options && model.ndp.options.length > 0 ? 'please_select_ndp' : 'empty'| translate}}">{{$select.selected.displayName|| $select.selected}}</ui-select-match>
+                            <ui-select-choices repeat="option in model.ndp.options | filter: $select.search | limitTo:maxOptionSize | orderBy: ['displayName']">
+                                <span ng-bind-html="option.displayName | highlight: $select.search"></span>
+                            </ui-select-choices>
+                        </ui-select>
+                    </th>
+                </tr>
+                <tr>
+                    <th colspan="100%">
+                        <ui-select ng-model="model.selectedProgram"
+                               theme="select2"
+                               style="width:100%;">
+                            <ui-select-match allow-clear="true" class="form-control-ui-select" placeholder="{{model.ndpProgram && model.ndpProgram.options && model.ndpProgram.options.length > 0 ? 'please_select_program' : 'empty'| translate}}">{{$select.selected.displayName|| $select.selected}}</ui-select-match>
+                            <ui-select-choices repeat="option in model.ndpProgram.options | filter: $select.search | limitTo:maxOptionSize | orderBy: ['displayName']">
+                                <span ng-bind-html="option.displayName | highlight: $select.search"></span>
+                            </ui-select-choices>
+                        </ui-select>
+                    </th>
+                </tr>
+                <tr>
+                    <th colspan="100%" class="hideInPrint">
+                        <input type="text" ng-model="model.filterText" class="form-control" placeholder="{{'filter_by_name_code'| translate}}">
+                    </th>
+                </tr>
+                <tr>
+                    <th ng-click="sortItems(header)" ng-class="header.colSize" ng-repeat="header in model.dictionaryHeaders | filter: {show: true}">
+                        {{header.name| translate}}
+                        <span class="fa-stack hideInPrint">
+                            <span ng-class="{true: 'alert-danger'} [sortHeader.id === header.id && !reverse]"><i class="fa fa-sort-asc fa-stack-1x"></i></span>
+                            <span ng-class="{true: 'alert-danger'} [sortHeader.id === header.id && reverse]"><i class="fa fa-sort-desc fa-stack-1x"></i></span>
+                        </span>
+                    </th>
+                    <th class="col-sm-1" ng-click="sortItems(header)" >
+                        {{'completeness' | translate}}
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr ng-repeat="item in model.dataElements | orderBy:sortHeader.id:reverse | multiColumnFilter:model.filterText" ng-click="showDetails(item.id)">
+                    <td ng-repeat="header in model.dictionaryHeaders | filter: {show: true}">
+                        {{item[header.id]}}
+                    </td>
+                    <td class="col-sm-1">
+                        {{getAttributeCompleteness(item)}}
+                    </td>
+                </tr>
+            </tbody>
+        </table>
     </div>
 
+    <div class="vertical-spacing" ng-if="model.dataElements.length === 0">
+        <div class="alert alert-warning">
+            {{'no_indicators_defined'| translate}}
+        </div>
+    </div>
 </div>

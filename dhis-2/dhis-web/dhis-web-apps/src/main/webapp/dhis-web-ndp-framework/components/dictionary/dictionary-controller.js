@@ -33,7 +33,7 @@ ndpFramework.controller('DictionaryController',
         selectedPeriodType: 'FinancialJuly',
         selectedDataElementGroup: null,
         selectedDictionary: null,
-        dictionaryHeaders: {},
+        dictionaryHeaders: [],
         ndp: null,
         ndpProgram: null,
         selectedNDP: null,
@@ -44,6 +44,64 @@ ndpFramework.controller('DictionaryController',
         financialPerformance: true,
         showProjectDetails: false
     };
+
+    $scope.getDataElementGroupSetsForNdp = function(){
+        $scope.model.selectedDataElementGroupSets = angular.copy( $scope.model.dataElementGroupSets );
+        if( angular.isObject($scope.model.selectedNDP) && $scope.model.selectedNDP.code){
+            $scope.model.selectedDataElementGroupSets = $filter('filter')($scope.model.dataElementGroupSets, {ndp: $scope.model.selectedNDP.code}, true);
+            $scope.model.ndpProgram = $filter('filter')($scope.model.optionSets, {ndp: $scope.model.selectedNDP.code, code: 'program'}, true)[0];
+        }
+
+        $scope.model.selectedDataElementGroups = [];
+
+        angular.forEach($scope.model.selectedDataElementGroupSets, function(degs){
+            angular.forEach(degs.dataElementGroups, function(deg){
+                $scope.model.selectedDataElementGroups.push( $filter('filter')($scope.model.dataElementGroups, {id: deg.id})[0] );
+            });
+        });
+    };
+
+    $scope.getDataElementGroupsForNdp = function(){
+        $scope.model.dataElements = [];
+        var available = [];
+        angular.forEach($scope.model.selectedDataElementGroups, function(deg){
+            angular.forEach(deg.dataElements, function(de){
+                var _de = $scope.model.dataElementsById[de.id];
+                if( _de && available.indexOf(de.id) === -1 ){
+                    $scope.model.dataElements.push( _de );
+                    available.push( de.id );
+                }
+            });
+        });
+    };
+
+    $scope.$watch('model.selectedNDP', function(){
+        $scope.model.selectedProgram = null;
+        $scope.model.selectedDataElementGroups = angular.copy( $scope.model.dataElementGroups );
+        $scope.getDataElementGroupSetsForNdp();
+
+        $scope.getDataElementGroupsForNdp();
+    });
+
+    $scope.$watch('model.selectedProgram', function(){
+        $scope.model.selectedDataElementGroupSets = angular.copy( $scope.model.dataElementGroupSets );
+        $scope.model.selectedDataElementGroups = angular.copy( $scope.model.dataElementGroups );
+        if( angular.isObject($scope.model.selectedProgram) && $scope.model.selectedProgram.code){
+            $scope.model.selectedDataElementGroups = [];
+            $scope.model.selectedDataElementGroupSets = $filter('filter')($scope.model.dataElementGroupSets, {ndp: $scope.model.selectedNDP.code, ndpProgramme: $scope.model.selectedProgram.code}, true);
+
+            angular.forEach($scope.model.selectedDataElementGroupSets, function(degs){
+                angular.forEach(degs.dataElementGroups, function(deg){
+                    $scope.model.selectedDataElementGroups.push( $filter('filter')($scope.model.dataElementGroups, {id: deg.id})[0] );
+                });
+            });
+        }
+        else{
+            $scope.getDataElementGroupSetsForNdp();
+        }
+
+        $scope.getDataElementGroupsForNdp();
+    });
 
     MetaDataFactory.getAll('attributes').then(function(attributes){
 
@@ -62,9 +120,10 @@ ndpFramework.controller('DictionaryController',
                     $scope.model.optionSetsById[optionSet.id] = optionSet;
                 });
 
+                $scope.model.ndp = $filter('filter')($scope.model.optionSets, {code: 'ndp'})[0];
+
                 $scope.model.ndp = $filter('filter')(optionSets, {code: 'ndp'})[0];
                 $scope.model.ndpProgram = $filter('filter')(optionSets, {code: 'ndpIIIProgram'})[0];
-
 
                 MetaDataFactory.getAll('dataSets').then(function(dataSets){
 
@@ -77,13 +136,15 @@ ndpFramework.controller('DictionaryController',
 
                     MetaDataFactory.getAll('dataElementGroupSets').then(function( dataElementGroupSets ){
                         $scope.model.dataElementGroupSets = dataElementGroupSets;
-                        MetaDataFactory.getAll('dataElementGroupSets').then(function(dataElementGroups){
+                        MetaDataFactory.getAll('dataElementGroups').then(function(dataElementGroups){
                             $scope.model.dataElementGroups = dataElementGroups;
+                            $scope.model.selectedDataElementGroups = angular.copy( $scope.model.dataElementGroups );
+
+                            $scope.getDataElementGroupsForNdp();
 
                             MetaDataFactory.getAll('dataElements').then(function(dataElements){
 
                                 angular.forEach(dataElements, function(de){
-                                    $scope.model.dataElementsById[de.id] = de;
                                     var cc = $scope.model.categoryCombosById[de.categoryCombo.id];
                                     de.disaggregation = !cc || cc.isDefault ? '-' : cc.displayName;
 
@@ -102,14 +163,16 @@ ndpFramework.controller('DictionaryController',
                                             break;
                                         }
                                     }
+
+                                    $scope.model.dataElementsById[de.id] = de;
                                 });
 
-                                var item = {id: 'dataElements', name: $translate.instant('indicators')};
-                                $scope.model.selectedDictionary = item;
-                                $scope.model.dictionaryItems.push( item );
-                                $scope.model.dataElements = dataElements;
+                                //var item = {id: 'dataElements', name: $translate.instant('indicators')};
+                                //$scope.model.selectedDictionary = item;
+                                //$scope.model.dictionaryItems.push( item );
+                                //$scope.model.dataElements = dataElements;
                                 $scope.sortHeader = {id: 'displayName', name: 'name', colSize: "col-sm-1", show: true, fetch: false};
-                                $scope.model.dictionaryHeaders['dataElements'] = [
+                                $scope.model.dictionaryHeaders = [
                                     {id: 'displayName', name: 'name', colSize: "col-sm-1", show: true, fetch: false},
                                     {id: 'code', name: 'code', colSize: "col-sm-1", show: true, fetch: false},
                                     {id: 'disaggregation', name: 'disaggregation', colSize: "col-sm-1", show: true, fetch: false},
@@ -121,9 +184,11 @@ ndpFramework.controller('DictionaryController',
                                 angular.forEach($scope.model.attributes, function(att){
                                     if(att['dataElementAttribute']){
                                         var header = {id: att.id, name: att.name, show: false, fetch: true, colSize: "col-sm-1"};
-                                        $scope.model.dictionaryHeaders['dataElements'].push(header);
+                                        $scope.model.dictionaryHeaders.push(header);
                                     }
                                 });
+
+                                $scope.getDataElementGroupsForNdp();
                             });
                         });
                     });
@@ -135,13 +200,13 @@ ndpFramework.controller('DictionaryController',
     $scope.getAttributeCompleteness = function( item ){
         var size = 0;
         
-        angular.forEach($scope.model.dictionaryHeaders['dataElements'], function(header){
+        angular.forEach($scope.model.dictionaryHeaders, function(header){
             if( item[header.id] ){
                 size++;
             }
         });
         
-        return size + ' / ' + $scope.model.dictionaryHeaders['dataElements'].length;
+        return size + ' / ' + $scope.model.dictionaryHeaders.length;
     };
     
     $scope.showCategoryDetail = function(){
@@ -158,7 +223,7 @@ ndpFramework.controller('DictionaryController',
             controller: 'DictionaryDetailsController',
             resolve: {
                 gridColumns: function () {
-                    return $scope.model.dictionaryHeaders[$scope.model.selectedDictionary.id];
+                    return $scope.model.dictionaryHeaders;
                 },
                 dictionaryItem: function(){
                     return item;
@@ -167,7 +232,7 @@ ndpFramework.controller('DictionaryController',
         });
 
         modalInstance.result.then(function (gridColumns) {
-            $scope.model.dictionaryHeaders[$scope.model.selectedDictionary.id] = gridColumns;
+            $scope.model.dictionaryHeaders = gridColumns;
         });
     };
 
@@ -177,16 +242,20 @@ ndpFramework.controller('DictionaryController',
             controller: 'ColumnDisplayController',
             resolve: {
                 gridColumns: function () {
-                    return $scope.model.dictionaryHeaders[$scope.model.selectedDictionary.id];
+                    return $scope.model.dictionaryHeaders;
                 },
                 hiddenGridColumns: function(){
-                    return ($filter('filter')($scope.model.dictionaryHeaders[$scope.model.selectedDictionary.id], {show: false})).length;
+                    return ($filter('filter')($scope.model.dictionaryHeaders, {show: false})).length;
                 }
             }
         });
 
         modalInstance.result.then(function (gridColumns) {
-            $scope.model.dictionaryHeaders[$scope.model.selectedDictionary.id] = gridColumns;
+            $scope.model.dictionaryHeaders = gridColumns;
         });
+    };
+
+    $scope.itemExists = function( item ){
+        return $scope.model.selectedDataElementGroups.indexOf( item ) !== -1;
     };
 });
