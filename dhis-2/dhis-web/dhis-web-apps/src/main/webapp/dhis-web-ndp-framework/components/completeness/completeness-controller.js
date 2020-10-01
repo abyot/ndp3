@@ -170,22 +170,27 @@ ndpFramework.controller('CompletenessController',
 
         if( !$scope.model.selectedNDP ){
             NotificationService.showNotifcationDialog($translate.instant("error"), $translate.instant("missing_ndp"));
+            return;
         }
         
         if( !$scope.model.selectedProgram ){
             NotificationService.showNotifcationDialog($translate.instant("error"), $translate.instant("missing_programme"));
+            return;
         }
         
         if( !$scope.model.dataElementGroup || $scope.model.dataElementGroup.length === 0 ){
             NotificationService.showNotifcationDialog($translate.instant("error"), $translate.instant("program_missing_objective"));
+            return;
         }
         
         if( !$scope.selectedOrgUnit || !$scope.selectedOrgUnit.id ){
             NotificationService.showNotifcationDialog($translate.instant("error"), $translate.instant("missing_vote"));
+            return;
         }
         
         if( !$scope.model.selectedPeriods || !$scope.model.selectedPeriods.length === 0 ){
             NotificationService.showNotifcationDialog($translate.instant("error"), $translate.instant("missing_period"));
+            return;
         }
         
         $scope.model.data = null;
