@@ -1,4 +1,4 @@
-html, body { 
+html, body {
     height:100%;
     margin: 0;
     padding: 0;
@@ -56,7 +56,7 @@ html, body {
 
     #header, #leftBar, .hideInPrint {
         display: none !important;
-    }    
+    }
 
     .select2-arrow, .ui-select-toggle {
         display: none !important;
@@ -77,11 +77,11 @@ html, body {
 }
 
 .vertical-spacing {
-    margin-top: 20px;    
+    margin-top: 20px;
 }
 
 .long-vertical-spacing {
-    margin-top: 30px;    
+    margin-top: 30px;
 }
 
 .vertical-center {
@@ -126,19 +126,19 @@ html, body {
     padding: 5px;
 }
 
-.font-18 {    
+.font-18 {
     font-size: 18px !important;
 }
 
-.font-16 {    
+.font-16 {
     font-size: 16px !important;
 }
 
-.font-14 {    
+.font-14 {
     font-size: 14px !important;
 }
 
-.font-12 {    
+.font-12 {
     font-size: 12px !important;
 }
 
@@ -159,15 +159,15 @@ html, body {
 }
 
 .small-horizontal-spacing{
-    margin-left: 5px;    
+    margin-left: 5px;
 }
 
 .horizontal-spacing {
-    margin-right: 20px;    
+    margin-right: 20px;
 }
 
 .long-horizontal-spacing {
-    margin-left: 40px;    
+    margin-left: 40px;
 }
 
 .remove-horizontal-spacing {
@@ -210,7 +210,7 @@ html, body {
     background-color: #BBD1EE !important;
     border-radius: 3px;
 }
-    
+
 .report-filter {
     border-color: #BBD1EE;
 }
@@ -272,7 +272,7 @@ html, body {
 }
 
 .multiSelectAvailable option,
-.multiSelectSelected option {    
+.multiSelectSelected option {
     padding: 5px;
     line-height: 1.428571429;
     font-size: 14px;
@@ -297,7 +297,7 @@ html, body {
 }
 
 .form-control-ui-select {
-    width:100%;     
+    width:100%;
     padding: 20px 6px;
     border-radius: 4px;
 }
@@ -307,7 +307,7 @@ html, body {
     color: #555 !important;
 }
 
-.form-control{    
+.form-control{
     padding: 5px !important;
     color: #555 !important;
 }
@@ -322,7 +322,7 @@ html, body {
 
 /* ou tree start */
 .ou-search-left-bar {
-    margin-top: 30px; 
+    margin-top: 30px;
     padding: 2px;
 }
 
@@ -425,7 +425,7 @@ ul.tree ul li:last-child:before {
 }
 
 .spacer {
-    margin: 15px;    
+    margin: 15px;
 }
 
 .milestone-info-area {
@@ -442,4 +442,19 @@ ul.tree ul li:last-child:before {
 
 .menu-vertical-spacing {
     margin-top: 60px;
+}
+
+.green {
+    background-color: green;
+    max-width: 15px !important;
+}
+
+.yellow {
+    background-color: yellow;
+    max-width: 15px !important;
+}
+
+.red {
+    background-color: red;
+    max-width: 15px !important;
 }

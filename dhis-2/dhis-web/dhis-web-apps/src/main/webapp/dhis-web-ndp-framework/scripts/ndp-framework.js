@@ -20,7 +20,7 @@ var batchSize = 50;
 dhis2.ndp.store = null;
 dhis2.ndp.metaDataCached = dhis2.ndp.metaDataCached || false;
 dhis2.ndp.memoryOnly = $('html').hasClass('ie7') || $('html').hasClass('ie8');
-var adapters = [];    
+var adapters = [];
 if( dhis2.ndp.memoryOnly ) {
     adapters = [ dhis2.storage.InMemoryAdapter ];
 } else {
@@ -46,9 +46,9 @@ dhis2.ndp.store = new dhis2.storage.Store({
 /**
  * Page init. The order of events is:
  *
- * 1. Load ouwt 
- * 2. Load meta-data (and notify ouwt) 
- * 
+ * 1. Load ouwt
+ * 2. Load meta-data (and notify ouwt)
+ *
  */
 $(document).ready(function()
 {
@@ -131,9 +131,9 @@ function ajax_login()
 dhis2.ndp.downloadMetaData = function()
 {
     console.log('Loading required meta-data');
-    
+
     return dhis2.ndp.store.open()
-    
+
         .then( getUserAccessibleDataSets )
         .then( getOrgUnitLevels )
         .then( getSystemSetting )
@@ -193,15 +193,15 @@ function getOrgUnitLevels()
     dhis2.ndp.store.getKeys( 'ouLevels').done(function(res){
         if(res.length > 0){
             return;
-        }        
+        }
         return dhis2.metadata.getMetaObjects('ouLevels', 'organisationUnitLevels', dhis2.ndp.apiUrl + '/organisationUnitLevels.json', 'fields=id,displayName,level&paging=false', 'idb', dhis2.ndp.store);
     });
 }
 
-function getSystemSetting(){   
+function getSystemSetting(){
     if(localStorage['SYSTEM_SETTING']){
-       return; 
-    }    
+       return;
+    }
     return dhis2.metadata.getMetaObject(null, 'SYSTEM_SETTING', dhis2.ndp.apiUrl + '/systemSettings?key=keyUiLocale&key=keyCalendar&key=keyDateFormat&key=multiOrganisationUnitForms', '', 'localStorage', dhis2.ndp.store);
 }
 
@@ -213,7 +213,7 @@ function filterMissingCategoryCombos( objs ){
     return dhis2.metadata.filterMissingObjIds('categoryCombos', dhis2.ndp.store, objs);
 }
 
-function getCategoryCombos( ids ){    
+function getCategoryCombos( ids ){
     return dhis2.metadata.getBatches( ids, batchSize, 'categoryCombos', 'categoryCombos', dhis2.ndp.apiUrl + '/categoryCombos.json', 'paging=false&fields=id,displayName,code,skipTotal,isDefault,categoryOptionCombos[id,displayName,categoryOptions[displayName]],categories[id,displayName,code,dimension,dataDimensionType,attributeValues[value,attribute[id,name,valueType,code]],categoryOptions[id,displayName,code]]', 'idb', dhis2.ndp.store);
 }
 
@@ -226,7 +226,7 @@ function filterMissingDataElements( objs ){
 }
 
 function getDataElements( ids ){
-    return dhis2.metadata.getBatches( ids, batchSize, 'dataElements', 'dataElements', dhis2.ndp.apiUrl + '/dataElements.json', 'paging=false&fields=id,code,displayName,shortName,description,formName,valueType,optionSetValue,optionSet[id],attributeValues[value,attribute[id,name,valueType,code]],categoryCombo[id]', 'idb', dhis2.ndp.store, dhis2.metadata.processObject);
+    return dhis2.metadata.getBatches( ids, batchSize, 'dataElements', 'dataElements', dhis2.ndp.apiUrl + '/dataElements.json', 'paging=false&fields=id,code,displayName,shortName,description,formName,valueType,optionSetValue,optionSet[id],attributeValues[value,attribute[id,name,valueType,code]],categoryCombo[id]', 'idb', dhis2.ndp.store);
 }
 
 function getMetaDataElementGroups(){
@@ -237,8 +237,8 @@ function filterMissingDataElementGroups( objs ){
     return dhis2.metadata.filterMissingObjIds('dataElementGroups', dhis2.ndp.store, objs);
 }
 
-function getDataElementGroups( ids ){    
-    return dhis2.metadata.getBatches( ids, batchSize, 'dataElementGroups', 'dataElementGroups', dhis2.ndp.apiUrl + '/dataElementGroups.json', 'paging=false&fields=id,displayName,code,description,dataElements[id],attributeValues[value,attribute[id,name,valueType,code]]', 'idb', dhis2.ndp.store, dhis2.metadata.processObject);
+function getDataElementGroups( ids ){
+    return dhis2.metadata.getBatches( ids, batchSize, 'dataElementGroups', 'dataElementGroups', dhis2.ndp.apiUrl + '/dataElementGroups.json', 'paging=false&fields=id,displayName,code,description,dataElements[id],attributeValues[value,attribute[id,name,valueType,code]]', 'idb', dhis2.ndp.store);
 }
 
 function getMetaDataElementGroupSets(){
@@ -249,8 +249,8 @@ function filterMissingDataElementGroupSets( objs ){
     return dhis2.metadata.filterMissingObjIds('dataElementGroupSets', dhis2.ndp.store, objs);
 }
 
-function getDataElementGroupSets( ids ){    
-    return dhis2.metadata.getBatches( ids, batchSize, 'dataElementGroupSets', 'dataElementGroupSets', dhis2.ndp.apiUrl + '/dataElementGroupSets.json', 'paging=false&fields=id,code,description,displayName,dataElementGroups[id,displayName],attributeValues[value,attribute[id,name,valueType,code]]', 'idb', dhis2.ndp.store, dhis2.metadata.processObject);
+function getDataElementGroupSets( ids ){
+    return dhis2.metadata.getBatches( ids, batchSize, 'dataElementGroupSets', 'dataElementGroupSets', dhis2.ndp.apiUrl + '/dataElementGroupSets.json', 'paging=false&fields=id,code,description,displayName,dataElementGroups[id,displayName],attributeValues[value,attribute[id,name,valueType,code]]', 'idb', dhis2.ndp.store);
 }
 
 function getMetaDataSets(){
@@ -261,7 +261,7 @@ function filterMissingDataSets( objs ){
     return dhis2.metadata.filterMissingObjIds('dataSets', dhis2.ndp.store, objs);
 }
 
-function getDataSets( ids ){    
+function getDataSets( ids ){
     return dhis2.metadata.getBatches( ids, batchSize, 'dataSets', 'dataSets', dhis2.ndp.apiUrl + '/dataSets.json', 'paging=false&fields=id,periodType,openFuturePeriods,displayName,version,categoryCombo[id],attributeValues[value,attribute[id,name,valueType,code]],organisationUnits[code,level],dataSetElements[id,dataElement[id]]', 'idb', dhis2.ndp.store, '');
 }
 
@@ -273,8 +273,8 @@ function filterMissingOptionSets( objs ){
     return dhis2.metadata.filterMissingObjIds('optionSets', dhis2.ndp.store, objs);
 }
 
-function getOptionSets( ids ){    
-    return dhis2.metadata.getBatches( ids, batchSize, 'optionSets', 'optionSets', dhis2.ndp.apiUrl + '/optionSets.json', 'paging=false&fields=id,displayName,code,version,valueType,attributeValues[value,attribute[id,name,valueType,code]],options[id,displayName,code]', 'idb', dhis2.ndp.store, dhis2.metadata.processObject);
+function getOptionSets( ids ){
+    return dhis2.metadata.getBatches( ids, batchSize, 'optionSets', 'optionSets', dhis2.ndp.apiUrl + '/optionSets.json', 'paging=false&fields=id,displayName,code,version,valueType,attributeValues[value,attribute[id,name,valueType,code]],options[id,displayName,code]', 'idb', dhis2.ndp.store);
 }
 
 function getMetaIndicatorGroups(){
@@ -285,8 +285,8 @@ function filterMissingIndicatorGroups( objs ){
     return dhis2.metadata.filterMissingObjIds('indicatorGroups', dhis2.ndp.store, objs);
 }
 
-function getIndicatorGroups( ids ){    
-    return dhis2.metadata.getBatches( ids, batchSize, 'indicatorGroups', 'indicatorGroups', dhis2.ndp.apiUrl + '/indicatorGroups.json', 'paging=false&fields=id,displayName,attributeValues[value,attribute[id,name,valueType,code]],indicators[id,displayName,denominatorDescription,numeratorDescription,dimensionItem,numerator,denominator,annualized,dimensionType,indicatorType[id,displayName,factor,number]]', 'idb', dhis2.ndp.store, dhis2.metadata.processObject);
+function getIndicatorGroups( ids ){
+    return dhis2.metadata.getBatches( ids, batchSize, 'indicatorGroups', 'indicatorGroups', dhis2.ndp.apiUrl + '/indicatorGroups.json', 'paging=false&fields=id,displayName,attributeValues[value,attribute[id,name,valueType,code]],indicators[id,displayName,denominatorDescription,numeratorDescription,dimensionItem,numerator,denominator,annualized,dimensionType,indicatorType[id,displayName,factor,number]]', 'idb', dhis2.ndp.store);
 }
 
 function getMetaAttributes(){
@@ -297,8 +297,8 @@ function filterMissingAttributes( objs ){
     return dhis2.metadata.filterMissingObjIds('attributes', dhis2.ndp.store, objs);
 }
 
-function getAttributes( ids ){    
-    return dhis2.metadata.getBatches( ids, batchSize, 'attributes', 'attributes', dhis2.ndp.apiUrl + '/attributes.json', 'paging=false&fields=:all,!access,!lastUpdatedBy,!lastUpdated,!created,!href,!user,!translations,!favorites,optionSet[id,displayName,code,options[id,displayName,code,sortOrder]]', 'idb', dhis2.ndp.store, dhis2.metadata.processObject);
+function getAttributes( ids ){
+    return dhis2.metadata.getBatches( ids, batchSize, 'attributes', 'attributes', dhis2.ndp.apiUrl + '/attributes.json', 'paging=false&fields=:all,!access,!lastUpdatedBy,!lastUpdated,!created,!href,!user,!translations,!favorites,optionSet[id,displayName,code,options[id,displayName,code,sortOrder]]', 'idb', dhis2.ndp.store);
 }
 
 function getMetaPrograms(){

@@ -8,8 +8,8 @@
                         {{'ndp'| translate}}
                     </div>
                     <div class="col-sm-10">
-                        <ui-select ng-model="model.selectedNDP" 
-                                   theme="select2"                                 
+                        <ui-select ng-model="model.selectedNDP"
+                                   theme="select2"
                                    style="width:100%;">
                             <ui-select-match allow-clear="true" class="form-control-ui-select" placeholder="{{model.ndp && model.ndp.options && model.ndp.options.length > 0 ? 'select_or_search' : 'empty'| translate}}">{{$select.selected.displayName|| $select.selected}}</ui-select-match>
                             <ui-select-choices repeat="option in model.ndp.options | filter: $select.search | limitTo:maxOptionSize | orderBy: ['displayName']">
@@ -23,7 +23,7 @@
                         {{'programme'| translate}}
                     </div>
                     <div class="col-sm-10">
-                        <ui-select ng-model="model.selectedProgram" 
+                        <ui-select ng-model="model.selectedProgram"
                                    theme="select2"
                                    style="width:100%;">
                             <ui-select-match allow-clear="true" class="form-control-ui-select" placeholder="{{model.ndpProgram && model.ndpProgram.options && model.ndpProgram.options.length > 0 ? 'select_or_search' : 'empty'| translate}}">{{$select.selected.displayName|| $select.selected}}</ui-select-match>
@@ -38,10 +38,10 @@
                         {{'objective'| translate}}
                     </div>
                     <div class="col-sm-10">
-                        <ui-select ng-model="model.selectedObjective" 
-                                   theme="select2"                                 
+                        <ui-select ng-model="model.selectedObjective"
+                                   theme="select2"
                                    style="width:100%;">
-                            <ui-select-match allow-clear="true" class="form-control-ui-select" placeholder="{{model.objectives && model.objectives.length > 0 ? 'select_or_search' : 'empty'| translate}}">{{$select.selected.displayName|| $select.selected}}</ui-select-match>
+                            <ui-select-match allow-clear="true" class="form-control-ui-select" placeholder="{{model.objectives && model.objectives.length > 0 ? 'all' : 'empty'| translate}}">{{$select.selected.displayName|| $select.selected}}</ui-select-match>
                             <ui-select-choices repeat="degs in model.objectives | filter: $select.search | limitTo:maxOptionSize | orderBy: ['displayName']">
                                 <span ng-bind-html="degs.displayName | highlight: $select.search"></span>
                             </ui-select-choices>
@@ -60,7 +60,7 @@
                 </div>
             </div>
             <div class="col-sm-5 blue-info-area add-small-left-padding">
-                <div ng-include="'components/report-filter/report-filters.html'"></div>                
+                <div ng-include="'components/report-filter/report-filters.html'"></div>
             </div>
         </div>
     </div>

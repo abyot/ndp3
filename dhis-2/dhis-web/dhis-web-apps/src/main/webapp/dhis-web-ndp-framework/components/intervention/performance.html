@@ -1,14 +1,14 @@
 <div class="small-vertical-spacing hideInPrint">
     <div class="selection-group">
         <div class="col-sm-7 green-info-area">
-            
+
             <div class="row small-vertical-spacing">
                 <div class="col-sm-4">
                     {{'objectives'| translate}}
                 </div>
                 <div class="col-sm-8">
                     <ui-select ng-model="model.selectedObjective"
-                               theme="select2"                                 
+                               theme="select2"
                                style="width:100%;">
                         <ui-select-match allow-clear="true" class="form-control-ui-select" placeholder="{{model.objectives && model.objectives.length > 0 ? 'select_or_search' : 'empty'| translate}}">{{$select.selected.displayName|| $select.selected}}</ui-select-match>
                         <ui-select-choices repeat="obj in model.objectives | filter: $select.search | limitTo:maxOptionSize | orderBy">
@@ -17,17 +17,17 @@
                     </ui-select>
                 </div>
             </div>
-            
-            <div class="row small-vertical-spacing">
+
+            <div class="row small-vertical-spacing" ng-if="model.selectedObjective">
                 <div class="col-sm-4">
                     {{'interventions'| translate}}
                 </div>
                 <div class="col-sm-8">
-                    <ui-select ng-model="model.selectedIntervention" 
+                    <ui-select ng-model="model.selectedIntervention"
                                ng-disabled="!model.selectedObjective"
-                               theme="select2"                                 
+                               theme="select2"
                                style="width:100%;">
-                        <ui-select-match allow-clear="true" class="form-control-ui-select" placeholder="{{model.selectedDataElementGroupSets && model.selectedDataElementGroupSets.length > 0 ? 'select_or_search' : 'empty'| translate}}">{{$select.selected.displayName|| $select.selected}}</ui-select-match>
+                        <ui-select-match allow-clear="true" class="form-control-ui-select" placeholder="{{model.selectedDataElementGroupSets && model.selectedDataElementGroupSets.length > 0 ? 'all' : 'empty'| translate}}">{{$select.selected.displayName|| $select.selected}}</ui-select-match>
                         <ui-select-choices repeat="degs in model.selectedDataElementGroupSets | filter: $select.search | limitTo:maxOptionSize | orderBy: ['displayName']">
                             <span ng-bind-html="degs.displayName | highlight: $select.search"></span>
                         </ui-select-choices>

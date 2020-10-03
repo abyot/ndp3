@@ -23,7 +23,7 @@
         </label>
     </span>
     <div id="exportTable">
-        <table class="listTable dhis2-table-striped-border dhis2-table-hover">
+        <table class="table table-bordered table-responsive">
             <thead>
                 <tr>
                     <th colspan="100%">
@@ -55,25 +55,25 @@
                     </th>
                 </tr>
                 <tr>
-                    <th ng-click="sortItems(header)" ng-class="header.colSize" ng-repeat="header in model.dictionaryHeaders | filter: {show: true}">
+                    <th class="col-sm-1" ng-click="sortItems(header)" >
+                        {{'completeness' | translate}}
+                    </th>
+                    <th class="cursor-pointer" ng-click="sortItems(header)" ng-class="header.colSize" ng-repeat="header in model.dictionaryHeaders | filter: {show: true}">
                         {{header.name| translate}}
                         <span class="fa-stack hideInPrint">
                             <span ng-class="{true: 'alert-danger'} [sortHeader.id === header.id && !reverse]"><i class="fa fa-sort-asc fa-stack-1x"></i></span>
                             <span ng-class="{true: 'alert-danger'} [sortHeader.id === header.id && reverse]"><i class="fa fa-sort-desc fa-stack-1x"></i></span>
                         </span>
                     </th>
-                    <th class="col-sm-1" ng-click="sortItems(header)" >
-                        {{'completeness' | translate}}
-                    </th>
                 </tr>
             </thead>
             <tbody>
                 <tr ng-repeat="item in model.dataElements | orderBy:sortHeader.id:reverse | multiColumnFilter:model.filterText" ng-click="showDetails(item.id)">
-                    <td ng-repeat="header in model.dictionaryHeaders | filter: {show: true}">
-                        {{item[header.id]}}
+                    <td class="col-sm-1" ng-class="item.completeness">
+                        {{item.completenessRate}}
                     </td>
-                    <td class="col-sm-1">
-                        {{getAttributeCompleteness(item)}}
+                    <td class="cursor-pointer" ng-repeat="header in model.dictionaryHeaders | filter: {show: true}">
+                        {{item[header.id]}}
                     </td>
                 </tr>
             </tbody>

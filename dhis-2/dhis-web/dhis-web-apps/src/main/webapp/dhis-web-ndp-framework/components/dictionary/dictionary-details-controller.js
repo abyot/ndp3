@@ -3,13 +3,12 @@
 /* global ndpFramework */
 
 ndpFramework.controller('DictionaryDetailsController',
-    function($scope, 
+    function($scope,
             $modalInstance,
             dictionaryItem,
             MetaDataFactory){
-    
+
     $scope.dictionaryItem = dictionaryItem;
-    console.log('dictionaryItem:  ', dictionaryItem);
     $scope.model = {
         dataElementsById: [],
         dataSetsById: {},
@@ -20,9 +19,9 @@ ndpFramework.controller('DictionaryDetailsController',
         dictionaryHeaders: []
     };
 
-    
+
     MetaDataFactory.getAll('attributes').then(function(attributes){
-            
+
         $scope.model.attributes = attributes;
 
         MetaDataFactory.getAll('programs').then(function( programs ){
@@ -84,28 +83,27 @@ ndpFramework.controller('DictionaryDetailsController',
 
                             angular.forEach($scope.model.attributes, function(att){
                                 if(att['dataElementAttribute']){
-                                    var header = {id: att.id, name: att.name, show: false, fetch: true, colSize: "col-sm-1"};
+                                    var header = {id: att.code, name: att.name, show: false, fetch: true, colSize: "col-sm-1"};
                                     $scope.model.dictionaryHeaders.push(header);
                                 }
                             });
                         });
                     });
-                });    
+                });
             });
         });
     });
-    
+
     $scope.close = function () {
-        $modalInstance.close($scope.gridColumns);
+        $modalInstance.close($scope.model.dictionaryHeaders);
     };
-    
+
     $scope.showHideColumns = function(gridColumn){
-       
-        if(gridColumn.show){                
-            $scope.hiddenGridColumns--;            
+        if(gridColumn.show){
+            $scope.hiddenGridColumns--;
         }
         else{
-            $scope.hiddenGridColumns++;            
+            $scope.hiddenGridColumns++;
         }
-    };    
+    };
 });
