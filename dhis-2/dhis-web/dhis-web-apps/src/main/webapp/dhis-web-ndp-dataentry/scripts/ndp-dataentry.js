@@ -1,4 +1,3 @@
-
 /* global dhis2, angular, selection, i18n_ajax_login_failed, _ */
 
 dhis2.util.namespace('dhis2.ndpde');
@@ -20,7 +19,7 @@ var batchSize = 50;
 dhis2.ndpde.store = null;
 dhis2.ndpde.metaDataCached = dhis2.ndpde.metaDataCached || false;
 dhis2.ndpde.memoryOnly = $('html').hasClass('ie7') || $('html').hasClass('ie8');
-var adapters = [];    
+var adapters = [];
 if( dhis2.ndpde.memoryOnly ) {
     adapters = [ dhis2.storage.InMemoryAdapter ];
 } else {
@@ -30,7 +29,7 @@ if( dhis2.ndpde.memoryOnly ) {
 dhis2.ndpde.store = new dhis2.storage.Store({
     name: 'dhis2ndpde',
     adapters: [dhis2.storage.IndexedDBAdapter, dhis2.storage.DomSessionStorageAdapter, dhis2.storage.InMemoryAdapter],
-    objectStores: ['dataSets', 'optionSets', 'categoryCombos', 'ouLevels']
+    objectStores: ['dataSets', 'optionSets', 'categoryCombos', 'ouLevels', 'programs']
 });
 
 (function($) {
@@ -46,9 +45,9 @@ dhis2.ndpde.store = new dhis2.storage.Store({
 /**
  * Page init. The order of events is:
  *
- * 1. Load ouwt 
- * 2. Load meta-data (and notify ouwt) 
- * 
+ * 1. Load ouwt
+ * 2. Load meta-data (and notify ouwt)
+ *
  */
 $(document).ready(function()
 {
@@ -133,9 +132,9 @@ function downloadMetaData()
     console.log('Loading required meta-data');
     var def = $.Deferred();
     var promise = def.promise();
-    
+
     promise = promise.then( dhis2.ndpde.store.open );
-    
+
     promise = promise.then( getUserAccessibleDataSets );
     promise = promise.then( getOrgUnitLevels );
     promise = promise.then( getSystemSetting );
@@ -155,16 +154,21 @@ function downloadMetaData()
     promise = promise.then( filterMissingCategoryCombos );
     promise = promise.then( getCategoryCombos );
 
-    promise.done(function() {        
+    //fetch programs
+    promise = promise.then( getMetaPrograms );
+    promise = promise.then( filterMissingPrograms );
+    promise = promise.then( getPrograms );
+
+    promise.done(function() {
         //Enable ou selection after meta-data has downloaded
         $( "#orgUnitTree" ).removeClass( "disable-clicks" );
         dhis2.ndpde.metaDataCached = true;
         dhis2.availability.startAvailabilityCheck();
-        console.log( 'Finished loading meta-data' );        
-        selection.responseReceived(); 
+        console.log( 'Finished loading meta-data' );
+        selection.responseReceived();
     });
 
-    def.resolve();  
+    def.resolve();
 };
 
 function getUserAccessibleDataSets(){
@@ -176,15 +180,15 @@ function getOrgUnitLevels()
     dhis2.ndpde.store.getKeys( 'ouLevels').done(function(res){
         if(res.length > 0){
             return;
-        }        
+        }
         return dhis2.metadata.getMetaObjects('ouLevels', 'organisationUnitLevels', dhis2.ndpde.apiUrl + '/organisationUnitLevels.json', 'fields=id,displayName,level&paging=false', 'idb', dhis2.ndpde.store);
     });
 }
 
-function getSystemSetting(){   
+function getSystemSetting(){
     if(localStorage['SYSTEM_SETTING']){
-       return; 
-    }    
+       return;
+    }
     return dhis2.metadata.getMetaObject(null, 'SYSTEM_SETTING', dhis2.ndpde.apiUrl + '/systemSettings?key=keyUiLocale&key=keyCalendar&key=keyDateFormat&key=multiOrganisationUnitForms', '', 'localStorage', dhis2.ndpde.store);
 }
 
@@ -196,7 +200,7 @@ function filterMissingCategoryCombos( objs ){
     return dhis2.metadata.filterMissingObjIds('categoryCombos', dhis2.ndpde.store, objs);
 }
 
-function getCategoryCombos( ids ){    
+function getCategoryCombos( ids ){
     return dhis2.metadata.getBatches( ids, batchSize, 'categoryCombos', 'categoryCombos', dhis2.ndpde.apiUrl + '/categoryCombos.json', 'paging=false&fields=id,displayName,code,skipTotal,isDefault,categoryOptionCombos[id,displayName,categoryOptions[id,displayName]],categories[id,displayName,code,dimension,dataDimensionType,attributeValues[value,attribute[id,name,valueType,code]],categoryOptions[id,displayName,code]]', 'idb', dhis2.ndpde.store);
 }
 
@@ -208,7 +212,7 @@ function filterMissingDataSets( objs ){
     return dhis2.metadata.filterMissingObjIds('dataSets', dhis2.ndpde.store, objs);
 }
 
-function getDataSets( ids ){    
+function getDataSets( ids ){
     return dhis2.metadata.getBatches( ids, batchSize, 'dataSets', 'dataSets', dhis2.ndpde.apiUrl + '/dataSets.json', 'paging=false&fields=id,periodType,openFuturePeriods,displayName,version,categoryCombo[id],attributeValues[value,attribute[id,name,valueType,code]],organisationUnits[id],sections[id,displayName,description,sortOrder,code,dataElements,greyedFields[dimensionItem],indicators[id,displayName,indicatorType,numerator,denominator,attributeValues[value,attribute[id,name,valueType,code]]]],dataSetElements[id,dataElement[id,code,displayFormName,description,optionSetValue,optionSet[id],attributeValues[value,attribute[id,name,valueType,code]],description,formName,valueType,optionSetValue,optionSet[id],categoryCombo[id]]]', 'idb', dhis2.ndpde.store, '');
 }
 
@@ -220,6 +224,18 @@ function filterMissingOptionSets( objs ){
     return dhis2.metadata.filterMissingObjIds('optionSets', dhis2.ndpde.store, objs);
 }
 
-function getOptionSets( ids ){    
+function getOptionSets( ids ){
     return dhis2.metadata.getBatches( ids, batchSize, 'optionSets', 'optionSets', dhis2.ndpde.apiUrl + '/optionSets.json', 'paging=false&fields=id,displayName,code,version,valueType,attributeValues[value,attribute[id,name,valueType,code]],options[id,displayName,code]', 'idb', dhis2.ndpde.store, dhis2.metadata.processObject);
+}
+
+function getMetaPrograms(){
+    return dhis2.metadata.getMetaObjectIds('programs', dhis2.ndpde.apiUrl + '/programs.json', 'filter=programType:eq:WITHOUT_REGISTRATION&paging=false&fields=id,version');
+}
+
+function filterMissingPrograms( objs ){
+    return dhis2.metadata.filterMissingObjIds('programs', dhis2.ndpde.store, objs);
+}
+
+function getPrograms( ids ){
+    return dhis2.metadata.getBatches( ids, batchSize, 'programs', 'programs', dhis2.ndpde.apiUrl + '/programs.json', 'paging=false&fields=*,categoryCombo[id],attributeValues[value,attribute[id,name,valueType,code]],organisationUnits[id,level],programStages[*,programStageDataElements[id,dataElement[*,attributeValues[value,attribute[id,name,valueType,code]]]]]', 'idb', dhis2.ndpde.store, dhis2.metadata.processObject);
 }
