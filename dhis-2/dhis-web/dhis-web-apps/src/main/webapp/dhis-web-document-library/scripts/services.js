@@ -125,9 +125,11 @@ var docLibraryServices = angular.module('docLibraryServices', ['ngResource'])
             D2StorageService.currentStore.open().done(function(){
                 D2StorageService.currentStore.getAll('programs').done(function(prs){
                     var programs = [];
-                    angular.forEach(prs, function(pr){   
-                        if(pr.organisationUnits.hasOwnProperty( ou.id ) && pr.id && CommonUtils.userHasWriteAccess( 'ACCESSIBLE_PROGRAMS', pr.id)){
-                            programs.push(pr);
+                    angular.forEach(prs, function(pr){
+                        if ( pr.documentFolderType === 'general' || pr.documentFolderType === 'programme' ){
+                            if(pr.organisationUnits.hasOwnProperty( ou.id ) && CommonUtils.userHasWriteAccess( 'ACCESSIBLE_PROGRAMS', pr.id)){
+                                programs.push(pr);
+                            }
                         }
                     });
                     

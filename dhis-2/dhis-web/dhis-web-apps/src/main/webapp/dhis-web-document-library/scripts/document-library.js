@@ -142,7 +142,7 @@ function downloadMetaData()
     promise = promise.then( getOrgUnitLevels );
     promise = promise.then( getSystemSetting );
         
-    //fetch data sets
+    //fetch programs
     promise = promise.then( getMetaPrograms );
     promise = promise.then( filterMissingPrograms );
     promise = promise.then( getPrograms );
