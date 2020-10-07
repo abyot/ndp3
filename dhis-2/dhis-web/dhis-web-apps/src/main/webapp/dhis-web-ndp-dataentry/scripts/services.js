@@ -277,7 +277,7 @@ var ndpDataEntryServices = angular.module('ndpDataEntryServices', ['ngResource']
 })
 
 /* factory to fetch and process programValidations */
-.factory('MetaDataFactory', function($q, $rootScope, NdpStorageService, orderByFilter) {
+.factory('MetaDataFactory', function($q, $rootScope, NdpStorageService, orderByFilter, SessionStorageService) {
 
     return {
         get: function(store, uid){
@@ -307,6 +307,23 @@ var ndpDataEntryServices = angular.module('ndpDataEntryServices', ['ngResource']
             NdpStorageService.currentStore.open().done(function(){
                 NdpStorageService.currentStore.getAll(store).done(function(objs){
                     objs = orderByFilter(objs, '-displayName').reverse();
+
+                    if( store === 'categoryCombos' ){
+                        var ocos = SessionStorageService.get('ACCESSIBLE_OPTION_COMBOS');
+                        angular.forEach(objs, function(obj){
+                            angular.forEach(obj.categoryOptionCombos, function(oco){
+                                var _oco = ocos[oco.id];
+
+                                if ( _oco ){
+                                    oco.dWrite = _oco.dWrite;
+                                    oco.dRead = _oco.dRead;
+                                    oco.write = _oco.write;
+                                    oco.read = _oco.read;
+                                }
+                            });
+                        });
+                    }
+
                     $rootScope.$apply(function(){
                         def.resolve(objs);
                     });

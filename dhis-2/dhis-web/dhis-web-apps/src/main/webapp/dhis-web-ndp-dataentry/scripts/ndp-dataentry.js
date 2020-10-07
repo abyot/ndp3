@@ -136,6 +136,7 @@ function downloadMetaData()
     promise = promise.then( dhis2.ndpde.store.open );
 
     promise = promise.then( getUserAccessibleDataSets );
+    promise = promise.then( getUserAccessibleOptionCombos );
     promise = promise.then( getOrgUnitLevels );
     promise = promise.then( getSystemSetting );
 
@@ -173,6 +174,10 @@ function downloadMetaData()
 
 function getUserAccessibleDataSets(){
     return dhis2.metadata.getMetaObject(null, 'ACCESSIBLE_DATASETS', dhis2.ndpde.apiUrl + '/dataSets.json', 'fields=id,access[data[write]]&paging=false', 'sessionStorage', dhis2.ndpde.store);
+}
+
+function getUserAccessibleOptionCombos(){
+    return dhis2.metadata.getMetaObject(null, 'ACCESSIBLE_OPTION_COMBOS', dhis2.ndpde.apiUrl + '/categoryCombos.json', 'fields=id,categoryOptionCombos[id,categoryOptions[id,access[:all]]]&paging=false', 'sessionStorage', dhis2.ndpde.store, dhis2.metadata.processOptionCombos);
 }
 
 function getOrgUnitLevels()

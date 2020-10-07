@@ -31,6 +31,7 @@
                             <span ng-if="de.optionSetValue">
                                 <ui-select theme="select2"
                                         ng-model="dataValues[de.id][oco.id][aoc.id].value"
+                                        ng-disabled="!aoc.dWrite"
                                         name="foo"
                                         d2-tab-index
                                         tabindex={{tabOrder[de.id][oco.id][aoc.id]}}
@@ -55,6 +56,7 @@
                                         <textarea rows="5"
                                                   name="foo"
                                                   ng-model="dataValues[de.id][oco.id][aoc.id].value"
+                                                  ng-disabled="!aoc.dWrite"
                                                   d2-tab-index
                                                   tabindex={{tabOrder[de.id][oco.id][aoc.id]}}
                                                   tabname="foo"
@@ -67,6 +69,7 @@
                                         <input type="text"
                                                name="foo"
                                                ng-model="dataValues[de.id][oco.id][aoc.id].value"
+                                               ng-disabled="!aoc.dWrite"
                                                d2-tab-index
                                                tabindex={{tabOrder[de.id][oco.id][aoc.id]}}
                                                tabname="foo"
@@ -80,6 +83,7 @@
                                                d2-number-validator
                                                number-type={{de.valueType}}
                                                ng-model="dataValues[de.id][oco.id][aoc.id].value"
+                                               ng-disabled="!aoc.dWrite"
                                                d2-tab-index
                                                tabindex={{tabOrder[de.id][oco.id][aoc.id]}}
                                                tabname="foo"
@@ -94,6 +98,7 @@
                                                d2-number-validator
                                                number-type={{de.valueType}}
                                                ng-model="dataValues[de.id][oco.id][aoc.id].value"
+                                               ng-disabled="!aoc.dWrite"
                                                d2-tab-index
                                                tabindex={{tabOrder[de.id][oco.id][aoc.id]}}
                                                tabname="foo"
@@ -108,6 +113,7 @@
                                                d2-number-validator
                                                number-type={{de.valueType}}
                                                ng-model="dataValues[de.id][oco.id][aoc.id].value"
+                                               ng-disabled="!aoc.dWrite"
                                                d2-tab-index
                                                tabindex={{tabOrder[de.id][oco.id][aoc.id]}}
                                                tabname="foo"
@@ -122,6 +128,7 @@
                                                d2-number-validator
                                                number-type={{de.valueType}}
                                                ng-model="dataValues[de.id][oco.id][aoc.id].value"
+                                               ng-disabled="!aoc.dWrite"
                                                d2-tab-index
                                                tabindex={{tabOrder[de.id][oco.id][aoc.id]}}
                                                tabname="foo"
@@ -136,6 +143,7 @@
                                                d2-number-validator
                                                number-type={{de.valueType}}
                                                ng-model="dataValues[de.id][oco.id][aoc.id].value"
+                                               ng-disabled="!aoc.dWrite"
                                                d2-tab-index
                                                tabindex={{tabOrder[de.id][oco.id][aoc.id]}}
                                                tabname="foo"
@@ -148,6 +156,7 @@
                                         <input type="checkbox"
                                                name="foo"
                                                ng-model="dataValues[de.id][oco.id][aoc.id].value"
+                                               ng-disabled="!aoc.dWrite"
                                                d2-tab-index
                                                tabindex={{tabOrder[de.id][oco.id][aoc.id]}}
                                                tabname="foo"
@@ -161,6 +170,7 @@
                                                d2-number-validator
                                                number-type={{de.valueType}}
                                                ng-model="dataValues[de.id][oco.id][aoc.id].value"
+                                               ng-disabled="!aoc.dWrite"
                                                d2-tab-index
                                                tabindex={{tabOrder[de.id][oco.id][aoc.id]}}
                                                tabname="foo"
@@ -172,6 +182,7 @@
                                     <span ng-switch-when="BOOLEAN">
                                         <ui-select theme="select2"
                                                    ng-model="dataValues[de.id][oco.id][aoc.id].value"
+                                                   ng-disabled="!aoc.dWrite"
                                                    name="foo"
                                                    d2-tab-index
                                                    tabindex={{tabOrder[de.id][oco.id][aoc.id]}}

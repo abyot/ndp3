@@ -87,7 +87,7 @@
                         </tr>
                         <tr>
                             <th></th>
-                            <th class="center" colspan="period.colSpan" ng-repeat="period in model.selectedPeriods" ng-if="period.hasData">
+                            <th class="center" colspan="{{period.colSpan}}" ng-repeat="period in model.selectedPeriods" ng-if="period.hasData">
                                 {{period.displayName}}
                             </th>
                         </tr>
