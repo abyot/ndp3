@@ -3,7 +3,7 @@
 /* global ndpFramework */
 
 
-ndpFramework.controller('SDGController', 
+ndpFramework.controller('SDGController',
     function($scope,
         $translate,
         $modal,
@@ -14,8 +14,9 @@ ndpFramework.controller('SDGController',
         PeriodService,
         MetaDataFactory,
         OrgUnitFactory,
+        OptionComboService,
         Analytics) {
-   
+
     $scope.model = {
         metaDataCached: false,
         data: null,
@@ -43,8 +44,8 @@ ndpFramework.controller('SDGController',
         financialPerformance: true,
         showProjectDetails: false
     };
-    
-    $scope.model.horizontalMenus = [        
+
+    $scope.model.horizontalMenus = [
         {id: 'performance', title: 'sdg_results', order: 3, view: 'components/sdg/performance.html', active: true},
         {id: 'dashboard', title: 'dashboards', order: 4, view: 'components/sdg/dashboard.html'},
         {id: 'library', title: 'library', order: 1, view: 'components/sdg/library.html'}
@@ -61,13 +62,13 @@ ndpFramework.controller('SDGController',
         });
         $scope.selectedOrgUnit = $scope.orgUnits[0] ? $scope.orgUnits[0] : null;
     });
-    
+
     $scope.$watch('model.selectedSdgGoal', function(){
         $scope.model.selectedSdgTarget = null;
         $scope.model.dataElementGroup = [];
         $scope.resetDataView();
         if( angular.isObject($scope.model.selectedSdgGoal) && $scope.model.selectedSdgGoal.id){
-            
+
             $scope.model.selectedDataElementGroupSets = $filter('filter')($scope.model.dataElementGroupSets, {id: $scope.model.selectedSdgGoal.id});
             angular.forEach($scope.model.selectedSdgGoal.dataElementGroups, function(deg){
                 $scope.model.dataElementGroup.push( $filter('filter')($scope.model.dataElementGroups, {id: deg.id})[0] );
@@ -81,9 +82,9 @@ ndpFramework.controller('SDGController',
                     $scope.model.dataElementGroup.push( $filter('filter')($scope.model.dataElementGroups, {id: deg.id})[0] );
                 });
             });
-        }*/        
+        }*/
     });
-    
+
     $scope.$watch('model.selectedSdgTarget', function(){
         $scope.resetDataView();
         $scope.model.dataElementGroup = [];
@@ -95,7 +96,7 @@ ndpFramework.controller('SDGController',
             $scope.getSdgs();
         }
     });
-    
+
     $scope.getSdgs = function(){
         $scope.model.dataElementGroup = [];
         angular.forEach($scope.model.selectedDataElementGroupSets, function(degs){
@@ -104,71 +105,78 @@ ndpFramework.controller('SDGController',
             });
         });
     };
-    
+
     $scope.setSdgGoal = function( goal ){
         if( $scope.model.selectedSdgGoal && $scope.model.selectedSdgGoal.id === goal.id ){
             $scope.model.selectedSdgGoal = null;
         }
         else{
-            $scope.model.selectedSdgGoal = goal; 
+            $scope.model.selectedSdgGoal = goal;
         }
-        
+
         /*if( $scope.model.selectedSdgGoal ){
-            $scope.model.objectives = $filter('filter')($scope.model.dataElementGroupSets, {ndp: $scope.model.selectedMenu.ndp, indicatorGroupSetType: $scope.model.selectedMenu.code, ndpProgramme: $scope.model.selectedNdpProgram.code}, true);            
+            $scope.model.objectives = $filter('filter')($scope.model.dataElementGroupSets, {ndp: $scope.model.selectedMenu.ndp, indicatorGroupSetType: $scope.model.selectedMenu.code, ndpProgramme: $scope.model.selectedNdpProgram.code}, true);
             $scope.model.selectedDataElementGroupSets = angular.copy( $scope.model.objectives );
             $scope.getObjectives();
         }*/
-        
+
     };
-    
-    MetaDataFactory.getAll('dataElementGroups').then(function(dataElementGroups){
 
-        $scope.model.dataElementGroups = dataElementGroups;
-        
-        MetaDataFactory.getAll('dataElementGroupSets').then(function(dataElementGroupSets){
-            
-            $scope.model.dataElementGroupSets = dataElementGroupSets;
+    OptionComboService.getBtaDimensions().then(function( btaDimensions ){
 
-            $scope.model.periods = PeriodService.getPeriods($scope.model.selectedPeriodType, $scope.model.periodOffset, $scope.model.openFuturePeriods);
+        if( btaDimensions.length !== 3 || !btaDimensions){
+            NotificationService.showNotifcationDialog($translate.instant("error"), $translate.instant("invalid_bta_dimensions"));
+            return;
+        }
 
-            var selectedPeriodNames = ['2020/21', '2021/22', '2022/23', '2023/24', '2024/25'];
+        $scope.model.baseLineTargetActualDimensions = $.map(btaDimensions, function(d){return d.id;});
 
-            angular.forEach($scope.model.periods, function(pe){
-                if(selectedPeriodNames.indexOf(pe.displayName) > -1 ){
-                   $scope.model.selectedPeriods.push(pe);
-                } 
-            });
+        MetaDataFactory.getAll('dataElementGroups').then(function(dataElementGroups){
 
-            $scope.model.selectedMenu = SelectedMenuService.getSelectedMenu();
-    
-            if( $scope.model.selectedMenu && $scope.model.selectedMenu.id && $scope.model.selectedMenu.id === 'SDG'){
-                var ctxt = $scope.model.selectedMenu.id.toLowerCase();                
-                $scope.model.sdgGoals = [];
-                angular.forEach($scope.model.dataElementGroupSets, function(degs){
-                    if( degs.indicatorGroupSetType === ctxt && degs.code.indexOf('sdg_') !== -1 ){
-                        var obj = degs;
-                        if( degs.code.indexOf('sdg_') !== -1 ){
-                            obj.order = parseInt( degs.code.substring(4, degs.code.length) );
-                        }
-                        $scope.model.sdgGoals.push( obj );
+            $scope.model.dataElementGroups = dataElementGroups;
+
+            MetaDataFactory.getAll('dataElementGroupSets').then(function(dataElementGroupSets){
+
+                $scope.model.dataElementGroupSets = dataElementGroupSets;
+
+                $scope.model.periods = PeriodService.getPeriods($scope.model.selectedPeriodType, $scope.model.periodOffset, $scope.model.openFuturePeriods);
+
+                var selectedPeriodNames = ['2020/21', '2021/22', '2022/23', '2023/24', '2024/25'];
+
+                angular.forEach($scope.model.periods, function(pe){
+                    if(selectedPeriodNames.indexOf(pe.displayName) > -1 ){
+                       $scope.model.selectedPeriods.push(pe);
                     }
                 });
-                
-                $scope.model.sdgGoals = orderByFilter( $scope.model.sdgGoals, '-order').reverse();
-                $scope.model.selectedDataElementGroupSets = angular.copy( $scope.model.sdgGoals );
-                if( $scope.model.sdgGoals && $scope.model.sdgGoals.length === 1 ){
-                    $scope.model.selectedSdgGoal = $scope.model.sdgGoals[0];
-                }
-                else{
-                    $scope.getSdgs();
-                }
-            }
 
-            $scope.model.baseLineTargetActualDimensions = ['bqIaasqpTas', 'Px8Lqkxy2si', 'HKtncMjp06U'];
+                $scope.model.selectedMenu = SelectedMenuService.getSelectedMenu();
 
+                if( $scope.model.selectedMenu && $scope.model.selectedMenu.id && $scope.model.selectedMenu.id === 'SDG'){
+                    var ctxt = $scope.model.selectedMenu.id.toLowerCase();
+                    $scope.model.sdgGoals = [];
+                    angular.forEach($scope.model.dataElementGroupSets, function(degs){
+                        if( degs.indicatorGroupSetType === ctxt && degs.code.indexOf('sdg_') !== -1 ){
+                            var obj = degs;
+                            if( degs.code.indexOf('sdg_') !== -1 ){
+                                obj.order = parseInt( degs.code.substring(4, degs.code.length) );
+                            }
+                            $scope.model.sdgGoals.push( obj );
+                        }
+                    });
+
+                    $scope.model.sdgGoals = orderByFilter( $scope.model.sdgGoals, '-order').reverse();
+                    $scope.model.selectedDataElementGroupSets = angular.copy( $scope.model.sdgGoals );
+                    if( $scope.model.sdgGoals && $scope.model.sdgGoals.length === 1 ){
+                        $scope.model.selectedSdgGoal = $scope.model.sdgGoals[0];
+                    }
+                    else{
+                        $scope.getSdgs();
+                    }
+                }
+            });
         });
     });
-    
+
     $scope.getPeriods = function(mode){
         if( mode === 'NXT'){
             $scope.model.periodOffset = $scope.model.periodOffset + 1;
@@ -177,22 +185,22 @@ ndpFramework.controller('SDGController',
         else{
             $scope.model.periodOffset = $scope.model.periodOffset - 1;
             $scope.model.periods = PeriodService.getPeriods($scope.model.selectedPeriodType, $scope.model.periodOffset, $scope.model.openFuturePeriods);
-        }    
+        }
     };
-    
+
     $scope.getAnalyticsData = function(){
 
         /*$scope.model.data = null;
         var analyticsUrl = '';
-        
+
         if( !$scope.selectedOrgUnit || !$scope.selectedOrgUnit.id ){
             NotificationService.showNotifcationDialog($translate.instant("error"), $translate.instant("missing_vote"));
         }
-        
+
         if( $scope.model.dataElementGroup.length === 0 || !$scope.model.dataElementGroup ){
             NotificationService.showNotifcationDialog($translate.instant("error"), $translate.instant("missing_goal"));
         }
-        
+
         if( $scope.model.dataElementGroup && $scope.model.dataElementGroup.length > 0 && $scope.model.selectedPeriods.length > 0){
             analyticsUrl += '&filter=ou:'+ $scope.selectedOrgUnit.id +'&displayProperty=NAME&includeMetadataDetails=true';
             analyticsUrl += '&dimension=Duw5yep8Vae:' + $.map($scope.model.baseLineTargetActualDimensions, function(dm){return dm;}).join(';');
@@ -224,7 +232,7 @@ ndpFramework.controller('SDGController',
                             colSpan++;
                             $scope.model.dataHeaders.push({periodId: pe.id, dimensionId: dm, dimension: 'Duw5yep8Vae'});
                         }
-                    });                    
+                    });
                     pe.colSpan = colSpan;
                 });
 
@@ -237,10 +245,10 @@ ndpFramework.controller('SDGController',
                     $scope.model.finalData = [];
                     var currRow = [], parsedRow = [];
 
-                    angular.forEach($scope.model.selectedDataElementGroupSets, function(degs){                        
+                    angular.forEach($scope.model.selectedDataElementGroupSets, function(degs){
                         var groupSet = {val: degs.displayName, span: 0};
                         currRow.push(groupSet);
-                        
+
                         var generateRow = function(group, deg){
                             angular.forEach(deg.dataElements, function(de){
                                 groupSet.span++;
@@ -254,7 +262,7 @@ ndpFramework.controller('SDGController',
                                 currRow = [];
                             });
                         };
-                        
+
                         angular.forEach(degs.dataElementGroups, function(deg){
                             if( $scope.model.selectedSdgTarget && $scope.model.selectedSdgTarget.id ){
                                 if ( deg.id === $scope.model.selectedSdgTarget.id ){
@@ -277,7 +285,7 @@ ndpFramework.controller('SDGController',
             });
         }*/
     };
-    
+
     $scope.showOrgUnitTree = function(){
         var modalInstance = $modal.open({
             templateUrl: 'components/outree/orgunit-tree.html',
@@ -297,15 +305,15 @@ ndpFramework.controller('SDGController',
                 $scope.selectedOrgUnit = selectedOu;
                 $scope.resetDataView();
             }
-        }); 
+        });
     };
-    
+
     $scope.filterData = function(header, dataElement){
         if(!header || !$scope.model.data || !header.periodId || !header.dimensionId || !dataElement) return;
         var res = $filter('filter')($scope.model.data, {dx: dataElement, Duw5yep8Vae: header.dimensionId, pe: header.periodId})[0];
-        return res && res.value ? res.value : '';        
+        return res && res.value ? res.value : '';
     };
-    
+
     $scope.exportData = function ( name ) {
         var blob = new Blob([document.getElementById('exportTable').innerHTML], {
             type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=utf-8"
@@ -317,8 +325,8 @@ ndpFramework.controller('SDGController',
         }
         saveAs(blob, reportName);
     };
-    
-    $scope.getIndicatorDictionary = function(item) {        
+
+    $scope.getIndicatorDictionary = function(item) {
         var modalInstance = $modal.open({
             templateUrl: 'components/dictionary/details-modal.html',
             controller: 'DictionaryDetailsController',
@@ -329,11 +337,11 @@ ndpFramework.controller('SDGController',
             }
         });
 
-        modalInstance.result.then(function () {            
-            
+        modalInstance.result.then(function () {
+
         });
     };
-    
+
     $scope.resetDataView = function(){
         $scope.model.data = null;
         $scope.model.reportReady = false;

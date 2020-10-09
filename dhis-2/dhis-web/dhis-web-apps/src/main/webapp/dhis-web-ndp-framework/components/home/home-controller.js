@@ -9,7 +9,7 @@ ndpFramework.controller('HomeController',
                 $filter,
                 SelectedMenuService,
                 MetaDataFactory) {
-   
+
     $scope.model = {
         metaDataCached: false,
         dataElementGroups: [],
@@ -100,23 +100,23 @@ ndpFramework.controller('HomeController',
             });
         });
     });
-   
+
     //expand/collapse of navigation menu
     $scope.expandCollapse = function(menu) {
-        
-        if( menu.hasChildren ){            
+
+        if( menu.hasChildren ){
             menu.show = !menu.show;
-            
+
             //Get children menu
             angular.forEach(menu.children, function(child){
-                
+
                 if( menu.id === 'NDP'){
-                
+
                     var objectives = $filter('filter')($scope.model.dataElementGroupSets, {ndp: child.code, indicatorGroupSetType: 'objective'}, true);
                     var goals = $filter('filter')($scope.model.dataElementGroupSets, {ndp: child.code, indicatorGroupSetType: 'goal'}, true);
                     var programs = $filter('filter')($scope.model.optionSets, {ndp: child.code, code: 'program'}, true);
-                    var interventions = $filter('filter')($scope.model.dataElementGroupSets, {ndp: child.code, indicatorGroupSetType: 'intervention'}, true);
-                    
+                    //var interventions = $filter('filter')($scope.model.dataElementGroupSets, {ndp: child.code, indicatorGroupSetType: 'intervention'}, true);
+
                     child.children = [];
                     if( objectives.length > 0 ){
                         child.hasChildren = true;
@@ -125,7 +125,7 @@ ndpFramework.controller('HomeController',
                             domain: 'OBJ',
                             code: 'objective',
                             ndp: child.code,
-                            order: 1,                            
+                            order: 1,
                             displayName: $translate.instant('objectives'),
                             children: []
                         } );
@@ -141,7 +141,7 @@ ndpFramework.controller('HomeController',
                             order: 0,
                             displayName: $translate.instant('goal'),
                             children: []
-                        } ); 
+                        } );
                     }
 
                     if( programs.length > 0 ){
@@ -155,8 +155,8 @@ ndpFramework.controller('HomeController',
                             displayName: $translate.instant('programmes'),
                             children: []
                         } );
-                        
-                        child.children.push( {
+
+                        /*child.children.push( {
                             id: child.code + '-PRJ',
                             domain: 'PRJ',
                             code: 'project',
@@ -165,23 +165,23 @@ ndpFramework.controller('HomeController',
                             displayName: $translate.instant('projects'),
                             chilren: [],
                             show: false
-                        } );
+                        } );*/
                     }
-                    
-                    if( interventions.length > 0 ){
+
+                    /*if( interventions.length > 0 ){
                         child.hasChildren = true;
                         child.children.push( {
                             id: child.code + '-INV',
                             domain: 'INV',
-                            code: 'intervention',                            
+                            code: 'intervention',
                             ndp: child.code,
                             order: 4,
                             displayName: $translate.instant('interventions'),
                             children: []
                         } );
-                    }
+                    }*/
                 }
-                           
+
             });
         }
         else{
@@ -197,7 +197,7 @@ ndpFramework.controller('HomeController',
             $scope.model.selectedMenu = menu;
         }
         SelectedMenuService.setSelectedMenu($scope.model.selectedMenu);
-        
+
         $scope.$broadcast('MENU', $scope.model.selectedMenu);
     };
 

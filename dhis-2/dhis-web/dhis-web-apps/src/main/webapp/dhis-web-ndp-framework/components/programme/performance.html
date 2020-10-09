@@ -18,6 +18,21 @@
             </div>
             <div class="row small-vertical-spacing">
                 <div class="col-sm-2">
+                    {{'sub-programmes'| translate}}
+                </div>
+                <div class="col-sm-10">
+                    <ui-select ng-model="model.selectedSubProgram"
+                               theme="select2"
+                               style="width:100%;">
+                        <ui-select-match allow-clear="true" class="form-control-ui-select" placeholder="{{model.subPrograms && model.subPrograms.length > 0 ? 'all' : 'empty'| translate}}">{{$select.selected.displayName|| $select.selected}}</ui-select-match>
+                        <ui-select-choices repeat="degs in model.subPrograms | filter: $select.search | limitTo:maxOptionSize | orderBy: ['displayName']">
+                            <span ng-bind-html="degs.displayName | highlight: $select.search"></span>
+                        </ui-select-choices>
+                    </ui-select>
+                </div>
+            </div>
+            <div class="row small-vertical-spacing">
+                <div class="col-sm-2">
                     {{'performance'| translate}}
                 </div>
                 <div class="col-sm-10">
@@ -66,7 +81,7 @@
                         <th></th>
                         <th></th>
                         <th></th>
-                        <th class="center" colspan="period.colSpan" ng-repeat="period in model.selectedPeriods" ng-if="period.hasData">
+                        <th class="center" colspan="{{period.colSpan}}" ng-repeat="period in model.selectedPeriods" ng-if="period.hasData">
                             {{period.displayName}}
                         </th>
                     </tr>

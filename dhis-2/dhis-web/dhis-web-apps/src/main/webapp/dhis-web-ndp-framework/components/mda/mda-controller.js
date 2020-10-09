@@ -3,7 +3,7 @@
 /* global ndpFramework */
 
 
-ndpFramework.controller('MDAController', 
+ndpFramework.controller('MDAController',
         function($scope,
         $translate,
         $modal,
@@ -15,8 +15,9 @@ ndpFramework.controller('MDAController',
         MetaDataFactory,
         OrgUnitFactory,
         Analytics,
+        OptionComboService,
         OrgUnitGroupSetService) {
-    
+
     $scope.model = {
         metaDataCached: false,
         data: null,
@@ -40,13 +41,13 @@ ndpFramework.controller('MDAController',
         openFuturePeriods: 10,
         selectedPeriodType: 'FinancialJuly'
     };
-    
-    $scope.model.horizontalMenus = [        
+
+    $scope.model.horizontalMenus = [
         {id: 'performance', title: 'results', order: 3, view: 'components/mda/performance.html', active: true},
         {id: 'dashboard', title: 'dashboards', order: 4, view: 'components/mda/dashboard.html'},
         {id: 'library', title: 'library', order: 1, view: 'components/mda/library.html'}
     ];
-    
+
     //Get orgunits for the logged in user
     OrgUnitFactory.getViewTreeRoot().then(function(response) {
         $scope.orgUnits = response.organisationUnits;
@@ -58,7 +59,7 @@ ndpFramework.controller('MDAController',
         });
         $scope.selectedOrgUnit = null;
     });
-    
+
     $scope.$watch('selectedOrgUnit', function(){
         if( angular.isObject($scope.selectedOrgUnit) && $scope.selectedOrgUnit.id){
             OrgUnitGroupSetService.getByVote( $scope.selectedOrgUnit.id ).then(function(data){
@@ -67,7 +68,7 @@ ndpFramework.controller('MDAController',
             });
         }
     });
-    
+
     $scope.$watch('model.selectedObjective', function(){
         $scope.model.dataElementGroup = [];
         $scope.resetDataView();
@@ -108,46 +109,52 @@ ndpFramework.controller('MDAController',
             });
         }
     });
-    
+
     OrgUnitGroupSetService.getMdas().then(function(mdas){
-        $scope.model.mdas = mdas;        
+        $scope.model.mdas = mdas;
         MetaDataFactory.getAll('optionSets').then(function(optionSets){
-        
+
             $scope.model.optionSets = optionSets;
 
             angular.forEach(optionSets, function(optionSet){
                 $scope.model.optionSetsById[optionSet.id] = optionSet;
             });
 
-            MetaDataFactory.getAll('dataElementGroups').then(function(dataElementGroups){
+            OptionComboService.getBtaDimensions().then(function( btaDimensions ){
 
-                $scope.model.dataElementGroups = dataElementGroups;
+                if( btaDimensions.length !== 3 || !btaDimensions){
+                    NotificationService.showNotifcationDialog($translate.instant("error"), $translate.instant("invalid_bta_dimensions"));
+                    return;
+                }
 
-                MetaDataFactory.getAll('dataElementGroupSets').then(function(dataElementGroupSets){
+                $scope.model.baseLineTargetActualDimensions = $.map(btaDimensions, function(d){return d.id;});
 
-                    $scope.model.dataElementGroupSets = dataElementGroupSets;
+                MetaDataFactory.getAll('dataElementGroups').then(function(dataElementGroups){
 
-                    $scope.model.selectedMenu = SelectedMenuService.getSelectedMenu();
+                    $scope.model.dataElementGroups = dataElementGroups;
 
-                    $scope.model.periods = PeriodService.getPeriods($scope.model.selectedPeriodType, $scope.model.periodOffset, $scope.model.openFuturePeriods);
+                    MetaDataFactory.getAll('dataElementGroupSets').then(function(dataElementGroupSets){
 
-                    var selectedPeriodNames = ['2020/21', '2021/22', '2022/23', '2023/24', '2024/25'];
+                        $scope.model.dataElementGroupSets = dataElementGroupSets;
 
-                    angular.forEach($scope.model.periods, function(pe){
-                        if(selectedPeriodNames.indexOf(pe.displayName) > -1 ){
-                           $scope.model.selectedPeriods.push(pe);
-                        } 
+                        $scope.model.selectedMenu = SelectedMenuService.getSelectedMenu();
+
+                        $scope.model.periods = PeriodService.getPeriods($scope.model.selectedPeriodType, $scope.model.periodOffset, $scope.model.openFuturePeriods);
+
+                        var selectedPeriodNames = ['2020/21', '2021/22', '2022/23', '2023/24', '2024/25'];
+
+                        angular.forEach($scope.model.periods, function(pe){
+                            if(selectedPeriodNames.indexOf(pe.displayName) > -1 ){
+                               $scope.model.selectedPeriods.push(pe);
+                            }
+                        });
                     });
-
-                    $scope.model.baseLineTargetActualDimensions = ['bqIaasqpTas', 'Px8Lqkxy2si', 'HKtncMjp06U'];
-
                 });
             });
-
         });
-        
+
     });
-    
+
     $scope.getObjectives = function(){
         $scope.model.objectives = [];
         $scope.model.dataElementGroup = [];
@@ -159,13 +166,13 @@ ndpFramework.controller('MDAController',
                 $scope.model.dataElementGroup.push( $filter('filter')($scope.model.dataElementGroups, {id: deg.id})[0] );
             });
         });
-    };    
-    
+    };
+
     $scope.getInterventions = function(){
         $scope.model.selectedDataElementGroupSets = [];
         $scope.model.objectives = [];
         $scope.model.dataElementGroup = [];
-        
+
         if( $scope.model.selectedVote && $scope.model.selectedVote.dataSets.length > 0 ){
             var groupSetIds = [];
             angular.forEach($scope.model.selectedVote.dataSets,function(ds){
@@ -179,20 +186,20 @@ ndpFramework.controller('MDAController',
                     });
                 });
             });
-            
+
             angular.forEach(groupSetIds,function(groupSetId){
                 $scope.model.selectedDataElementGroupSets.push( $filter('filter')($scope.model.dataElementGroupSets, {id: groupSetId})[0] );
             });
-            
+
             $scope.model.selectedDataElementGroupSets = $filter('filter')($scope.model.selectedDataElementGroupSets, {indicatorGroupSetType: 'intervention'}, true);
-            
+
             $scope.getObjectives();
-            
+
             //var goals = $filter('filter')($scope.model.selectedDataElementGroupSets, {indicatorGroupSetType: 'goal'}, true);
             //var objectives = $filter('filter')($scope.model.selectedDataElementGroupSets, {indicatorGroupSetType: 'objective'}, true);
-        }        
+        }
     };
-    
+
     $scope.resetView = function(horizontalMenu){
         $scope.model.activeHorizontalMenu = horizontalMenu;
         $scope.model.dataElementGroup = [];
@@ -203,7 +210,7 @@ ndpFramework.controller('MDAController',
         $scope.model.selectedObjective = null;
         $scope.resetDataView();
     };
-    
+
     $scope.resetDataView = function(){
         $scope.model.data = null;
         $scope.model.reportReady = false;
@@ -219,22 +226,22 @@ ndpFramework.controller('MDAController',
         else{
             $scope.model.periodOffset = $scope.model.periodOffset - 1;
             $scope.model.periods = PeriodService.getPeriods($scope.model.selectedPeriodType, $scope.model.periodOffset, $scope.model.openFuturePeriods);
-        }    
+        }
     };
-    
+
     $scope.getAnalyticsData = function(){
-        
+
         $scope.model.data = null;
         var analyticsUrl = '';
-        
+
         if( !$scope.selectedOrgUnit || !$scope.selectedOrgUnit.id ){
             NotificationService.showNotifcationDialog($translate.instant("error"), $translate.instant("missing_vote"));
         }
-        
+
         if( $scope.model.dataElementGroup.length === 0 || !$scope.model.dataElementGroup ){
             NotificationService.showNotifcationDialog($translate.instant("error"), $translate.instant("missing_invervention"));
         }
-        
+
         if( $scope.model.dataElementGroup && $scope.model.dataElementGroup.length > 0 && $scope.model.selectedPeriods.length > 0){
             analyticsUrl += '&filter=ou:'+ $scope.selectedOrgUnit.id +'&displayProperty=NAME&includeMetadataDetails=true';
             analyticsUrl += '&dimension=Duw5yep8Vae:' + $.map($scope.model.baseLineTargetActualDimensions, function(dm){return dm;}).join(';');
@@ -266,7 +273,7 @@ ndpFramework.controller('MDAController',
                             colSpan++;
                             $scope.model.dataHeaders.push({periodId: pe.id, dimensionId: dm, dimension: 'Duw5yep8Vae'});
                         }
-                    });                    
+                    });
                     pe.colSpan = colSpan;
                 });
 
@@ -279,10 +286,10 @@ ndpFramework.controller('MDAController',
                     $scope.model.finalData = [];
                     var currRow = [], parsedRow = [];
 
-                    angular.forEach($scope.model.selectedDataElementGroupSets, function(degs){                        
+                    angular.forEach($scope.model.selectedDataElementGroupSets, function(degs){
                         var groupSet = {val: degs.displayName, span: 0};
                         currRow.push(groupSet);
-                        
+
                         var generateRow = function(group, deg){
                             angular.forEach(deg.dataElements, function(de){
                                 groupSet.span++;
@@ -296,7 +303,7 @@ ndpFramework.controller('MDAController',
                                 currRow = [];
                             });
                         };
-                        
+
                         angular.forEach(degs.dataElementGroups, function(deg){
                             if( $scope.model.selectedKra && $scope.model.selectedKra.id ){
                                 if ( deg.id === $scope.model.selectedKra.id ){
@@ -319,7 +326,7 @@ ndpFramework.controller('MDAController',
             });
         }
     };
-    
+
     $scope.showOrgUnitTree = function(){
         var modalInstance = $modal.open({
             templateUrl: 'components/outree/orgunit-tree.html',
@@ -342,15 +349,15 @@ ndpFramework.controller('MDAController',
                 $scope.selectedOrgUnit = selectedOu;
                 $scope.resetDataView();
             }
-        }); 
+        });
     };
-    
+
     $scope.filterData = function(header, dataElement){
         if(!header || !$scope.model.data || !header.periodId || !header.dimensionId || !dataElement) return;
         var res = $filter('filter')($scope.model.data, {dx: dataElement, Duw5yep8Vae: header.dimensionId, pe: header.periodId})[0];
-        return res && res.value ? res.value : '';        
+        return res && res.value ? res.value : '';
     };
-    
+
     $scope.exportData = function ( name ) {
         var blob = new Blob([document.getElementById('exportTable').innerHTML], {
             type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=utf-8"
@@ -362,8 +369,8 @@ ndpFramework.controller('MDAController',
         }
         saveAs(blob, reportName);
     };
-    
-    $scope.getIndicatorDictionary = function(item) {        
+
+    $scope.getIndicatorDictionary = function(item) {
         var modalInstance = $modal.open({
             templateUrl: 'components/dictionary/details-modal.html',
             controller: 'DictionaryDetailsController',
@@ -374,8 +381,8 @@ ndpFramework.controller('MDAController',
             }
         });
 
-        modalInstance.result.then(function () {            
-            
+        modalInstance.result.then(function () {
+
         });
     };
 });

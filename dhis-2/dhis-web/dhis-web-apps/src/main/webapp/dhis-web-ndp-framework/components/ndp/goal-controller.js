@@ -3,7 +3,7 @@
 /* global ndpFramework */
 
 
-ndpFramework.controller('GoalController', 
+ndpFramework.controller('GoalController',
     function($scope,
         $translate,
         $modal,
@@ -14,8 +14,9 @@ ndpFramework.controller('GoalController',
         PeriodService,
         MetaDataFactory,
         OrgUnitFactory,
+        OptionComboService,
         Analytics) {
-   
+
     $scope.model = {
         metaDataCached: false,
         data: null,
@@ -55,7 +56,7 @@ ndpFramework.controller('GoalController',
         });
         $scope.selectedOrgUnit = $scope.orgUnits[0] ? $scope.orgUnits[0] : null;
     });
-    
+
     $scope.$watch('model.selectedGoal', function(){
         $scope.model.selectedKra = null;
         $scope.model.dataElementGroup = [];
@@ -73,9 +74,9 @@ ndpFramework.controller('GoalController',
                     $scope.model.dataElementGroup.push( $filter('filter')($scope.model.dataElementGroups, {id: deg.id})[0] );
                 });
             });
-        }        
+        }
     });
-    
+
     $scope.$watch('model.selectedKra', function(){
         $scope.resetDataView();
         $scope.model.dataElementGroup = [];
@@ -87,7 +88,7 @@ ndpFramework.controller('GoalController',
             $scope.getGoals();
         }
     });
-    
+
     $scope.getGoals = function(){
         $scope.model.dataElementGroup = [];
         angular.forEach($scope.model.selectedDataElementGroupSets, function(degs){
@@ -96,43 +97,50 @@ ndpFramework.controller('GoalController',
             });
         });
     };
-    
-    MetaDataFactory.getAll('dataElementGroups').then(function(dataElementGroups){
 
-        $scope.model.dataElementGroups = dataElementGroups;
-        
-        MetaDataFactory.getAll('dataElementGroupSets').then(function(dataElementGroupSets){
-            
-            $scope.model.dataElementGroupSets = dataElementGroupSets;
+    OptionComboService.getBtaDimensions().then(function( btaDimensions ){
 
-            $scope.model.periods = PeriodService.getPeriods($scope.model.selectedPeriodType, $scope.model.periodOffset, $scope.model.openFuturePeriods);
+        if( btaDimensions.length !== 3 || !btaDimensions){
+            NotificationService.showNotifcationDialog($translate.instant("error"), $translate.instant("invalid_bta_dimensions"));
+            return;
+        }
 
-            var selectedPeriodNames = ['2020/21', '2021/22', '2022/23', '2023/24', '2024/25'];
+        $scope.model.baseLineTargetActualDimensions = $.map(btaDimensions, function(d){return d.id;});
 
-            angular.forEach($scope.model.periods, function(pe){
-                if(selectedPeriodNames.indexOf(pe.displayName) > -1 ){
-                   $scope.model.selectedPeriods.push(pe);
-                } 
+        MetaDataFactory.getAll('dataElementGroups').then(function(dataElementGroups){
+
+            $scope.model.dataElementGroups = dataElementGroups;
+
+            MetaDataFactory.getAll('dataElementGroupSets').then(function(dataElementGroupSets){
+
+                $scope.model.dataElementGroupSets = dataElementGroupSets;
+
+                $scope.model.periods = PeriodService.getPeriods($scope.model.selectedPeriodType, $scope.model.periodOffset, $scope.model.openFuturePeriods);
+
+                var selectedPeriodNames = ['2020/21', '2021/22', '2022/23', '2023/24', '2024/25'];
+
+                angular.forEach($scope.model.periods, function(pe){
+                    if(selectedPeriodNames.indexOf(pe.displayName) > -1 ){
+                       $scope.model.selectedPeriods.push(pe);
+                    }
+                });
+
+                $scope.model.selectedMenu = SelectedMenuService.getSelectedMenu();
+
+                if( $scope.model.selectedMenu && $scope.model.selectedMenu.ndp && $scope.model.selectedMenu.code ){
+                    $scope.model.goals = $filter('filter')($scope.model.dataElementGroupSets, {ndp: $scope.model.selectedMenu.ndp, indicatorGroupSetType: $scope.model.selectedMenu.code }, true);
+                    $scope.model.selectedDataElementGroupSets = angular.copy( $scope.model.goals );
+                    if( $scope.model.goals && $scope.model.goals.length === 1 ){
+                        $scope.model.selectedGoal = $scope.model.goals[0];
+                    }
+                    else{
+                        $scope.getGoals();
+                    }
+                }
             });
-
-            $scope.model.selectedMenu = SelectedMenuService.getSelectedMenu();
-    
-            if( $scope.model.selectedMenu && $scope.model.selectedMenu.ndp && $scope.model.selectedMenu.code ){  
-                $scope.model.goals = $filter('filter')($scope.model.dataElementGroupSets, {ndp: $scope.model.selectedMenu.ndp, indicatorGroupSetType: $scope.model.selectedMenu.code }, true);
-                $scope.model.selectedDataElementGroupSets = angular.copy( $scope.model.goals );
-                if( $scope.model.goals && $scope.model.goals.length === 1 ){
-                    $scope.model.selectedGoal = $scope.model.goals[0];
-                }
-                else{
-                    $scope.getGoals();
-                }
-            }
-
-            $scope.model.baseLineTargetActualDimensions = ['bqIaasqpTas', 'Px8Lqkxy2si', 'HKtncMjp06U'];
-
         });
     });
-    
+
     $scope.getPeriods = function(mode){
         if( mode === 'NXT'){
             $scope.model.periodOffset = $scope.model.periodOffset + 1;
@@ -141,22 +149,22 @@ ndpFramework.controller('GoalController',
         else{
             $scope.model.periodOffset = $scope.model.periodOffset - 1;
             $scope.model.periods = PeriodService.getPeriods($scope.model.selectedPeriodType, $scope.model.periodOffset, $scope.model.openFuturePeriods);
-        }    
+        }
     };
-    
+
     $scope.getAnalyticsData = function(){
 
         $scope.model.data = null;
         var analyticsUrl = '';
-        
+
         if( !$scope.selectedOrgUnit || !$scope.selectedOrgUnit.id ){
             NotificationService.showNotifcationDialog($translate.instant("error"), $translate.instant("missing_vote"));
         }
-        
+
         if( $scope.model.dataElementGroup.length === 0 || !$scope.model.dataElementGroup ){
             NotificationService.showNotifcationDialog($translate.instant("error"), $translate.instant("missing_goal"));
         }
-        
+
         if( $scope.model.dataElementGroup && $scope.model.dataElementGroup.length > 0 && $scope.model.selectedPeriods.length > 0){
             analyticsUrl += '&filter=ou:'+ $scope.selectedOrgUnit.id +'&displayProperty=NAME&includeMetadataDetails=true';
             analyticsUrl += '&dimension=Duw5yep8Vae:' + $.map($scope.model.baseLineTargetActualDimensions, function(dm){return dm;}).join(';');
@@ -188,7 +196,7 @@ ndpFramework.controller('GoalController',
                             colSpan++;
                             $scope.model.dataHeaders.push({periodId: pe.id, dimensionId: dm, dimension: 'Duw5yep8Vae'});
                         }
-                    });                    
+                    });
                     pe.colSpan = colSpan;
                 });
 
@@ -201,10 +209,10 @@ ndpFramework.controller('GoalController',
                     $scope.model.finalData = [];
                     var currRow = [], parsedRow = [];
 
-                    angular.forEach($scope.model.selectedDataElementGroupSets, function(degs){                        
+                    angular.forEach($scope.model.selectedDataElementGroupSets, function(degs){
                         var groupSet = {val: degs.displayName, span: 0};
                         currRow.push(groupSet);
-                        
+
                         var generateRow = function(group, deg){
                             angular.forEach(deg.dataElements, function(de){
                                 groupSet.span++;
@@ -218,7 +226,7 @@ ndpFramework.controller('GoalController',
                                 currRow = [];
                             });
                         };
-                        
+
                         angular.forEach(degs.dataElementGroups, function(deg){
                             if( $scope.model.selectedKra && $scope.model.selectedKra.id ){
                                 if ( deg.id === $scope.model.selectedKra.id ){
@@ -241,7 +249,7 @@ ndpFramework.controller('GoalController',
             });
         }
     };
-    
+
     $scope.showOrgUnitTree = function(){
         var modalInstance = $modal.open({
             templateUrl: 'components/outree/orgunit-tree.html',
@@ -264,15 +272,15 @@ ndpFramework.controller('GoalController',
                 $scope.selectedOrgUnit = selectedOu;
                 $scope.resetDataView();
             }
-        }); 
+        });
     };
-    
+
     $scope.filterData = function(header, dataElement){
         if(!header || !$scope.model.data || !header.periodId || !header.dimensionId || !dataElement) return;
         var res = $filter('filter')($scope.model.data, {dx: dataElement, Duw5yep8Vae: header.dimensionId, pe: header.periodId})[0];
-        return res && res.value ? res.value : '';        
+        return res && res.value ? res.value : '';
     };
-    
+
     $scope.exportData = function ( name ) {
         var blob = new Blob([document.getElementById('exportTable').innerHTML], {
             type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=utf-8"
@@ -284,8 +292,8 @@ ndpFramework.controller('GoalController',
         }
         saveAs(blob, reportName);
     };
-    
-    $scope.getIndicatorDictionary = function(item) {        
+
+    $scope.getIndicatorDictionary = function(item) {
         var modalInstance = $modal.open({
             templateUrl: 'components/dictionary/details-modal.html',
             controller: 'DictionaryDetailsController',
@@ -296,11 +304,11 @@ ndpFramework.controller('GoalController',
             }
         });
 
-        modalInstance.result.then(function () {            
-            
+        modalInstance.result.then(function () {
+
         });
     };
-    
+
     $scope.resetDataView = function(){
         $scope.model.data = null;
         $scope.model.reportReady = false;

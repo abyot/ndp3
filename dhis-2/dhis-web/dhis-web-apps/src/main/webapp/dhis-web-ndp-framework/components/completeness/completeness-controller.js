@@ -13,9 +13,10 @@ ndpFramework.controller('CompletenessController',
                 OrgUnitFactory,
                 MetaDataFactory,
                 NotificationService,
+                OptionComboService,
                 CommonUtils,
                 Analytics) {
-   
+
     $scope.model = {
         metaDataCached: false,
         dataElementGroups: [],
@@ -33,7 +34,7 @@ ndpFramework.controller('CompletenessController',
         openFuturePeriods: 10,
         selectedPeriodType: 'FinancialJuly'
     };
-             
+
     //Get orgunits for the logged in user
     OrgUnitFactory.getViewTreeRoot().then(function(response) {
         $scope.orgUnits = response.organisationUnits;
@@ -45,7 +46,7 @@ ndpFramework.controller('CompletenessController',
         });
         $scope.selectedOrgUnit = $scope.orgUnits[0] ? $scope.orgUnits[0] : null;
     });
-    
+
     $scope.$watch('model.selectedNDP', function(){
         $scope.model.selectedDataElementGroupSets = [];
         $scope.model.dataElementGroup = [];
@@ -56,7 +57,7 @@ ndpFramework.controller('CompletenessController',
             $scope.model.ndpProgram = $filter('filter')($scope.model.optionSets, {ndp: $scope.model.selectedNDP.code, code: 'program'}, true)[0];
         }
     });
-    
+
     $scope.$watch('model.selectedProgram', function(){
         $scope.model.dataElementGroup = [];
         $scope.model.objectives = [];
@@ -72,7 +73,7 @@ ndpFramework.controller('CompletenessController',
             });
         }
     });
-    
+
     $scope.$watch('model.selectedObjective', function(){
         $scope.model.dataElementGroup = [];
         $scope.resetDataView();
@@ -89,7 +90,7 @@ ndpFramework.controller('CompletenessController',
                     $scope.model.dataElementGroup.push( $filter('filter')($scope.model.dataElementGroups, {id: deg.id})[0] );
                 });
             });
-        }        
+        }
     });
 
     MetaDataFactory.getAll('optionSets').then(function(optionSets){
@@ -100,29 +101,37 @@ ndpFramework.controller('CompletenessController',
             $scope.model.optionSetsById[optionSet.id] = optionSet;
         });
 
-        MetaDataFactory.getAll('dataElementGroupSets').then(function( dataElementGroupSets ){
-            $scope.model.dataElementGroupSets = dataElementGroupSets;
 
-            MetaDataFactory.getAll('dataElementGroups').then(function(dataElementGroups){
-                $scope.model.dataElementGroups = dataElementGroups;
+        OptionComboService.getBtaDimensions().then(function( btaDimensions ){
 
-                $scope.model.periods = PeriodService.getPeriods($scope.model.selectedPeriodType, $scope.model.periodOffset, $scope.model.openFuturePeriods);
+            if( btaDimensions.length !== 3 || !btaDimensions){
+                NotificationService.showNotifcationDialog($translate.instant("error"), $translate.instant("invalid_bta_dimensions"));
+            }
 
-                var selectedPeriodNames = ['2020/21', '2021/22', '2022/23', '2023/24', '2024/25'];
+            $scope.model.baseLineTargetActualDimensions = $.map(btaDimensions, function(d){return d.id;});
 
-                angular.forEach($scope.model.periods, function(pe){
-                    if(selectedPeriodNames.indexOf(pe.displayName) > -1 ){
-                       $scope.model.selectedPeriods.push(pe);
-                    } 
+            MetaDataFactory.getAll('dataElementGroupSets').then(function( dataElementGroupSets ){
+                $scope.model.dataElementGroupSets = dataElementGroupSets;
+
+                MetaDataFactory.getAll('dataElementGroups').then(function(dataElementGroups){
+                    $scope.model.dataElementGroups = dataElementGroups;
+
+                    $scope.model.periods = PeriodService.getPeriods($scope.model.selectedPeriodType, $scope.model.periodOffset, $scope.model.openFuturePeriods);
+
+                    var selectedPeriodNames = ['2020/21', '2021/22', '2022/23', '2023/24', '2024/25'];
+
+                    angular.forEach($scope.model.periods, function(pe){
+                        if(selectedPeriodNames.indexOf(pe.displayName) > -1 ){
+                           $scope.model.selectedPeriods.push(pe);
+                        }
+                    });
+
+                    $scope.model.ndp = $filter('filter')($scope.model.optionSets, {code: 'ndp'})[0];
                 });
-                
-                $scope.model.ndp = $filter('filter')($scope.model.optionSets, {code: 'ndp'})[0];
-                
-                $scope.model.baseLineTargetActualDimensions = ['bqIaasqpTas', 'Px8Lqkxy2si', 'HKtncMjp06U'];
             });
         });
     });
-    
+
     $scope.getPeriods = function(mode){
         if( mode === 'NXT'){
             $scope.model.periodOffset = $scope.model.periodOffset + 1;
@@ -131,9 +140,9 @@ ndpFramework.controller('CompletenessController',
         else{
             $scope.model.periodOffset = $scope.model.periodOffset - 1;
             $scope.model.periods = PeriodService.getPeriods($scope.model.selectedPeriodType, $scope.model.periodOffset, $scope.model.openFuturePeriods);
-        }    
+        }
     };
-    
+
     $scope.showOrgUnitTree = function(){
         var modalInstance = $modal.open({
             templateUrl: 'components/outree/orgunit-tree.html',
@@ -156,46 +165,46 @@ ndpFramework.controller('CompletenessController',
                 $scope.selectedOrgUnit = selectedOu;
                 $scope.resetDataView();
             }
-        }); 
+        });
     };
-    
+
     $scope.resetDataView = function(){
         $scope.model.data = null;
         $scope.model.reportReady = false;
         $scope.model.dataExists = false;
         $scope.model.dataHeaders = [];
     };
-    
+
     $scope.getCompleteness = function(){
 
         if( !$scope.model.selectedNDP ){
             NotificationService.showNotifcationDialog($translate.instant("error"), $translate.instant("missing_ndp"));
             return;
         }
-        
+
         if( !$scope.model.selectedProgram ){
             NotificationService.showNotifcationDialog($translate.instant("error"), $translate.instant("missing_programme"));
             return;
         }
-        
+
         if( !$scope.model.dataElementGroup || $scope.model.dataElementGroup.length === 0 ){
             NotificationService.showNotifcationDialog($translate.instant("error"), $translate.instant("program_missing_objective"));
             return;
         }
-        
+
         if( !$scope.selectedOrgUnit || !$scope.selectedOrgUnit.id ){
             NotificationService.showNotifcationDialog($translate.instant("error"), $translate.instant("missing_vote"));
             return;
         }
-        
+
         if( !$scope.model.selectedPeriods || !$scope.model.selectedPeriods.length === 0 ){
             NotificationService.showNotifcationDialog($translate.instant("error"), $translate.instant("missing_period"));
             return;
         }
-        
+
         $scope.model.data = null;
         var analyticsUrl = '';
-        
+
         analyticsUrl += '&filter=ou:'+ $scope.selectedOrgUnit.id +'&displayProperty=NAME&includeMetadataDetails=true';
         analyticsUrl += '&dimension=Duw5yep8Vae:' + $.map($scope.model.baseLineTargetActualDimensions, function(dm){return dm;}).join(';');
         analyticsUrl += '&dimension=pe:' + $.map($scope.model.selectedPeriods, function(pe){return pe.id;}).join(';');
@@ -226,7 +235,7 @@ ndpFramework.controller('CompletenessController',
                         colSpan++;
                         $scope.model.dataHeaders.push({periodId: pe.id, dimensionId: dm, dimension: 'Duw5yep8Vae'});
                     }
-                });                    
+                });
                 pe.colSpan = colSpan;
             });
 
@@ -243,7 +252,7 @@ ndpFramework.controller('CompletenessController',
                     degs.available = {};
                     angular.forEach(degs.dataElementGroups, function(deg){
                         var _deg = $filter('filter')($scope.model.dataElementGroups, {id: deg.id})[0];
-                        angular.forEach(_deg.dataElements, function(de){                            
+                        angular.forEach(_deg.dataElements, function(de){
                             angular.forEach($scope.model.dataHeaders, function(dh){
                                 var id = [dh.periodId, dh.dimensionId].join('-');
                                 if ( !degs.available[id] ){
@@ -252,7 +261,7 @@ ndpFramework.controller('CompletenessController',
                                 if ( !degs.expected[id] ){
                                     degs.expected[id] = 0;
                                 }
-                                
+
                                 degs.expected[id]++;
                                 $scope.model.denominator++;
                                 if( $scope.valueExists(dh, de.id) ){
@@ -266,21 +275,21 @@ ndpFramework.controller('CompletenessController',
             }
         });
     };
-    
+
     $scope.valueExists = function(header, dataElement){
         if(!header || !$scope.model.data || !header.periodId || !header.dimensionId || !dataElement) {
             return false;
         }
-            
+
         var res = $filter('filter')($scope.model.data, {dx: dataElement, Duw5yep8Vae: header.dimensionId, pe: header.periodId})[0];
-        var dataExists = res && res.value ? true : false; 
+        var dataExists = res && res.value ? true : false;
         return dataExists;
     };
-    
+
     $scope.getCoverage = function(numerator, denominator){
         return CommonUtils.getPercent(numerator, denominator);
     };
-    
+
     $scope.exportData = function ( name ) {
         var blob = new Blob([document.getElementById('exportTable').innerHTML], {
             type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=utf-8"
