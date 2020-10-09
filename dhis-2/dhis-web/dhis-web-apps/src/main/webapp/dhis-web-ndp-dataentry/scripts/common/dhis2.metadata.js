@@ -115,6 +115,37 @@ dhis2.metadata.processMetaDataAttribute = function( obj )
     return obj;
 };
 
+dhis2.metadata.getMetaDataAttribute = function( obj )
+{
+    if(!obj){
+        return;
+    }
+
+    var metaAttribute = {};
+    if(obj.attributeValues){
+        for(var i=0; i<obj.attributeValues.length; i++){
+            if(obj.attributeValues[i].value && obj.attributeValues[i].attribute && obj.attributeValues[i].attribute.code && obj.attributeValues[i].attribute.valueType){
+            	if( obj.attributeValues[i].attribute.valueType === 'BOOLEAN' || obj.attributeValues[i].attribute.valueType === 'TRUE_ONLY' ){
+                    if( obj.attributeValues[i].value === 'true' ){
+                        metaAttribute[obj.attributeValues[i].attribute.code] = true;
+                    }
+            	}
+            	else if( obj.attributeValues[i].attribute.valueType === 'NUMBER' && obj.attributeValues[i].value ){
+                    obj[obj.attributeValues[i].attribute.code] = parseInt( obj.attributeValues[i].value );
+                    metaAttribute[obj.attributeValues[i].attribute.code] = parseInt( obj.attributeValues[i].value );
+            	}
+                else{
+                    metaAttribute[obj.attributeValues[i].attribute.code] = obj.attributeValues[i].value;
+                }
+            }
+        }
+    }
+
+    //delete obj.attributeValues;
+
+    return metaAttribute;
+};
+
 dhis2.metadata.getMetaObjectIds = function( objNames, url, filter )
 {
     var def = $.Deferred();
@@ -446,6 +477,12 @@ dhis2.metadata.processOptionCombos = function( data ){
             dRead = co.access.data.read && dRead;
             mRead = co.access.read && mRead;
             mWrite = co.access.write && mWrite;
+            var att = dhis2.metadata.getMetaDataAttribute( co );
+            if( coc.categoryOptions.length === 1 && Object.keys(att).length > 0 ){
+                for( var key in att ){
+                    coc[key] = att[key];
+                }
+            }
         });
 
         coc.dWrite = dWrite;

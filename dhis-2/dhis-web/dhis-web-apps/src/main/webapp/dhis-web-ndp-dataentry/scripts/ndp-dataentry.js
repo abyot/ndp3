@@ -177,7 +177,7 @@ function getUserAccessibleDataSets(){
 }
 
 function getUserAccessibleOptionCombos(){
-    return dhis2.metadata.getMetaObject(null, 'ACCESSIBLE_OPTION_COMBOS', dhis2.ndpde.apiUrl + '/categoryCombos.json', 'fields=id,categoryOptionCombos[id,categoryOptions[id,access[:all]]]&paging=false', 'sessionStorage', dhis2.ndpde.store, dhis2.metadata.processOptionCombos);
+    return dhis2.metadata.getMetaObject(null, 'ACCESSIBLE_OPTION_COMBOS', dhis2.ndpde.apiUrl + '/categoryCombos.json', 'fields=id,categoryOptionCombos[id,categoryOptions[id,attributeValues[value,attribute[id,name,valueType,code]],access[:all]]]&paging=false', 'sessionStorage', dhis2.ndpde.store, dhis2.metadata.processOptionCombos);
 }
 
 function getOrgUnitLevels()

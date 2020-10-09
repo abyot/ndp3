@@ -319,6 +319,9 @@ var ndpDataEntryServices = angular.module('ndpDataEntryServices', ['ngResource']
                                     oco.dRead = _oco.dRead;
                                     oco.write = _oco.write;
                                     oco.read = _oco.read;
+                                    if( _oco.hasAttachment ){
+                                        oco.hasAttachment = _oco.hasAttachment;
+                                    }
                                 }
                             });
                         });
@@ -511,6 +514,9 @@ var ndpDataEntryServices = angular.module('ndpDataEntryServices', ['ngResource']
             return promise;
         },
         saveComment: function( dv ){
+            if( dv.comment ){
+                dv.comment = encodeURI(dv.comment);
+            }
             var url = '?de='+dv.de + '&ou='+dv.ou + '&pe='+dv.pe + '&co='+dv.co + '&cc='+dv.cc + '&cp='+dv.cp + '&comment=' + dv.comment;
             var promise = $http.post('../api/dataValues.json' + url).then(function(response){
                 return response.data;

@@ -23,7 +23,7 @@
                 </th>
             </tr>
         </thead>
-        <tr ng-repeat="aoc in selectedAttributeCategoryCombo.categoryOptionCombos">
+        <tr ng-repeat="aoc in selectedAttributeCategoryCombo.categoryOptionCombos" ng-if="aoc.hasAttachment">
             <td class="col-sm-1 vertical-center">
                 {{aoc.displayName}}
             </td>
