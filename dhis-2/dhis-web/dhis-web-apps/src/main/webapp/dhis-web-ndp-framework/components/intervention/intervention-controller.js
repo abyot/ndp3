@@ -116,16 +116,17 @@ ndpFramework.controller('InterventionController',
             $scope.model.optionSetsById[optionSet.id] = optionSet;
         });
 
-        OptionComboService.getBtaDimensions().then(function( btaDimensions ){
+        OptionComboService.getBtaDimensions().then(function( bta ){
 
-            if( btaDimensions.length !== 3 || !btaDimensions){
+            if( !bta || !bta.category || !bta.options || bta.options.length !== 3 ){
                 NotificationService.showNotifcationDialog($translate.instant("error"), $translate.instant("invalid_bta_dimensions"));
                 return;
             }
 
-            $scope.model.baseLineTargetActualDimensions = $.map(btaDimensions, function(d){return d.id;});
+            $scope.model.bta = bta;
+            $scope.model.baseLineTargetActualDimensions = $.map($scope.model.bta.options, function(d){return d.id;});
 
-            MetaDataFactory.getAll('dataElementGroups').then(function(dataElementGroups){
+            MetaDataFactory.getDataElementGroups().then(function(dataElementGroups){
 
                 $scope.model.dataElementGroups = dataElementGroups;
 
@@ -216,7 +217,7 @@ ndpFramework.controller('InterventionController',
 
         if( $scope.model.dataElementGroup && $scope.model.dataElementGroup.length > 0 && $scope.model.selectedPeriods.length > 0){
             analyticsUrl += '&filter=ou:'+ $scope.selectedOrgUnit.id +'&displayProperty=NAME&includeMetadataDetails=true';
-            analyticsUrl += '&dimension=Duw5yep8Vae:' + $.map($scope.model.baseLineTargetActualDimensions, function(dm){return dm;}).join(';');
+            analyticsUrl += '&dimension=co&dimension=' + $scope.model.bta.category + ':' + $.map($scope.model.baseLineTargetActualDimensions, function(dm){return dm;}).join(';');
             analyticsUrl += '&dimension=pe:' + $.map($scope.model.selectedPeriods, function(pe){return pe.id;}).join(';');
 
             var des = [];

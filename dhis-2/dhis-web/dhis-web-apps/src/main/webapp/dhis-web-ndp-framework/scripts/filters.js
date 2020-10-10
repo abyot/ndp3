@@ -9,7 +9,7 @@ var ndpFrameworkFilters = angular.module('ndpFrameworkFilters', [])
 
         if(!bytes ){
             return;
-        }        
+        }
         var sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
         if (bytes === 0) return '0 Byte';
         var i = parseInt(Math.floor(Math.log(bytes) / Math.log(1024)));
@@ -34,6 +34,29 @@ var ndpFrameworkFilters = angular.module('ndpFrameworkFilters', [])
                     p = item[programmeDataElement.id].indexOf(programme.displayName) > -1;
                 }
                 return f && p;
+            });
+        }
+    };
+})
+
+.filter('dataFilter', function(){
+    return function(data, obj){
+        if(!data ){
+            return;
+        }
+        if(!obj ){
+            return data;
+        }
+        else{
+            return data.filter(function(item){
+                var match = true;
+                for( var k in obj ){
+                    match = match && item[k] === obj[k];
+                    if( !match ){
+                        return match;
+                    }
+                }
+                return match;
             });
         }
     };

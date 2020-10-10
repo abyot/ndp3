@@ -102,18 +102,20 @@ ndpFramework.controller('CompletenessController',
         });
 
 
-        OptionComboService.getBtaDimensions().then(function( btaDimensions ){
+        OptionComboService.getBtaDimensions().then(function( bta ){
 
-            if( btaDimensions.length !== 3 || !btaDimensions){
+            if( !bta || !bta.category || !bta.options || bta.options.length !== 3 ){
                 NotificationService.showNotifcationDialog($translate.instant("error"), $translate.instant("invalid_bta_dimensions"));
+                return;
             }
 
-            $scope.model.baseLineTargetActualDimensions = $.map(btaDimensions, function(d){return d.id;});
+            $scope.model.bta = bta;
+            $scope.model.baseLineTargetActualDimensions = $.map($scope.model.bta.options, function(d){return d.id;});
 
             MetaDataFactory.getAll('dataElementGroupSets').then(function( dataElementGroupSets ){
                 $scope.model.dataElementGroupSets = dataElementGroupSets;
 
-                MetaDataFactory.getAll('dataElementGroups').then(function(dataElementGroups){
+                MetaDataFactory.getDataElementGroups().then(function(dataElementGroups){
                     $scope.model.dataElementGroups = dataElementGroups;
 
                     $scope.model.periods = PeriodService.getPeriods($scope.model.selectedPeriodType, $scope.model.periodOffset, $scope.model.openFuturePeriods);
@@ -206,7 +208,7 @@ ndpFramework.controller('CompletenessController',
         var analyticsUrl = '';
 
         analyticsUrl += '&filter=ou:'+ $scope.selectedOrgUnit.id +'&displayProperty=NAME&includeMetadataDetails=true';
-        analyticsUrl += '&dimension=Duw5yep8Vae:' + $.map($scope.model.baseLineTargetActualDimensions, function(dm){return dm;}).join(';');
+        analyticsUrl += '&dimension=' + $scope.model.bta.category + ':' + $.map($scope.model.baseLineTargetActualDimensions, function(dm){return dm;}).join(';');
         analyticsUrl += '&dimension=pe:' + $.map($scope.model.selectedPeriods, function(pe){return pe.id;}).join(';');
 
         var des = [];
@@ -230,10 +232,13 @@ ndpFramework.controller('CompletenessController',
                 var d = $filter('filter')($scope.model.data, {pe: pe.id});
                 pe.hasData = d && d.length > 0;
                 angular.forEach($scope.model.baseLineTargetActualDimensions, function(dm){
-                    var d = $filter('filter')($scope.model.data, {Duw5yep8Vae: dm, pe: pe.id});
+                    //var d = $filter('filter')($scope.model.data, {Duw5yep8Vae: dm, pe: pe.id});
+                    var filterParams = {pe: pe.id};
+                    filterParams[$scope.model.bta.category] = dm;
+                    var d = $filter('dataFilter')($scope.model.data, filterParams);
                     if( d && d.length > 0 ){
                         colSpan++;
-                        $scope.model.dataHeaders.push({periodId: pe.id, dimensionId: dm, dimension: 'Duw5yep8Vae'});
+                        $scope.model.dataHeaders.push({periodId: pe.id, dimensionId: dm, dimension: $scope.model.bta.category});
                     }
                 });
                 pe.colSpan = colSpan;
@@ -280,10 +285,14 @@ ndpFramework.controller('CompletenessController',
         if(!header || !$scope.model.data || !header.periodId || !header.dimensionId || !dataElement) {
             return false;
         }
+        var filterParams = {
+            dx: dataElement,
+            pe: header.periodId
+        };
 
-        var res = $filter('filter')($scope.model.data, {dx: dataElement, Duw5yep8Vae: header.dimensionId, pe: header.periodId})[0];
-        var dataExists = res && res.value ? true : false;
-        return dataExists;
+        filterParams[$scope.model.bta.category] = header.dimensionId;
+        var res = $filter('dataFilter')($scope.model.data, filterParams)[0];
+        return res && res.value ? true : false;
     };
 
     $scope.getCoverage = function(numerator, denominator){

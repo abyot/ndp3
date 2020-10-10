@@ -98,16 +98,17 @@ ndpFramework.controller('GoalController',
         });
     };
 
-    OptionComboService.getBtaDimensions().then(function( btaDimensions ){
+    OptionComboService.getBtaDimensions().then(function( bta ){
 
-        if( btaDimensions.length !== 3 || !btaDimensions){
+        if( !bta || !bta.category || !bta.options || bta.options.length !== 3 ){
             NotificationService.showNotifcationDialog($translate.instant("error"), $translate.instant("invalid_bta_dimensions"));
             return;
         }
 
-        $scope.model.baseLineTargetActualDimensions = $.map(btaDimensions, function(d){return d.id;});
+        $scope.model.bta = bta;
+        $scope.model.baseLineTargetActualDimensions = $.map($scope.model.bta.options, function(d){return d.id;});
 
-        MetaDataFactory.getAll('dataElementGroups').then(function(dataElementGroups){
+        MetaDataFactory.getDataElementGroups().then(function(dataElementGroups){
 
             $scope.model.dataElementGroups = dataElementGroups;
 
@@ -167,7 +168,7 @@ ndpFramework.controller('GoalController',
 
         if( $scope.model.dataElementGroup && $scope.model.dataElementGroup.length > 0 && $scope.model.selectedPeriods.length > 0){
             analyticsUrl += '&filter=ou:'+ $scope.selectedOrgUnit.id +'&displayProperty=NAME&includeMetadataDetails=true';
-            analyticsUrl += '&dimension=Duw5yep8Vae:' + $.map($scope.model.baseLineTargetActualDimensions, function(dm){return dm;}).join(';');
+            analyticsUrl += '&dimension=co&dimension=' + $scope.model.bta.category + ':' + $.map($scope.model.baseLineTargetActualDimensions, function(dm){return dm;}).join(';');
             analyticsUrl += '&dimension=pe:' + $.map($scope.model.selectedPeriods, function(pe){return pe.id;}).join(';');
 
             var des = [];
@@ -180,72 +181,27 @@ ndpFramework.controller('GoalController',
             analyticsUrl += '&dimension=dx:' + des.join(';');
 
             Analytics.getData( analyticsUrl ).then(function(data){
-                $scope.model.selectedPeriods = orderByFilter( $scope.model.selectedPeriods, '-id').reverse();
                 $scope.model.data = data.data;
                 $scope.model.metaData = data.metaData;
                 $scope.model.reportReady = true;
                 $scope.model.reportStarted = false;
-                $scope.model.dataHeaders = [];
-                angular.forEach($scope.model.selectedPeriods, function(pe){
-                    var colSpan = 0;
-                    var d = $filter('filter')($scope.model.data, {pe: pe.id});
-                    pe.hasData = d && d.length > 0;
-                    angular.forEach($scope.model.baseLineTargetActualDimensions, function(dm){
-                        var d = $filter('filter')($scope.model.data, {Duw5yep8Vae: dm, pe: pe.id});
-                        if( d && d.length > 0 ){
-                            colSpan++;
-                            $scope.model.dataHeaders.push({periodId: pe.id, dimensionId: dm, dimension: 'Duw5yep8Vae'});
-                        }
-                    });
-                    pe.colSpan = colSpan;
-                });
 
-                if( Object.keys( $scope.model.data ).length === 0 ){
-                    $scope.model.dataExists = false;
-                    return;
-                }
-                else{
-                    $scope.model.dataExists = true;
-                    $scope.model.finalData = [];
-                    var currRow = [], parsedRow = [];
+                var dataParams = {
+                    data: data.data,
+                    metaData: data.metaData,
+                    reportPeriods: angular.copy( $scope.model.selectedPeriods ),
+                    bta: $scope.model.bta,
+                    selectedDataElementGroupSets: $scope.model.selectedDataElementGroupSets,
+                    selectedDataElementGroup: $scope.model.selectedKra,
+                    dataElementGroups: $scope.model.dataElementGroups
+                };
 
-                    angular.forEach($scope.model.selectedDataElementGroupSets, function(degs){
-                        var groupSet = {val: degs.displayName, span: 0};
-                        currRow.push(groupSet);
+                var result = Analytics.processData( dataParams );
 
-                        var generateRow = function(group, deg){
-                            angular.forEach(deg.dataElements, function(de){
-                                groupSet.span++;
-                                group.span++;
-
-                                currRow.push({val: $scope.model.metaData.items[de.id].name, span: 1, info: de.id});
-                                angular.forEach($scope.model.dataHeaders, function(dh){
-                                    currRow.push({val: $scope.filterData(dh, de.id), span: 1});
-                                });
-                                parsedRow.push(currRow);
-                                currRow = [];
-                            });
-                        };
-
-                        angular.forEach(degs.dataElementGroups, function(deg){
-                            if( $scope.model.selectedKra && $scope.model.selectedKra.id ){
-                                if ( deg.id === $scope.model.selectedKra.id ){
-                                    var group = {val: deg.displayName, span: 0};
-                                    currRow.push(group);
-                                    var _deg = $filter('filter')($scope.model.dataElementGroups, {id: deg.id})[0];
-                                    generateRow(group, _deg);
-                                }
-                            }
-                            else{
-                                var group = {val: deg.displayName, span: 0};
-                                currRow.push(group);
-                                var _deg = $filter('filter')($scope.model.dataElementGroups, {id: deg.id})[0];
-                                generateRow(group, _deg);
-                            }
-                        });
-                    });
-                    $scope.model.finalData = parsedRow;
-                }
+                $scope.model.dataHeaders = result.dataHeaders;
+                $scope.model.finalData = result.finalData;
+                $scope.model.reportPeriods = result.reportPeriods;
+                $scope.model.dataExists = result.dataExists;
             });
         }
     };
