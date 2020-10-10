@@ -168,21 +168,33 @@ ndpFramework.controller('DictionaryController',
                                 angular.forEach(dataElements, function(de){
                                     var cc = $scope.model.categoryCombosById[de.categoryCombo.id];
                                     de.disaggregation = !cc || cc.isDefault ? '-' : cc.displayName;
+                                    de.vote = [];
+                                    ds.periodType = [];
 
                                     for(var i=0; i<$scope.model.dataSets.length; i++){
                                         if( $scope.model.dataSets[i].dataElements.indexOf(de.id) !== -1 ){
                                             var ds = $scope.model.dataSets[i];
-                                            de.periodType = ds.periodType  === 'FinancialJuly' ? 'Fiscal year' : ds.periodType;
-                                            de.vote = ds.organisationUnits.map(function(ou){
-                                                return ou.code;
-                                            });
-
-                                            if( de.vote && de.vote.length > 0 ){
-                                                de.vote = de.vote.sort();
-                                                de.vote = de.vote.join(', ');
+                                            var periodType = ds.periodType  === 'FinancialJuly' ? 'Fiscal year' : ds.periodType;
+                                            if( de.periodType.indexOf(periodType) === -1){
+                                                de.periodType.push(periodType);
                                             }
-                                            break;
+                                            var votes = ds.organisationUnits.map(function(ou){return ou.code;})
+                                            angular.forEach(votes, function(vote){
+                                                if(de.vote.indexOf(vote) === -1){
+                                                    de.vote.push(vote);
+                                                }
+                                            });
                                         }
+                                    }
+
+                                    if( de.vote && de.vote.length > 0 ){
+                                        de.vote = de.vote.sort();
+                                        de.vote = de.vote.join(', ');
+                                    }
+
+                                    if( de.periodType && de.periodType.length > 0 ){
+                                        de.periodType = de.periodType.sort();
+                                        de.periodType = de.periodType.join(', ');
                                     }
 
                                     de = $scope.getAttributeCompleteness( de );
