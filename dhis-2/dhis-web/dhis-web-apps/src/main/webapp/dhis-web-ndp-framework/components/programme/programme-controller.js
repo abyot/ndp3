@@ -65,6 +65,21 @@ ndpFramework.controller('ProgrammeController',
         });
     };
 
+    $scope.$watch('model.selectedNdpProgram', function(){
+        $scope.model.objectives = [];
+        $scope.model.subPrograms = [];
+        $scope.model.selectedDataElementGroupSets = [];
+
+        if( angular.isObject($scope.model.selectedNdpProgram) ){
+            if( $scope.model.selectedNdpProgram && $scope.model.selectedNdpProgram.code ){
+                $scope.model.objectives = $filter('filter')($scope.model.dataElementGroupSets, {ndp: $scope.model.selectedMenu.ndp, indicatorGroupSetType: $scope.model.selectedMenu.code, ndpProgramme: $scope.model.selectedNdpProgram.code}, true);
+                $scope.model.subPrograms = $filter('filter')($scope.model.dataElementGroupSets, {ndp: $scope.model.selectedMenu.ndp, indicatorGroupSetType: 'sub-programme', ndpProgramme: $scope.model.selectedNdpProgram.code}, true);
+                $scope.model.selectedDataElementGroupSets = angular.copy( $scope.model.objectives );
+                $scope.getObjectives();
+            }
+        }
+    });
+
     $scope.$watch('model.selectedObjective', function(){
         $scope.model.dataElementGroup = [];
         $scope.resetDataView();
@@ -137,23 +152,6 @@ ndpFramework.controller('ProgrammeController',
 
         });
     });
-
-    $scope.setNdpProgram = function( program ){
-        if( $scope.model.selectedNdpProgram && $scope.model.selectedNdpProgram.id === program.id ){
-            $scope.model.selectedNdpProgram = null;
-        }
-        else{
-            $scope.model.selectedNdpProgram = program;
-        }
-
-        if( $scope.model.selectedNdpProgram && $scope.model.selectedNdpProgram.code ){
-            $scope.model.objectives = $filter('filter')($scope.model.dataElementGroupSets, {ndp: $scope.model.selectedMenu.ndp, indicatorGroupSetType: $scope.model.selectedMenu.code, ndpProgramme: $scope.model.selectedNdpProgram.code}, true);
-            $scope.model.subPrograms = $filter('filter')($scope.model.dataElementGroupSets, {ndp: $scope.model.selectedMenu.ndp, indicatorGroupSetType: 'sub-programme', ndpProgramme: $scope.model.selectedNdpProgram.code}, true);
-            $scope.model.selectedDataElementGroupSets = angular.copy( $scope.model.objectives );
-            $scope.getObjectives();
-        }
-
-    };
 
     $scope.resetView = function(horizontalMenu){
         $scope.model.activeHorizontalMenu = horizontalMenu;
