@@ -10,7 +10,6 @@ ndpFramework.controller('GoalController',
         $filter,
         NotificationService,
         SelectedMenuService,
-        orderByFilter,
         PeriodService,
         MetaDataFactory,
         OrgUnitFactory,
@@ -229,12 +228,6 @@ ndpFramework.controller('GoalController',
                 $scope.resetDataView();
             }
         });
-    };
-
-    $scope.filterData = function(header, dataElement){
-        if(!header || !$scope.model.data || !header.periodId || !header.dimensionId || !dataElement) return;
-        var res = $filter('filter')($scope.model.data, {dx: dataElement, Duw5yep8Vae: header.dimensionId, pe: header.periodId})[0];
-        return res && res.value ? res.value : '';
     };
 
     $scope.exportData = function ( name ) {

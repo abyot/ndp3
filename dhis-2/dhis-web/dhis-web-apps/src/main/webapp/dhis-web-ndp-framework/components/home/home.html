@@ -24,53 +24,53 @@
     </div>
 
     <div ng-show="model.metaDataCached">
-        
+
         <form name="outerForm" novalidate>
             <div ng-if="model.selectedMenu" ng-switch="model.selectedMenu.domain">
                 <!--<span ng-switch-when="NDP">
                     <div equal-height-nav-tabs ng-include="'components/home/ndp-framework.html'"></div>
                 </span>-->
-                
+
                 <span ng-switch-when="GOL">
                     <div ng-include="'components/ndp/goals.html'"></div>
                 </span>
-                
+
                 <span ng-switch-when="OBJ">
                     <div ng-include="'components/ndp/objectives.html'"></div>
                 </span>
-                
+
                 <span ng-switch-when="PRG">
                     <div ng-include="'components/programme/programme-status.html'"></div>
                 </span>
-                
+
                 <span ng-switch-when="PRJ">
                     <div ng-include="'components/project/project-status.html'"></div>
                 </span>
-                
+
                 <span ng-switch-when="INV">
                     <div ng-include="'components/intervention/intervention-status.html'"></div>
                 </span>
-                
+
                 <span ng-switch-when="SDG">
                     <div ng-include="'components/sdg/sdg-status.html'"></div>
                 </span>
-                
+
                 <span ng-switch-when="SEC">
                     <div ng-include="'components/sector/sector-status.html'"></div>
                 </span>
-                
+
                 <span ng-switch-when="MDA">
                     <div ng-include="'components/mda/mda-status.html'"></div>
                 </span>
-                
+
                 <span ng-switch-when="LOG">
                     <div ng-include="'components/log/log-status.html'"></div>
                 </span>
-                
+
                 <span ng-switch-when="DICTIONARY">
                     <div ng-include="'components/dictionary/dictionary.html'"></div>
                 </span>
-                
+
                 <span ng-switch-when="COMPLETENESS">
                     <div ng-include="'components/completeness/completeness.html'"></div>
                 </span>

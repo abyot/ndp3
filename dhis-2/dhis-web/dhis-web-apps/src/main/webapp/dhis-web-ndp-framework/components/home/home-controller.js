@@ -57,14 +57,6 @@ ndpFramework.controller('HomeController',
                             show: true,
                             children: [
                                 {
-                                    id: 'SDG',
-                                    domain: 'SDG',
-                                    displayName: $translate.instant('sdg'),
-                                    order: 0,
-                                    path: "sdg",
-                                    children: []
-                                },
-                                {
                                     id: 'NDP',
                                     domain: 'NDP',
                                     displayName: $translate.instant('ndps'),
@@ -73,24 +65,37 @@ ndpFramework.controller('HomeController',
                                     hasChildren: true
                                 },
                                 {
-                                    id: 'SEC',
-                                    domain: 'SEC',
-                                    displayName: $translate.instant('ssp'),
+                                    id: 'SPACE',
+                                    displayName: $translate.instant('space'),
                                     order: 2,
                                     children: []
                                 },
                                 {
-                                    id: 'MDA',
-                                    domain: 'MDA',
-                                    displayName: $translate.instant('mdas'),
+                                    id: 'PRG',
+                                    domain: 'PRG',
+                                    displayName: $translate.instant('programme_performance'),
                                     order: 3,
                                     children: []
                                 },
                                 {
-                                    id: 'LOG',
-                                    domain: 'LOG',
-                                    displayName: $translate.instant('lgs'),
+                                    id: 'SUB',
+                                    domain: 'SUB',
+                                    displayName: $translate.instant('sub_programme_performance'),
                                     order: 4,
+                                    children: []
+                                },
+                                {
+                                    id: 'PRJ',
+                                    domain: 'PRJ',
+                                    displayName: $translate.instant('project_performance'),
+                                    order: 5,
+                                    children: []
+                                },
+                                {
+                                    id: 'MDALG',
+                                    domain: 'MDALG',
+                                    displayName: $translate.instant('mdalg_performance'),
+                                    order: 6,
                                     children: []
                                 }
                             ]
@@ -112,34 +117,35 @@ ndpFramework.controller('HomeController',
 
                 if( menu.id === 'NDP'){
 
-                    var objectives = $filter('filter')($scope.model.dataElementGroupSets, {ndp: child.code, indicatorGroupSetType: 'objective'}, true);
+                    var objectives = $filter('filter')($scope.model.dataElementGroupSets, {ndp: child.code, indicatorGroupSetType: 'resultsFrameworkObjective'}, true);
                     var goals = $filter('filter')($scope.model.dataElementGroupSets, {ndp: child.code, indicatorGroupSetType: 'goal'}, true);
                     var programs = $filter('filter')($scope.model.optionSets, {ndp: child.code, code: 'program'}, true);
-                    //var interventions = $filter('filter')($scope.model.dataElementGroupSets, {ndp: child.code, indicatorGroupSetType: 'intervention'}, true);
+                    var sdgs = $filter('filter')($scope.model.dataElementGroupSets, {indicatorGroupSetType: 'sdg'}, true);
 
                     child.children = [];
-                    if( objectives.length > 0 ){
+
+                    if( sdgs.length > 0 ){
                         child.hasChildren = true;
                         child.children.push( {
-                            id: child.code + '-OBJ',
-                            domain: 'OBJ',
-                            code: 'objective',
+                            id: 'SDG',
+                            domain: 'SDG',
+                            code: 'sdg',
                             ndp: child.code,
-                            order: 1,
-                            displayName: $translate.instant('objectives'),
+                            order: 0,
+                            displayName: $translate.instant('sdg_outcomes'),
                             children: []
                         } );
                     }
 
-                    if( goals.length > 0 ){
+                    if( objectives.length > 0 || goals.length > 0 ){
                         child.hasChildren = true;
                         child.children.push( {
-                            id: child.code + '-GOL',
-                            domain: 'GOL',
-                            code: 'goal',
+                            id: child.code + '-OBJ',
+                            domain: 'OBJ',
+                            code: 'resultsFrameworkObjective',
                             ndp: child.code,
-                            order: 0,
-                            displayName: $translate.instant('goal'),
+                            order: 1,
+                            displayName: $translate.instant('ndp_outcomes'),
                             children: []
                         } );
                     }
@@ -148,21 +154,49 @@ ndpFramework.controller('HomeController',
                         child.hasChildren = true;
                         child.children.push( {
                             id: child.code + '-PRG',
-                            domain: 'PRG',
+                            domain: 'NPRG',
                             code: 'objective',
                             ndp: child.code,
                             order: 2,
-                            displayName: $translate.instant('programmes'),
+                            displayName: $translate.instant('programme_outcomes'),
                             children: []
                         } );
 
+                        child.children.push( {
+                            id: child.code + '-PRG-SUB',
+                            domain: 'NSUB',
+                            code: 'objective',
+                            ndp: child.code,
+                            order: 2,
+                            displayName: $translate.instant('sub_programme_outcomes'),
+                            show: true,
+                            children: [
+                                {
+                                    id: child.code + '-PRG-SUB-PRJ',
+                                    domain: 'NPRJ',
+                                    code: 'objective',
+                                    ndp: child.code,
+                                    order: 2,
+                                    displayName: $translate.instant('output_projects'),
+                                },
+                                {
+                                    id: child.code + '-PRG-SUB-DEP',
+                                    domain: 'NDEP',
+                                    code: 'objective',
+                                    ndp: child.code,
+                                    order: 2,
+                                    displayName: $translate.instant('output_departments'),
+                                }
+                            ]
+                        } );
+
                         /*child.children.push( {
-                            id: child.code + '-PRJ',
-                            domain: 'PRJ',
+                            id: child.code + '-PIAP',
+                            domain: 'PIAP',
                             code: 'project',
                             ndp: child.code,
                             order: 3,
-                            displayName: $translate.instant('projects'),
+                            displayName: $translate.instant('piap_outputs'),
                             chilren: [],
                             show: false
                         } );*/

@@ -8,9 +8,9 @@ ndpFramework.controller('ObjectiveController',
         $translate,
         $modal,
         $filter,
+        orderByFilter,
         NotificationService,
         SelectedMenuService,
-        orderByFilter,
         PeriodService,
         MetaDataFactory,
         OrgUnitFactory,
@@ -150,6 +150,14 @@ ndpFramework.controller('ObjectiveController',
                 return !obj.ndpProgramme;
             });
 
+            $scope.model.objectives = orderByFilter( $scope.model.objectives, '-displayName').reverse();
+
+            var goals = $filter('filter')($scope.model.dataElementGroupSets, {ndp: $scope.model.selectedMenu.ndp, indicatorGroupSetType: 'goal'}, true);
+
+            if( goals.length > 0 ){
+                $scope.model.objectives.splice(0,0, ...goals);
+            }
+
             $scope.model.selectedDataElementGroupSets = angular.copy( $scope.model.objectives );
 
             if( $scope.model.objectives && $scope.model.objectives.length === 1 ){
@@ -249,12 +257,6 @@ ndpFramework.controller('ObjectiveController',
                 $scope.resetDataView();
             }
         });
-    };
-
-    $scope.filterData = function(header, dataElement, oc){
-        if(!header || !$scope.model.data || !header.periodId || !header.dimensionId || !dataElement) return;
-        var res = $filter('filter')($scope.model.data, {dx: dataElement, Duw5yep8Vae: header.dimensionId, pe: header.periodId, co: oc})[0];
-        return res && res.value ? res.value : '';
     };
 
     $scope.exportData = function ( name ) {

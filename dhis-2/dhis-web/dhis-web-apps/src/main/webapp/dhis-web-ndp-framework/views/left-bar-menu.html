@@ -5,20 +5,36 @@
 <div class="vertical-spacing category-menu">
     <div data-stop-propagation="true">
         <script type="text/ng-template" id="treeMenu.html">
-            <span class="tree-menu-button" ng-click="expandCollapse(menuItem)" ng-show="menuItem.show && menuItem.children.length > 0"><i class="fa fa-minus-square-o"></i></span>
-            <span class="tree-menu-button" ng-click="expandCollapse(menuItem)" ng-show="(!menuItem.show && menuItem.children.length > 0) || (!menuItem.show && menuItem.hasChildren)"><i class="fa fa-plus-square-o"></i></span>
-            <span class="tree-menu-button" ng-click="setSelectedMenu(menuItem)" ng-class="{'selected-menu' : menuItem.id === model.selectedMenu.id, 'bold': menuItem.bold}">{{menuItem.displayName}}</span>
+            <span class="tree-menu-button"
+                    ng-click="expandCollapse(menuItem)"
+                    ng-show="menuItem.id !== 'SPACE' && menuItem.show && menuItem.children.length > 0">
+                <i class="fa fa-minus-square-o"></i>
+            </span>
+            <span class="tree-menu-button"
+                    ng-click="expandCollapse(menuItem)"
+                    ng-show="menuItem.id !== 'SPACE' && (!menuItem.show && menuItem.children.length > 0) || (!menuItem.show && menuItem.hasChildren)">
+                <i class="fa fa-plus-square-o"></i>
+            </span>
+            <span class="tree-menu-button"
+                    ng-click="setSelectedMenu(menuItem)"
+                    ng-class="{'selected-menu' : menuItem.id === model.selectedMenu.id, 'bold': menuItem.bold}"
+                    ng-show="menuItem.id !== 'SPACE'">
+                {{menuItem.displayName}}
+            </span>
+            <span ng-show="menuItem.id === 'SPACE'" class="vertical-center">
+                <br>
+            </span>
             <ul class="tree" id="tree" ng-show="menuItem.show">
-                <li ng-repeat="menuItem in menuItem.children | orderBy:'order'" ng-include="'treeMenu.html'"></li>
+                <li ng-class="{'active-menu-item': menuItem.id !== 'SPACE'}" ng-repeat="menuItem in menuItem.children | orderBy:'order'" ng-include="'treeMenu.html'"></li>
             </ul>
         </script>
         <ul class="tree" id="tree">
-            <li ng-repeat="menuItem in model.menuItems | orderBy:'order'" ng-include="'treeMenu.html'"></li>
+            <li ng-class="{'active-menu-item': menuItem.id !== 'SPACE'}" ng-repeat="menuItem in model.menuItems | orderBy:'order'" ng-include="'treeMenu.html'"></li>
         </ul>
     </div>
-    
+
     <br>
-    <table class="table dhis2-table-hover table-bordered menu-vertical-spacing">        
+    <table class="table dhis2-table-hover table-bordered menu-vertical-spacing">
         <tr ng-class="{'selected-menu' : 'COMPLETENESS' === model.selectedMenu.domain, 'bold': menuItem.bold}">
             <td ng-click="setBottomMenu('COMPLETENESS')">{{'data_completeness' | translate}}</td>
         </tr>
