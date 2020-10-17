@@ -31,7 +31,11 @@ ndpFramework.controller('HomeController',
                 $scope.model.optionSetsById[optionSet.id] = optionSet;
             });
 
-            $scope.model.ndp = $filter('filter')(optionSets, {code: 'ndp'})[0];
+            var ndpOptions = $filter('filter')(optionSets, {code: 'ndp'});
+
+            if( ndpOptions && ndpOptions.length > 0 ){
+                $scope.model.ndp = angular.copy( ndpOptions[0] );
+            }
 
             MetaDataFactory.getAll('dataElementGroupSets').then(function( dataElementGroupSets ){
                 $scope.model.dataElementGroupSets = dataElementGroupSets;
@@ -45,6 +49,84 @@ ndpFramework.controller('HomeController',
                     angular.forEach($scope.model.ndp.options, function(op){
                         op.order = order;
                         order++;
+
+                        var objectives = $filter('filter')($scope.model.dataElementGroupSets, {ndp: op.code, indicatorGroupSetType: 'resultsFrameworkObjective'}, true);
+                        var goals = $filter('filter')($scope.model.dataElementGroupSets, {ndp: op.code, indicatorGroupSetType: 'goal'}, true);
+                        var programs = $filter('filter')($scope.model.optionSets, {ndp: op.code, code: 'program'}, true);
+                        var sdgs = $filter('filter')($scope.model.dataElementGroupSets, {indicatorGroupSetType: 'sdg'}, true);
+
+                        op.children = [];
+
+                        if( sdgs.length > 0 ){
+                            op.hasChildren = true;
+                            op.show = true;
+                            op.children.push( {
+                                id: 'SDG',
+                                domain: 'SDG',
+                                code: 'sdg',
+                                ndp: op.code,
+                                order: 0,
+                                displayName: $translate.instant('sdg_outcomes'),
+                                children: []
+                            } );
+                        }
+
+                        if( objectives.length > 0 || goals.length > 0 ){
+                            op.hasChildren = true;
+                            op.show = true;
+                            op.children.push( {
+                                id: op.code + '-OUT',
+                                domain: 'NOUT',
+                                code: 'resultsFrameworkObjective',
+                                ndp: op.code,
+                                order: 1,
+                                displayName: $translate.instant('ndp_outcomes'),
+                                children: []
+                            } );
+                        }
+
+                        if( programs.length > 0 ){
+                            op.hasChildren = true;
+                            op.show = true;
+                            op.children.push( {
+                                id: op.code + '-PRG',
+                                domain: 'NPRG',
+                                code: 'ndpObjective',
+                                ndp: op.code,
+                                order: 2,
+                                displayName: $translate.instant('programme_outcomes'),
+                                children: []
+                            } );
+
+                            op.children.push( {
+                                id: op.code + '-SUB',
+                                domain: 'NSUB',
+                                code: 'sub-programme',
+                                ndp: op.code,
+                                order: 2,
+                                displayName: $translate.instant('sub_programme_outcomes'),
+                                show: true,
+                                children: [
+                                    {
+                                        id: op.code + '-PRG-SUB-PRJ',
+                                        domain: 'NPRJ',
+                                        code: 'objective',
+                                        ndp: op.code,
+                                        order: 2,
+                                        displayName: $translate.instant('output_projects')
+                                    },
+                                    {
+                                        id: op.code + '-PRG-SUB-DEP',
+                                        domain: 'NDEP',
+                                        code: 'objective',
+                                        ndp: op.code,
+                                        order: 2,
+                                        displayName: $translate.instant('output_departments')
+                                    }
+                                ]
+                            } );
+                        }
+
                         ndpMenus.push( op );
                     });
 
@@ -62,7 +144,8 @@ ndpFramework.controller('HomeController',
                                     displayName: $translate.instant('ndps'),
                                     order: 1,
                                     children: ndpMenus,
-                                    hasChildren: true
+                                    hasChildren: ndpMenus.length > 0 ? true : false,
+                                    show: ndpMenus.length > 0 ? true : false
                                 },
                                 {
                                     id: 'SPACE',
@@ -106,123 +189,6 @@ ndpFramework.controller('HomeController',
         });
     });
 
-    //expand/collapse of navigation menu
-    $scope.expandCollapse = function(menu) {
-
-        if( menu.hasChildren ){
-            menu.show = !menu.show;
-
-            //Get children menu
-            angular.forEach(menu.children, function(child){
-
-                if( menu.id === 'NDP'){
-
-                    var objectives = $filter('filter')($scope.model.dataElementGroupSets, {ndp: child.code, indicatorGroupSetType: 'resultsFrameworkObjective'}, true);
-                    var goals = $filter('filter')($scope.model.dataElementGroupSets, {ndp: child.code, indicatorGroupSetType: 'goal'}, true);
-                    var programs = $filter('filter')($scope.model.optionSets, {ndp: child.code, code: 'program'}, true);
-                    var sdgs = $filter('filter')($scope.model.dataElementGroupSets, {indicatorGroupSetType: 'sdg'}, true);
-
-                    child.children = [];
-
-                    if( sdgs.length > 0 ){
-                        child.hasChildren = true;
-                        child.children.push( {
-                            id: 'SDG',
-                            domain: 'SDG',
-                            code: 'sdg',
-                            ndp: child.code,
-                            order: 0,
-                            displayName: $translate.instant('sdg_outcomes'),
-                            children: []
-                        } );
-                    }
-
-                    if( objectives.length > 0 || goals.length > 0 ){
-                        child.hasChildren = true;
-                        child.children.push( {
-                            id: child.code + '-OBJ',
-                            domain: 'OBJ',
-                            code: 'resultsFrameworkObjective',
-                            ndp: child.code,
-                            order: 1,
-                            displayName: $translate.instant('ndp_outcomes'),
-                            children: []
-                        } );
-                    }
-
-                    if( programs.length > 0 ){
-                        child.hasChildren = true;
-                        child.children.push( {
-                            id: child.code + '-PRG',
-                            domain: 'NPRG',
-                            code: 'objective',
-                            ndp: child.code,
-                            order: 2,
-                            displayName: $translate.instant('programme_outcomes'),
-                            children: []
-                        } );
-
-                        child.children.push( {
-                            id: child.code + '-PRG-SUB',
-                            domain: 'NSUB',
-                            code: 'objective',
-                            ndp: child.code,
-                            order: 2,
-                            displayName: $translate.instant('sub_programme_outcomes'),
-                            show: true,
-                            children: [
-                                {
-                                    id: child.code + '-PRG-SUB-PRJ',
-                                    domain: 'NPRJ',
-                                    code: 'objective',
-                                    ndp: child.code,
-                                    order: 2,
-                                    displayName: $translate.instant('output_projects'),
-                                },
-                                {
-                                    id: child.code + '-PRG-SUB-DEP',
-                                    domain: 'NDEP',
-                                    code: 'objective',
-                                    ndp: child.code,
-                                    order: 2,
-                                    displayName: $translate.instant('output_departments'),
-                                }
-                            ]
-                        } );
-
-                        /*child.children.push( {
-                            id: child.code + '-PIAP',
-                            domain: 'PIAP',
-                            code: 'project',
-                            ndp: child.code,
-                            order: 3,
-                            displayName: $translate.instant('piap_outputs'),
-                            chilren: [],
-                            show: false
-                        } );*/
-                    }
-
-                    /*if( interventions.length > 0 ){
-                        child.hasChildren = true;
-                        child.children.push( {
-                            id: child.code + '-INV',
-                            domain: 'INV',
-                            code: 'intervention',
-                            ndp: child.code,
-                            order: 4,
-                            displayName: $translate.instant('interventions'),
-                            children: []
-                        } );
-                    }*/
-                }
-
-            });
-        }
-        else{
-            menu.show = !menu.show;
-        }
-    };
-
     $scope.setSelectedMenu = function( menu ){
         if( $scope.model.selectedMenu && $scope.model.selectedMenu.id === menu.id ){
             $scope.model.selectedMenu = null;
@@ -246,5 +212,13 @@ ndpFramework.controller('HomeController',
 
     $scope.goToMenu = function( menuLink ){
         window.location.href = menuLink;
+    };
+
+    $scope.getMenuStyle = function( menu ){
+        var style = menu.class + ' horizontal-menu font-16';
+        if( menu.active ){
+            style += ' active-horizontal-menu';
+        }
+        return style;
     };
 });

@@ -463,3 +463,15 @@ ul.tree ul li:last-child:before {
     background-color: red;
     max-width: 15px !important;
 }
+
+.main-horizontal-menu > a:link {
+    background: #b4cdcd !important;
+}
+
+.external-horizontal-menu > a:link {
+    background: #d9e6e6 !important;
+}
+
+.active-horizontal-menu > a {
+    font-weight: bold !important;
+}

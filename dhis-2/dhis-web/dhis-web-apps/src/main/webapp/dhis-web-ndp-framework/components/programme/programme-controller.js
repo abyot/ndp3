@@ -9,7 +9,6 @@ ndpFramework.controller('ProgrammeController',
         $filter,
         NotificationService,
         SelectedMenuService,
-        orderByFilter,
         PeriodService,
         MetaDataFactory,
         OrgUnitFactory,
@@ -39,9 +38,13 @@ ndpFramework.controller('ProgrammeController',
     };
 
     $scope.model.horizontalMenus = [
-        {id: 'performance', title: 'ndp_results', order: 1, view: 'components/programme/performance.html', active: true},
-        {id: 'dashboard', title: 'dashboards', order: 2, view: 'components/programme/dashboard.html'},
-        {id: 'library', title: 'library', order: 3, view: 'components/programme/library.html'}
+        {id: 'result', title: 'results', order: 1, view: 'components/programme/results.html', active: true, class: 'main-horizontal-menu'},
+        {id: 'performance', title: 'physical_performance', order: 2, view: 'components/programme/performance.html', class: 'main-horizontal-menu'},
+        {id: 'cumulative', title: 'cumulative_progress', order: 3, view: 'components/programme/progress.html', class: 'main-horizontal-menu'},
+        {id: 'cost', title: 'cost', order: 4, view: 'components/programme/cost.html', class: 'main-horizontal-menu'},
+        {id: 'efficiency', title: 'cost_efficiency', order: 5, view: 'components/programme/efficiency.html', class: 'main-horizontal-menu'},
+        {id: 'dashboard', title: 'dashboard', order: 6, view: 'components/programme/dashboard.html', class: 'external-horizontal-menu'},
+        {id: 'library', title: 'library', order: 7, view: 'components/programme/library.html', class: 'external-horizontal-menu'}
     ];
 
     //Get orgunits for the logged in user
@@ -56,46 +59,34 @@ ndpFramework.controller('ProgrammeController',
         $scope.selectedOrgUnit = $scope.orgUnits[0] ? $scope.orgUnits[0] : null;
     });
 
-    $scope.getObjectives = function(){
+    $scope.getOutcomes = function(){
+
+        $scope.model.selectedDataElementGroupSets = $scope.model.selectedDataElementGroupSets.filter(function(obj){
+            return obj.dataElementGroups && obj.dataElementGroups.length && obj.dataElementGroups.length > 0;
+        });
+
         $scope.model.dataElementGroup = [];
         angular.forEach($scope.model.selectedDataElementGroupSets, function(degs){
             angular.forEach(degs.dataElementGroups, function(deg){
-                $scope.model.dataElementGroup.push( $filter('filter')($scope.model.dataElementGroups, {id: deg.id})[0] );
+                var _deg = $filter('filter')($scope.model.dataElementGroups, {indicatorGroupType: 'outcome', id: deg.id}, true);
+                if ( _deg.length > 0 ){
+                    $scope.model.dataElementGroup.push( _deg[0] );
+                }
             });
         });
     };
 
     $scope.$watch('model.selectedNdpProgram', function(){
+        $scope.resetDataView();
         $scope.model.objectives = [];
-        $scope.model.subPrograms = [];
         $scope.model.selectedDataElementGroupSets = [];
 
         if( angular.isObject($scope.model.selectedNdpProgram) ){
             if( $scope.model.selectedNdpProgram && $scope.model.selectedNdpProgram.code ){
                 $scope.model.objectives = $filter('filter')($scope.model.dataElementGroupSets, {ndp: $scope.model.selectedMenu.ndp, indicatorGroupSetType: $scope.model.selectedMenu.code, ndpProgramme: $scope.model.selectedNdpProgram.code}, true);
-                $scope.model.subPrograms = $filter('filter')($scope.model.dataElementGroupSets, {ndp: $scope.model.selectedMenu.ndp, indicatorGroupSetType: 'sub-programme', ndpProgramme: $scope.model.selectedNdpProgram.code}, true);
-                $scope.model.selectedDataElementGroupSets = angular.copy( $scope.model.objectives );
-                $scope.getObjectives();
+                $scope.model.selectedDataElementGroupSets = $filter('filter')($scope.model.dataElementGroupSets, {ndp: $scope.model.selectedMenu.ndp, ndpProgramme: $scope.model.selectedNdpProgram.code}, true);
+                $scope.getOutcomes();
             }
-        }
-    });
-
-    $scope.$watch('model.selectedObjective', function(){
-        $scope.model.dataElementGroup = [];
-        $scope.resetDataView();
-        if( angular.isObject($scope.model.selectedObjective) && $scope.model.selectedObjective.id){
-            $scope.model.selectedDataElementGroupSets = $filter('filter')($scope.model.dataElementGroupSets, {id: $scope.model.selectedObjective.id});
-            angular.forEach($scope.model.selectedObjective.dataElementGroups, function(deg){
-                $scope.model.dataElementGroup.push( $filter('filter')($scope.model.dataElementGroups, {id: deg.id})[0] );
-            });
-        }
-        else{
-            $scope.model.selectedDataElementGroupSets = angular.copy( $scope.model.objectives );
-            angular.forEach($scope.model.objectives, function(degs){
-                angular.forEach(degs.dataElementGroups, function(deg){
-                    $scope.model.dataElementGroup.push( $filter('filter')($scope.model.dataElementGroups, {id: deg.id})[0] );
-                });
-            });
         }
     });
 
@@ -140,7 +131,7 @@ ndpFramework.controller('ProgrammeController',
                     if( $scope.model.selectedMenu && $scope.model.selectedMenu.ndp && $scope.model.selectedMenu.code ){
 
                         $scope.model.ndpProgram = $filter('filter')($scope.model.optionSets, {ndp: $scope.model.selectedMenu.ndp, code: 'program'}, true)[0];
-                        $scope.model.ndpObjectives = $filter('filter')($scope.model.dataElementGroupSets, {ndp: $scope.model.selectedMenu.ndp, indicatorGroupSetType: 'objective'}, true);
+                        $scope.model.ndpObjectives = $filter('filter')($scope.model.dataElementGroupSets, {ndp: $scope.model.selectedMenu.ndp, indicatorGroupSetType: 'resultsFrameworkObjective'}, true);
                         $scope.model.ndpProgrammes = $filter('filter')($scope.model.dataElementGroupSets, {ndp: $scope.model.selectedMenu.ndp, indicatorGroupSetType: 'programme'}, true);
 
                         $scope.model.ndpObjectives = $scope.model.ndpObjectives.filter(function(obj){
@@ -184,10 +175,12 @@ ndpFramework.controller('ProgrammeController',
 
         if( !$scope.selectedOrgUnit || !$scope.selectedOrgUnit.id ){
             NotificationService.showNotifcationDialog($translate.instant("error"), $translate.instant("missing_vote"));
+            return;
         }
 
         if( $scope.model.dataElementGroup.length === 0 || !$scope.model.dataElementGroup ){
-            NotificationService.showNotifcationDialog($translate.instant("error"), $translate.instant("missing_objective"));
+            NotificationService.showNotifcationDialog($translate.instant("error"), $translate.instant("missing_outcome_output"));
+            return;
         }
 
         if( $scope.model.dataElementGroup && $scope.model.dataElementGroup.length > 0 && $scope.model.selectedPeriods.length > 0){
@@ -205,27 +198,29 @@ ndpFramework.controller('ProgrammeController',
             analyticsUrl += '&dimension=dx:' + des.join(';');
 
             Analytics.getData( analyticsUrl ).then(function(data){
-                $scope.model.data = data.data;
-                $scope.model.metaData = data.metaData;
-                $scope.model.reportReady = true;
-                $scope.model.reportStarted = false;
+                if( data && data.data && data.metaData ){
+                    $scope.model.data = data.data;
+                    $scope.model.metaData = data.metaData;
+                    $scope.model.reportReady = true;
+                    $scope.model.reportStarted = false;
 
-                var dataParams = {
-                    data: data.data,
-                    metaData: data.metaData,
-                    reportPeriods: angular.copy( $scope.model.selectedPeriods ),
-                    bta: $scope.model.bta,
-                    selectedDataElementGroupSets: $scope.model.selectedDataElementGroupSets,
-                    selectedDataElementGroup: $scope.model.selectedKra,
-                    dataElementGroups: $scope.model.dataElementGroups
-                };
+                    var dataParams = {
+                        data: data.data,
+                        metaData: data.metaData,
+                        reportPeriods: angular.copy( $scope.model.selectedPeriods ),
+                        bta: $scope.model.bta,
+                        selectedDataElementGroupSets: $scope.model.selectedDataElementGroupSets,
+                        selectedDataElementGroup: $scope.model.selectedKra,
+                        dataElementGroups: $scope.model.dataElementGroups
+                    };
 
-                var result = Analytics.processData( dataParams );
+                    var result = Analytics.processData( dataParams );
 
-                $scope.model.dataHeaders = result.dataHeaders;
-                $scope.model.finalData = result.finalData;
-                $scope.model.reportPeriods = result.reportPeriods;
-                $scope.model.dataExists = result.dataExists;
+                    $scope.model.dataHeaders = result.dataHeaders;
+                    $scope.model.finalData = result.finalData;
+                    $scope.model.reportPeriods = result.reportPeriods;
+                    $scope.model.dataExists = result.dataExists;
+                }
             });
         }
     };
@@ -253,12 +248,6 @@ ndpFramework.controller('ProgrammeController',
                 $scope.resetDataView();
             }
         });
-    };
-
-    $scope.filterData = function(header, dataElement){
-        if(!header || !$scope.model.data || !header.periodId || !header.dimensionId || !dataElement) return;
-        var res = $filter('filter')($scope.model.data, {dx: dataElement, Duw5yep8Vae: header.dimensionId, pe: header.periodId})[0];
-        return res && res.value ? res.value : '';
     };
 
     $scope.exportData = function ( name ) {

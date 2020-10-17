@@ -152,6 +152,7 @@ ndpFramework.controller('DictionaryController',
                                 $scope.model.dictionaryHeaders = [
                                     {id: 'displayName', name: 'name', colSize: "col-sm-1", show: true, fetch: false},
                                     {id: 'code', name: 'code', colSize: "col-sm-1", show: true, fetch: false},
+                                    {id: 'aggregationType', name: 'aggregationType', colSize: "col-sm-1", show: true, fetch: false},
                                     {id: 'disaggregation', name: 'disaggregation', colSize: "col-sm-1", show: true, fetch: false},
                                     {id: 'valueType', name: 'valueType', colSize: "col-sm-1", show: true, fetch: false},
                                     {id: 'periodType', name: 'frequency', colSize: "col-sm-1", show: true, fetch: false},
@@ -169,7 +170,7 @@ ndpFramework.controller('DictionaryController',
                                     var cc = $scope.model.categoryCombosById[de.categoryCombo.id];
                                     de.disaggregation = !cc || cc.isDefault ? '-' : cc.displayName;
                                     de.vote = [];
-                                    ds.periodType = [];
+                                    de.periodType = [];
 
                                     for(var i=0; i<$scope.model.dataSets.length; i++){
                                         if( $scope.model.dataSets[i].dataElements.indexOf(de.id) !== -1 ){
@@ -301,5 +302,17 @@ ndpFramework.controller('DictionaryController',
 
     $scope.itemExists = function( item ){
         return $scope.model.selectedDataElementGroups.indexOf( item ) !== -1;
+    };
+
+    $scope.exportData = function ( name ) {
+        var blob = new Blob([document.getElementById('exportTable').innerHTML], {
+            type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=utf-8"
+        });
+
+        var reportName = "indicator-dictionary.xls";
+        if( name ){
+            reportName = name + '.xls';
+        }
+        saveAs(blob, reportName);
     };
 });

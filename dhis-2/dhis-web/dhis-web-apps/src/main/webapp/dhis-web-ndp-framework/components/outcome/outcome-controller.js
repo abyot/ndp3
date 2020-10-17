@@ -3,7 +3,7 @@
 /* global ndpFramework */
 
 
-ndpFramework.controller('SDGController',
+ndpFramework.controller('OutcomeController',
     function($scope,
         $translate,
         $modal,
@@ -27,7 +27,7 @@ ndpFramework.controller('SDGController',
         kra: [],
         objectives: [],
         selectedKra: null,
-        selectedSdg: null,
+        selectedObjective: null,
         selectedDataElementGroupSets: [],
         dataElementGroups: [],
         baseLineTargetActualDimensions: [],
@@ -48,13 +48,13 @@ ndpFramework.controller('SDGController',
     };
 
     $scope.model.horizontalMenus = [
-        {id: 'result', title: 'results', order: 1, view: 'components/sdg/results.html', active: true, class: 'main-horizontal-menu'},
-        {id: 'performance', title: 'physical_performance', order: 2, view: 'components/sdg/performance.html', class: 'main-horizontal-menu'},
-        {id: 'cumulative', title: 'cumulative_progress', order: 3, view: 'components/sdg/progress.html', class: 'main-horizontal-menu'},
-        {id: 'cost', title: 'cost', order: 4, view: 'components/sdg/cost.html', class: 'main-horizontal-menu'},
-        {id: 'efficiency', title: 'cost_efficiency', order: 5, view: 'components/sdg/efficiency.html', class: 'main-horizontal-menu'},
-        {id: 'dashboard', title: 'dashboard', order: 6, view: 'components/sdg/dashboard.html', class: 'external-horizontal-menu'},
-        {id: 'library', title: 'library', order: 7, view: 'components/sdg/library.html', class: 'external-horizontal-menu'}
+        {id: 'result', title: 'results', order: 1, view: 'components/outcome/results.html', active: true, class: 'main-horizontal-menu'},
+        {id: 'performance', title: 'physical_performance', order: 2, view: 'components/outcome/performance.html', class: 'main-horizontal-menu'},
+        {id: 'cumulative', title: 'cumulative_progress', order: 3, view: 'components/outcome/progress.html', class: 'main-horizontal-menu'},
+        {id: 'cost', title: 'cost', order: 4, view: 'components/outcome/cost.html', class: 'main-horizontal-menu'},
+        {id: 'efficiency', title: 'cost_efficiency', order: 5, view: 'components/outcome/efficiency.html', class: 'main-horizontal-menu'},
+        {id: 'dashboard', title: 'dashboard', order: 6, view: 'components/outcome/dashboard.html', class: 'external-horizontal-menu'},
+        {id: 'library', title: 'library', order: 7, view: 'components/outcome/library.html', class: 'external-horizontal-menu'}
     ];
 
     //Get orgunits for the logged in user
@@ -69,25 +69,25 @@ ndpFramework.controller('SDGController',
         $scope.selectedOrgUnit = $scope.orgUnits[0] ? $scope.orgUnits[0] : null;
     });
 
-    $scope.$watch('model.selectedSdg', function(){
+    $scope.$watch('model.selectedObjective', function(){
         $scope.model.selectedKra = null;
         $scope.model.dataElementGroup = [];
         $scope.resetDataView();
-        if( angular.isObject($scope.model.selectedSdg) && $scope.model.selectedSdg.id){
-            $scope.model.selectedDataElementGroupSets = $filter('filter')($scope.model.dataElementGroupSets, {id: $scope.model.selectedSdg.id});
-            angular.forEach($scope.model.selectedSdg.dataElementGroups, function(deg){
+        if( angular.isObject($scope.model.selectedObjective) && $scope.model.selectedObjective.id){
+            $scope.model.selectedDataElementGroupSets = $filter('filter')($scope.model.dataElementGroupSets, {id: $scope.model.selectedObjective.id});
+            angular.forEach($scope.model.selectedObjective.dataElementGroups, function(deg){
                 var _deg = $filter('filter')($scope.model.dataElementGroups, {id: deg.id});
-                if (_deg && deg.length > 0){
+                if ( _deg.length > 0 ){
                     $scope.model.dataElementGroup.push( _deg[0] );
                 }
             });
         }
         else{
-            $scope.model.selectedDataElementGroupSets = angular.copy( $scope.model.sdgs );
-            angular.forEach($scope.model.sdgs, function(degs){
+            $scope.model.selectedDataElementGroupSets = angular.copy( $scope.model.objectives );
+            angular.forEach($scope.model.objectives, function(degs){
                 angular.forEach(degs.dataElementGroups, function(deg){
                     var _deg = $filter('filter')($scope.model.dataElementGroups, {id: deg.id});
-                    if (_deg && deg.length > 0){
+                    if ( _deg.length > 0 ){
                         $scope.model.dataElementGroup.push( _deg[0] );
                     }
                 });
@@ -99,12 +99,27 @@ ndpFramework.controller('SDGController',
         $scope.populateMenu();
     });
 
+    $scope.$watch('model.selectedKra', function(){
+        $scope.resetDataView();
+        $scope.model.dataElementGroup = [];
+        if( angular.isObject($scope.model.selectedKra) && $scope.model.selectedKra.id){
+            var _deg = $filter('filter')($scope.model.dataElementGroups, {id: $scope.model.selectedKra.id});
+            if ( _deg.length > 0 ){
+                $scope.model.dataElementGroup.push( _deg[0] );
+            }
+            $scope.getAnalyticsData();
+        }
+        else{
+            $scope.getObjectives();
+        }
+    });
+
     $scope.getObjectives = function(){
         $scope.model.dataElementGroup = [];
         angular.forEach($scope.model.selectedDataElementGroupSets, function(degs){
             angular.forEach(degs.dataElementGroups, function(deg){
                 var _deg = $filter('filter')($scope.model.dataElementGroups, {id: deg.id});
-                if (_deg && deg.length > 0){
+                if ( _deg.length > 0 ){
                     $scope.model.dataElementGroup.push( _deg[0] );
                 }
             });
@@ -147,23 +162,26 @@ ndpFramework.controller('SDGController',
     $scope.populateMenu = function(){
 
         $scope.model.selectedMenu = SelectedMenuService.getSelectedMenu();
-        $scope.model.selectedSdg = null;
+        $scope.model.selectedObjective = null;
         $scope.model.selectedKra = null;
-        $scope.model.sdgs = [];
+        $scope.model.objectives = [];
         $scope.model.selectedDataElementGroupSets = [];
 
         if( $scope.model.selectedMenu && $scope.model.selectedMenu.ndp && $scope.model.selectedMenu.code ){
-            var objs = $filter('filter')($scope.model.dataElementGroupSets, {ndp: $scope.model.selectedMenu.ndp, indicatorGroupSetType: $scope.model.selectedMenu.code}, true);
-            $scope.model.sdgs = objs.filter(function(obj){
-                return !obj.ndpProgramme;
-            });
+            $scope.model.objectives = $filter('filter')($scope.model.dataElementGroupSets, {ndp: $scope.model.selectedMenu.ndp, indicatorGroupSetType: $scope.model.selectedMenu.code}, true);
 
-            $scope.model.sdgs = orderByFilter( $scope.model.sdgs, '-displayName').reverse();
+            $scope.model.objectives = orderByFilter( $scope.model.objectives, '-displayName').reverse();
 
-            $scope.model.selectedDataElementGroupSets = angular.copy( $scope.model.sdgs );
+            var goals = $filter('filter')($scope.model.dataElementGroupSets, {ndp: $scope.model.selectedMenu.ndp, indicatorGroupSetType: 'goal'}, true);
 
-            if( $scope.model.sdgs && $scope.model.sdgs.length === 1 ){
-                $scope.model.selectedSdg = $scope.model.sdgs[0];
+            if( goals.length > 0 ){
+                $scope.model.objectives.splice(0,0, ...goals);
+            }
+
+            $scope.model.selectedDataElementGroupSets = angular.copy( $scope.model.objectives );
+
+            if( $scope.model.objectives && $scope.model.objectives.length === 1 ){
+                $scope.model.selectedObjective = $scope.model.objectives[0];
             }
             else{
                 $scope.getObjectives();
@@ -192,8 +210,8 @@ ndpFramework.controller('SDGController',
             return;
         }
 
-        if( $scope.model.dataElementGroup.length === 0 || !$scope.model.dataElementGroup ){
-            NotificationService.showNotifcationDialog($translate.instant("error"), $translate.instant("missing_objective_or_kra"));
+        if( !$scope.model.dataElementGroup || $scope.model.dataElementGroup.length === 0){
+            NotificationService.showNotifcationDialog($translate.instant("error"), $translate.instant("missing_objective_goal"));
             return;
         }
 
@@ -269,7 +287,7 @@ ndpFramework.controller('SDGController',
             type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=utf-8"
         });
 
-        var reportName = $scope.model.selectedSdg.ndp + " objective" + " .xls";
+        var reportName = $scope.model.selectedObjective.ndp + " objective" + " .xls";
         if( name ){
             reportName = name + ' performance.xls';
         }
@@ -298,4 +316,5 @@ ndpFramework.controller('SDGController',
         $scope.model.dataExists = false;
         $scope.model.dataHeaders = [];
     };
+
 });

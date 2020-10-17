@@ -29,18 +29,26 @@
             <div ng-if="model.selectedMenu" ng-switch="model.selectedMenu.domain">
                 <!--<span ng-switch-when="NDP">
                     <div equal-height-nav-tabs ng-include="'components/home/ndp-framework.html'"></div>
-                </span>-->
+                </span>
 
                 <span ng-switch-when="GOL">
                     <div ng-include="'components/ndp/goals.html'"></div>
+                </span>-->
+
+                <span ng-switch-when="SDG">
+                    <div ng-include="'components/sdg/sdg-status.html'"></div>
                 </span>
 
-                <span ng-switch-when="OBJ">
-                    <div ng-include="'components/ndp/objectives.html'"></div>
+                <span ng-switch-when="NOUT">
+                    <div ng-include="'components/outcome/outcome-status.html'"></div>
                 </span>
 
-                <span ng-switch-when="PRG">
+                <span ng-switch-when="NPRG">
                     <div ng-include="'components/programme/programme-status.html'"></div>
+                </span>
+
+                <span ng-switch-when="NSUB">
+                    <div ng-include="'components/sub-programme/sub-programme-status.html'"></div>
                 </span>
 
                 <span ng-switch-when="PRJ">
@@ -51,9 +59,7 @@
                     <div ng-include="'components/intervention/intervention-status.html'"></div>
                 </span>
 
-                <span ng-switch-when="SDG">
-                    <div ng-include="'components/sdg/sdg-status.html'"></div>
-                </span>
+
 
                 <span ng-switch-when="SEC">
                     <div ng-include="'components/sector/sector-status.html'"></div>

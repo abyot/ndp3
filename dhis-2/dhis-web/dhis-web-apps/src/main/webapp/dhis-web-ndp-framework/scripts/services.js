@@ -554,6 +554,7 @@ var ndpFrameworkServices = angular.module('ndpFrameworkServices', ['ngResource']
                 }
                 return {data: reportData, metaData: data.metaData};
             }, function(response){
+                console.log('in service ...');
                 CommonUtils.errorNotifier(response);
                 return response.data;
             });
@@ -626,23 +627,25 @@ var ndpFrameworkServices = angular.module('ndpFrameworkServices', ['ngResource']
                     currRow.push(groupSet);
 
                     var generateRow = function(group, deg){
-                        angular.forEach(deg.dataElements, function(de){
-                            angular.forEach(de.categoryOptionCombos, function(oc){
-                                groupSet.span++;
-                                group.span++;
+                        if( deg && deg.dataElements ){
+                            angular.forEach(deg.dataElements, function(de){
+                                angular.forEach(de.categoryOptionCombos, function(oc){
+                                    groupSet.span++;
+                                    group.span++;
 
-                                var name = dataParams.metaData.items[de.id].name;
-                                if( de.categoryOptionCombos.length > 1 ){
-                                    name = name + " - " + oc.displayName;
-                                }
-                                currRow.push({val: name , span: 1, info: de.id});
-                                angular.forEach(dataHeaders, function(dh){
-                                    currRow.push({val: filterData(dh, de.id, oc.id, data, dataParams), span: 1});
+                                    var name = dataParams.metaData.items[de.id].name;
+                                    if( de.categoryOptionCombos.length > 1 ){
+                                        name = name + " - " + oc.displayName;
+                                    }
+                                    currRow.push({val: name , span: 1, info: de.id});
+                                    angular.forEach(dataHeaders, function(dh){
+                                        currRow.push({val: filterData(dh, de.id, oc.id, data, dataParams), span: 1});
+                                    });
+                                    parsedRow.push(currRow);
+                                    currRow = [];
                                 });
-                                parsedRow.push(currRow);
-                                currRow = [];
                             });
-                        });
+                        }
                     };
 
                     angular.forEach(degs.dataElementGroups, function(deg){

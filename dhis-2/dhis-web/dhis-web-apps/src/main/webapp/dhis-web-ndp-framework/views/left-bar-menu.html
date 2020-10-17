@@ -6,12 +6,12 @@
     <div data-stop-propagation="true">
         <script type="text/ng-template" id="treeMenu.html">
             <span class="tree-menu-button"
-                    ng-click="expandCollapse(menuItem)"
+                    ng-click="menuItem.show = !menuItem.show"
                     ng-show="menuItem.id !== 'SPACE' && menuItem.show && menuItem.children.length > 0">
                 <i class="fa fa-minus-square-o"></i>
             </span>
             <span class="tree-menu-button"
-                    ng-click="expandCollapse(menuItem)"
+                    ng-click="menuItem.show = !menuItem.show"
                     ng-show="menuItem.id !== 'SPACE' && (!menuItem.show && menuItem.children.length > 0) || (!menuItem.show && menuItem.hasChildren)">
                 <i class="fa fa-plus-square-o"></i>
             </span>
