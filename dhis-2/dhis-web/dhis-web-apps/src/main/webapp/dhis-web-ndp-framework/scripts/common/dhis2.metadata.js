@@ -92,7 +92,7 @@ dhis2.metadata.processMetaDataAttribute = function( obj )
         return;
     }
 
-    if(obj.attributeValues){
+    if(obj.attributeValues && obj.attributeValues.length > 0){
         for(var i=0; i<obj.attributeValues.length; i++){
             if(obj.attributeValues[i].value && obj.attributeValues[i].attribute && obj.attributeValues[i].attribute.code && obj.attributeValues[i].attribute.valueType){
             	if( obj.attributeValues[i].attribute.valueType === 'BOOLEAN' || obj.attributeValues[i].attribute.valueType === 'TRUE_ONLY' ){
@@ -257,6 +257,7 @@ dhis2.metadata.getMetaObjects = function( store, objs, url, filter, storage, db,
                             ca = dhis2.metadata.processMetaDataAttribute( ca );
                             if( ca.categoryOptions ){
                                 _.each( _.values( ca.categoryOptions ), function ( co ) {
+                                    co = dhis2.metadata.processMetaDataAttribute( co );
                                     co.mappedOrganisationUnits = [];
                                     if( co.organisationUnits && co.organisationUnits.length > 0 ){
                                         co.mappedOrganisationUnits = $.map(co.organisationUnits, function(ou){return ou.id;});
