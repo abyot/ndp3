@@ -44,44 +44,8 @@ ndpFramework.controller('ProjectController',
         {id: 'library', title: 'library', order: 3, view: 'components/project/library.html'}
     ];
 
-    //Get orgunits for the logged in user
-    OrgUnitFactory.getViewTreeRoot().then(function(response) {
-        $scope.orgUnits = response.organisationUnits;
-        angular.forEach($scope.orgUnits, function(ou){
-            ou.show = true;
-            angular.forEach(ou.children, function(o){
-                o.hasChildren = o.children && o.children.length > 0 ? true : false;
-            });
-        });
-        $scope.selectedOrgUnit = $scope.orgUnits[0] ? $scope.orgUnits[0] : null;
-    });
-
-    $scope.getObjectives = function(){
-        $scope.model.dataElementGroup = [];
-        angular.forEach($scope.model.selectedDataElementGroupSets, function(degs){
-            angular.forEach(degs.dataElementGroups, function(deg){
-                $scope.model.dataElementGroup.push( $filter('filter')($scope.model.dataElementGroups, {id: deg.id})[0] );
-            });
-        });
-    };
-
-    $scope.$watch('model.selectedObjective', function(){
-        $scope.model.dataElementGroup = [];
-        $scope.resetDataView();
-        if( angular.isObject($scope.model.selectedObjective) && $scope.model.selectedObjective.id){
-            $scope.model.selectedDataElementGroupSets = $filter('filter')($scope.model.dataElementGroupSets, {id: $scope.model.selectedObjective.id});
-            angular.forEach($scope.model.selectedObjective.dataElementGroups, function(deg){
-                $scope.model.dataElementGroup.push( $filter('filter')($scope.model.dataElementGroups, {id: deg.id})[0] );
-            });
-        }
-        else{
-            $scope.model.selectedDataElementGroupSets = angular.copy( $scope.model.objectives );
-            angular.forEach($scope.model.objectives, function(degs){
-                angular.forEach(degs.dataElementGroups, function(deg){
-                    $scope.model.dataElementGroup.push( $filter('filter')($scope.model.dataElementGroups, {id: deg.id})[0] );
-                });
-            });
-        }
+    $scope.$watch('model.selectedNdpProgram', function(){
+        $scope.setNdpProgram();
     });
 
     MetaDataFactory.getAll('optionSets').then(function(optionSets){
@@ -98,11 +62,24 @@ ndpFramework.controller('ProjectController',
 
             $scope.model.selectedMenu = SelectedMenuService.getSelectedMenu();
 
-            if( $scope.model.selectedMenu && $scope.model.selectedMenu.ndp && $scope.model.selectedMenu.code ){
-                $scope.model.ndpProgram = $filter('filter')($scope.model.optionSets, {ndp: $scope.model.selectedMenu.ndp, code: 'program'}, true)[0];
+            var programs = $filter('filter')($scope.model.optionSets, {code: 'program'});
+            if ( programs && programs.length > 0 ){
+                $scope.model.ndpProgram = programs[0];
             }
 
-            $scope.fetchDocuments();
+            //Get orgunits for the logged in user
+            OrgUnitFactory.getViewTreeRoot().then(function(response) {
+                $scope.orgUnits = response.organisationUnits;
+                angular.forEach($scope.orgUnits, function(ou){
+                    ou.show = true;
+                    angular.forEach(ou.children, function(o){
+                        o.hasChildren = o.children && o.children.length > 0 ? true : false;
+                    });
+                });
+                $scope.selectedOrgUnit = $scope.orgUnits[0] ? $scope.orgUnits[0] : null;
+
+                $scope.fetchDocuments();
+            });
         });
     });
 
@@ -172,25 +149,22 @@ ndpFramework.controller('ProjectController',
         }
     };
 
-    $scope.setNdpProgram = function( program ){
+    $scope.setNdpProgram = function(){
 
         $scope.model.attributesById = [];
         $scope.model.dataElementsById = [];
-
-        if( $scope.model.selectedNdpProgram && $scope.model.selectedNdpProgram.id === program.id ){
-            $scope.model.selectedNdpProgram = null;
-        }
-        else{
-            $scope.model.selectedNdpProgram = program;
-        }
+        $scope.model.projectsFetched = false;
 
         if( $scope.model.selectedNdpProgram && $scope.model.selectedNdpProgram.code ){
 
             var prs = $filter('filter')($scope.model.programs, {ndpProgramme: $scope.model.selectedNdpProgram.code}, true);
             $scope.model.selectedProgram = prs[0] || null;
 
-            $scope.model.projects = [];
             if( $scope.model.selectedProgram && $scope.model.selectedProgram.id && $scope.model.selectedProgram.programTrackedEntityAttributes ){
+
+                $scope.model.projects = [];
+                $scope.model.projectFetchStarted = true;
+
                 $scope.model.attributesById = $scope.model.selectedProgram.programTrackedEntityAttributes.reduce(function(map, obj){
                     map[obj.trackedEntityAttribute.id] = obj.trackedEntityAttribute;
                     return map;
@@ -208,7 +182,12 @@ ndpFramework.controller('ProjectController',
 
                 ProjectService.getByProgram($scope.selectedOrgUnit, $scope.model.selectedProgram, $scope.model.optionSetsById, $scope.model.attributesById ).then(function( data ){
                     $scope.model.projects = data;
+                    $scope.model.projectsFetched = true;
+                    $scope.model.projectFetchStarted = false;
                 });
+            }
+            else{
+                NotificationService.showNotifcationDialog($translate.instant("error"), $translate.instant("invalid_project_tracking_config"));
             }
         }
     };

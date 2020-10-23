@@ -128,6 +128,8 @@ ndpFramework.controller('ProgrammeController',
 
                     $scope.model.selectedMenu = SelectedMenuService.getSelectedMenu();
 
+                    console.log('selectedMenu:  ', $scope.model.selectedMenu);
+
                     if( $scope.model.selectedMenu && $scope.model.selectedMenu.ndp && $scope.model.selectedMenu.code ){
 
                         $scope.model.ndpProgram = $filter('filter')($scope.model.optionSets, {ndp: $scope.model.selectedMenu.ndp, code: 'program'}, true)[0];
@@ -138,6 +140,8 @@ ndpFramework.controller('ProgrammeController',
                             return !obj.ndpProgramme;
                         });
                     }
+
+                    console.log('ndp-programme:  ', $scope.model.ndpProgram);
                 });
             });
 

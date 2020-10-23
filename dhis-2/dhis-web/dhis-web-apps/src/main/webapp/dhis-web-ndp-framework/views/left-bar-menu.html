@@ -33,13 +33,13 @@
         </ul>
     </div>
 
-    <br>
-    <table class="table dhis2-table-hover table-bordered menu-vertical-spacing">
-        <tr ng-class="{'selected-menu' : 'COMPLETENESS' === model.selectedMenu.domain, 'bold': menuItem.bold}">
-            <td ng-click="setBottomMenu('COMPLETENESS')">{{'data_completeness' | translate}}</td>
+    <br><br>
+    <table class="table dhis2-table-hover table-bordered">
+        <tr ng-class="{'selected-menu' : 'CMP' === model.selectedMenu.domain, 'bold': menuItem.bold}">
+            <td ng-click="setBottomMenu('CMP')">{{'data_completeness' | translate}}</td>
         </tr>
-        <tr ng-class="{'selected-menu' : 'DICTIONARY' === model.selectedMenu.domain, 'bold': menuItem.bold}">
-            <td ng-click="setBottomMenu('DICTIONARY')">{{'indicator_dictionary' | translate}}</td>
+        <tr ng-class="{'selected-menu' : 'DCT' === model.selectedMenu.domain, 'bold': menuItem.bold}">
+            <td ng-click="setBottomMenu('DCT')">{{'indicator_dictionary' | translate}}</td>
         </tr>
         <tr ng-class="{'selected-menu' : 'DOCUMENT' === model.selectedMenu.domain, 'bold': menuItem.bold}">
             <td ng-click="goToMenu('../dhis-web-document-library')">{{'document_library' | translate}}</td>

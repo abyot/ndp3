@@ -11,11 +11,12 @@ html, body {
     margin-top: 4px;
     border-radius: 3px;
     height: 100%;
-    width: 335px;
+    width: 340px;
+    overflow: scroll;
 }
 
 #mainPage {
-    margin: 60px 5px 5px 340px;
+    margin: 60px 5px 5px 345px;
 }
 
 .not-for-screen {
@@ -65,7 +66,7 @@ html, body {
 
 .category-menu {
     background-color: #fff;
-    height: 100vh;
+    height: auto;
 }
 
 .menu-title  {
@@ -474,4 +475,8 @@ ul.tree ul li:last-child:before {
 
 .active-horizontal-menu > a {
     font-weight: bold !important;
+}
+
+.word-wrap {
+    word-wrap: break-word
 }

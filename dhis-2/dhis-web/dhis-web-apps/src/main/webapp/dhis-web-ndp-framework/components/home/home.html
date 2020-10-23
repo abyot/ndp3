@@ -27,15 +27,10 @@
 
         <form name="outerForm" novalidate>
             <div ng-if="model.selectedMenu" ng-switch="model.selectedMenu.domain">
-                <!--<span ng-switch-when="NDP">
-                    <div equal-height-nav-tabs ng-include="'components/home/ndp-framework.html'"></div>
-                </span>
 
-                <span ng-switch-when="GOL">
-                    <div ng-include="'components/ndp/goals.html'"></div>
-                </span>-->
+                <div ng-include="model.selectedMenu.view"></div>
 
-                <span ng-switch-when="SDG">
+                <!--<span ng-switch-when="SDG">
                     <div ng-include="'components/sdg/sdg-status.html'"></div>
                 </span>
 
@@ -43,26 +38,32 @@
                     <div ng-include="'components/outcome/outcome-status.html'"></div>
                 </span>
 
-                <span ng-switch-when="NPRG">
+                <span ng-switch-when="PRGO">
                     <div ng-include="'components/programme/programme-status.html'"></div>
                 </span>
 
-                <span ng-switch-when="NSUB">
+                <span ng-switch-when="SUBO">
                     <div ng-include="'components/sub-programme/sub-programme-status.html'"></div>
                 </span>
 
-                <span ng-switch-when="PRJ">
-                    <div ng-include="'components/project/project-status.html'"></div>
+                <span ng-switch-when="PRJO">
+                    <div ng-include="'components/project/output-status.html'"></div>
                 </span>
 
-                <span ng-switch-when="INV">
-                    <div ng-include="'components/intervention/intervention-status.html'"></div>
+                <span ng-switch-when="DEPO">
+                    <div ng-include="'components/department/output-status.html'"></div>
                 </span>
 
+                <span ng-switch-when="PRGP">
+                    <div ng-include="'components/programme/programme-performance.html'"></div>
+                </span>
 
+                <span ng-switch-when="SUBP">
+                    <div ng-include="'components/sub-programme/sub-programme-performance.html'"></div>
+                </span>
 
-                <span ng-switch-when="SEC">
-                    <div ng-include="'components/sector/sector-status.html'"></div>
+                <span ng-switch-when="PRJP">
+                    <div ng-include="'components/project/project-performance.html'"></div>
                 </span>
 
                 <span ng-switch-when="MDA">
@@ -79,7 +80,8 @@
 
                 <span ng-switch-when="COMPLETENESS">
                     <div ng-include="'components/completeness/completeness.html'"></div>
-                </span>
+                </span>-->
+
             </div>
         </form>
 

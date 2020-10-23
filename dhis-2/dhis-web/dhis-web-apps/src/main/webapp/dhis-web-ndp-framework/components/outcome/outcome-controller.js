@@ -38,6 +38,7 @@ ndpFramework.controller('OutcomeController',
         dictionaryItems: [],
         selectedPeriods: [],
         periods: [],
+        allPeriods: [],
         periodOffset: 0,
         openFuturePeriods: 10,
         selectedPeriodType: 'FinancialJuly',
@@ -114,6 +115,26 @@ ndpFramework.controller('OutcomeController',
         }
     });
 
+    $scope.getBasePeriod = function(){
+        $scope.model.basePeriod = null;
+        var location = -1;
+
+        var getBase = function(){
+            $scope.model.selectedPeriods = orderByFilter( $scope.model.selectedPeriods, '-id').reverse();
+            var p = $scope.model.selectedPeriods[0];
+            var res = PeriodService.getBasePeriod( p.id, $scope.model.allPeriods );
+            $scope.model.basePeriod = res.period;
+            location = res.location;
+        };
+
+        getBase();
+
+        if( location === 0 ){
+            $scope.getPeriods('PREV');
+            getBase();
+        }
+    };
+
     $scope.getObjectives = function(){
         $scope.model.dataElementGroup = [];
         angular.forEach($scope.model.selectedDataElementGroupSets, function(degs){
@@ -144,7 +165,9 @@ ndpFramework.controller('OutcomeController',
 
                 $scope.model.dataElementGroupSets = dataElementGroupSets;
 
-                $scope.model.periods = PeriodService.getPeriods($scope.model.selectedPeriodType, $scope.model.periodOffset, $scope.model.openFuturePeriods);
+                var periods = PeriodService.getPeriods($scope.model.selectedPeriodType, $scope.model.periodOffset, $scope.model.openFuturePeriods);
+                $scope.model.allPeriods = angular.copy( periods );
+                $scope.model.periods = periods;
 
                 var selectedPeriodNames = ['2020/21', '2021/22', '2022/23', '2023/24', '2024/25'];
 
@@ -190,14 +213,30 @@ ndpFramework.controller('OutcomeController',
     };
 
     $scope.getPeriods = function(mode){
+        var periods = [];
         if( mode === 'NXT'){
             $scope.model.periodOffset = $scope.model.periodOffset + 1;
-            $scope.model.periods = PeriodService.getPeriods($scope.model.selectedPeriodType, $scope.model.periodOffset, $scope.model.openFuturePeriods);
+            periods = PeriodService.getPeriods($scope.model.selectedPeriodType, $scope.model.periodOffset, $scope.model.openFuturePeriods);
         }
         else{
             $scope.model.periodOffset = $scope.model.periodOffset - 1;
-            $scope.model.periods = PeriodService.getPeriods($scope.model.selectedPeriodType, $scope.model.periodOffset, $scope.model.openFuturePeriods);
+            periods = PeriodService.getPeriods($scope.model.selectedPeriodType, $scope.model.periodOffset, $scope.model.openFuturePeriods);
         }
+
+        var periodsById = {};
+        angular.forEach($scope.model.periods, function(p){
+            periodsById[p.id] = p;
+        });
+
+        angular.forEach(periods, function(p){
+            if( !periodsById[p.id] ){
+                periodsById[p.id] = p;
+            }
+        });
+
+        $scope.model.periods = Object.values( periodsById );
+
+        $scope.model.allPeriods = angular.copy( $scope.model.periods );
     };
 
     $scope.getAnalyticsData = function(){
@@ -215,10 +254,17 @@ ndpFramework.controller('OutcomeController',
             return;
         }
 
+        $scope.getBasePeriod();
+
+        if ( !$scope.model.basePeriod || !$scope.model.basePeriod.id ){
+            NotificationService.showNotifcationDialog($translate.instant("error"), $translate.instant("invalid_base_period"));
+            return;
+        }
+
         if( $scope.model.dataElementGroup && $scope.model.dataElementGroup.length > 0 && $scope.model.selectedPeriods.length > 0){
             analyticsUrl += '&filter=ou:'+ $scope.selectedOrgUnit.id +'&displayProperty=NAME&includeMetadataDetails=true';
             analyticsUrl += '&dimension=co&dimension=' + $scope.model.bta.category + ':' + $.map($scope.model.baseLineTargetActualDimensions, function(dm){return dm;}).join(';');
-            analyticsUrl += '&dimension=pe:' + $.map($scope.model.selectedPeriods, function(pe){return pe.id;}).join(';');
+            analyticsUrl += '&dimension=pe:' + $.map($scope.model.selectedPeriods.concat( $scope.model.basePeriod ), function(pe){return pe.id;}).join(';');
 
             var des = [];
             angular.forEach($scope.model.dataElementGroup, function(deg){
@@ -243,15 +289,18 @@ ndpFramework.controller('OutcomeController',
                         bta: $scope.model.bta,
                         selectedDataElementGroupSets: $scope.model.selectedDataElementGroupSets,
                         selectedDataElementGroup: $scope.model.selectedKra,
-                        dataElementGroups: $scope.model.dataElementGroups
+                        dataElementGroups: $scope.model.dataElementGroups,
+                        basePeriod: $scope.model.basePeriod,
+                        allPeriods: $scope.model.allPeriods
                     };
 
-                    var result = Analytics.processData( dataParams );
+                    var processedData = Analytics.processData( dataParams );
 
-                    $scope.model.dataHeaders = result.dataHeaders;
-                    $scope.model.finalData = result.finalData;
-                    $scope.model.reportPeriods = result.reportPeriods;
-                    $scope.model.dataExists = result.dataExists;
+                    $scope.model.dataHeaders = processedData.dataHeaders;
+                    $scope.model.resultData = processedData.resultData;
+                    $scope.model.reportPeriods = processedData.reportPeriods;
+                    $scope.model.dataExists = processedData.dataExists;
+                    $scope.model.performanceData = processedData.performanceData || [];
                 }
             });
         }

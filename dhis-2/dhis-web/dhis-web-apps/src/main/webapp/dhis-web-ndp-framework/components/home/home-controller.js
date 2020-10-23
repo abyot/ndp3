@@ -18,7 +18,12 @@ ndpFramework.controller('HomeController',
         optionSetsById: [],
         ndp: null,
         programs: [],
-        selectedProgram: null
+        selectedProgram: null,
+        bottomMenu: {
+            FAQ: '',
+            CMP: 'components/completeness/completeness.html',
+            DCT: 'components/dictionary/dictionary.html'
+        }
     };
 
     dhis2.ndp.downloadMetaData().then(function(){
@@ -67,7 +72,8 @@ ndpFramework.controller('HomeController',
                                 ndp: op.code,
                                 order: 0,
                                 displayName: $translate.instant('sdg_outcomes'),
-                                children: []
+                                children: [],
+                                view: 'components/sdg/sdg-status.html'
                             } );
                         }
 
@@ -81,7 +87,8 @@ ndpFramework.controller('HomeController',
                                 ndp: op.code,
                                 order: 1,
                                 displayName: $translate.instant('ndp_outcomes'),
-                                children: []
+                                children: [],
+                                view: 'components/outcome/outcome-status.html'
                             } );
                         }
 
@@ -90,38 +97,42 @@ ndpFramework.controller('HomeController',
                             op.show = true;
                             op.children.push( {
                                 id: op.code + '-PRG',
-                                domain: 'NPRG',
+                                domain: 'PRGO',
                                 code: 'ndpObjective',
                                 ndp: op.code,
                                 order: 2,
                                 displayName: $translate.instant('programme_outcomes'),
-                                children: []
+                                children: [],
+                                view: 'components/programme/programme-status.html'
                             } );
 
                             op.children.push( {
                                 id: op.code + '-SUB',
-                                domain: 'NSUB',
+                                domain: 'SUBO',
                                 code: 'sub-programme',
                                 ndp: op.code,
                                 order: 2,
                                 displayName: $translate.instant('sub_programme_outcomes'),
                                 show: true,
+                                view: 'components/sub-programme/sub-programme-status.html',
                                 children: [
                                     {
-                                        id: op.code + '-PRG-SUB-PRJ',
-                                        domain: 'NPRJ',
+                                        id: op.code + '-SUB-PRJ',
+                                        domain: 'PRJO',
                                         code: 'objective',
                                         ndp: op.code,
                                         order: 2,
-                                        displayName: $translate.instant('output_projects')
+                                        displayName: $translate.instant('output_projects'),
+                                        view: 'components/project/output-status.html'
                                     },
                                     {
-                                        id: op.code + '-PRG-SUB-DEP',
-                                        domain: 'NDEP',
+                                        id: op.code + '-SUB-DEP',
+                                        domain: 'DEPO',
                                         code: 'objective',
                                         ndp: op.code,
                                         order: 2,
-                                        displayName: $translate.instant('output_departments')
+                                        displayName: $translate.instant('output_departments'),
+                                        view: 'components/department/output-status.html'
                                     }
                                 ]
                             } );
@@ -154,32 +165,44 @@ ndpFramework.controller('HomeController',
                                     children: []
                                 },
                                 {
-                                    id: 'PRG',
-                                    domain: 'PRG',
+                                    id: 'PRGP',
+                                    domain: 'PRGP',
                                     displayName: $translate.instant('programme_performance'),
                                     order: 3,
-                                    children: []
+                                    children: [],
+                                    view: 'components/programme/programme-performance.html'
                                 },
                                 {
-                                    id: 'SUB',
-                                    domain: 'SUB',
+                                    id: 'SUBP',
+                                    domain: 'SUBP',
                                     displayName: $translate.instant('sub_programme_performance'),
                                     order: 4,
-                                    children: []
+                                    children: [],
+                                    view: 'components/sub-programme/sub-programme-performance.html'
                                 },
                                 {
-                                    id: 'PRJ',
-                                    domain: 'PRJ',
+                                    id: 'PRJP',
+                                    domain: 'PRJP',
                                     displayName: $translate.instant('project_performance'),
                                     order: 5,
-                                    children: []
+                                    children: [],
+                                    view: 'components/project/performance.html'
                                 },
                                 {
-                                    id: 'MDALG',
-                                    domain: 'MDALG',
-                                    displayName: $translate.instant('mdalg_performance'),
+                                    id: 'MDA',
+                                    domain: 'MDA',
+                                    displayName: $translate.instant('mda_performance'),
                                     order: 6,
-                                    children: []
+                                    children: [],
+                                    view: 'components/mda/mda-status.html'
+                                },
+                                {
+                                    id: 'LOG',
+                                    domain: 'LOG',
+                                    displayName: $translate.instant('log_performance'),
+                                    order: 7,
+                                    children: [],
+                                    view: 'components/log/log-status.html'
                                 }
                             ]
                         }
@@ -206,7 +229,7 @@ ndpFramework.controller('HomeController',
             $scope.model.selectedMenu = null;
         }
         else{
-            $scope.model.selectedMenu = {domain: menu};
+            $scope.model.selectedMenu = {domain: menu, view: $scope.model.bottomMenu[menu]};
         }
     };
 

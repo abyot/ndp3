@@ -30,7 +30,7 @@ var ndpFrameworkServices = angular.module('ndpFrameworkServices', ['ngResource']
     };
 })
 
-.service('PeriodService', function(CalendarService){
+.service('PeriodService', function(CalendarService, orderByFilter){
 
     this.getPeriods = function(periodType, periodOffset, futurePeriods){
         if(!periodType){
@@ -59,6 +59,22 @@ var ndpFrameworkServices = angular.module('ndpFrameworkServices', ['ngResource']
         });
 
         return d2Periods;
+    };
+
+    this.getBasePeriod = function( periodId, allPeriods ){
+        var index = -1, basePeriod = null;
+        if ( periodId && allPeriods && allPeriods.length > 0 ){
+            allPeriods = orderByFilter( allPeriods, '-id').reverse();
+            for( var i=0; i<allPeriods.length; i++){
+                if( allPeriods[i].id === periodId ){
+                    index = i;
+                }
+            }
+            if( index > 0 ){
+                basePeriod = allPeriods[index - 1];
+            }
+        }
+        return {location: index, period: basePeriod};
     };
 })
 
@@ -523,7 +539,7 @@ var ndpFrameworkServices = angular.module('ndpFrameworkServices', ['ngResource']
     };
 })
 
-.service('Analytics', function($http, $filter, $translate, orderByFilter, CommonUtils, NotificationService){
+.service('Analytics', function($http, $filter, $translate, PeriodService, orderByFilter, CommonUtils, NotificationService){
     return {
         getData: function( url ){
             url = dhis2.ndp.apiUrl + '/analytics?' + url;
@@ -554,27 +570,12 @@ var ndpFrameworkServices = angular.module('ndpFrameworkServices', ['ngResource']
                 }
                 return {data: reportData, metaData: data.metaData};
             }, function(response){
-                console.log('in service ...');
                 CommonUtils.errorNotifier(response);
                 return response.data;
             });
             return promise;
         },
         processData: function( dataParams ){
-
-            var filterData = function(header, dataElement, oc, data, reportParams){
-                if(!header || !data || !header.periodId || !header.dimensionId || !dataElement) return;
-
-                var filterParams = {
-                    dx: dataElement,
-                    pe: header.periodId,
-                    co: oc
-                };
-
-                filterParams[reportParams.bta.category] = header.dimensionId;
-                var res = $filter('dataFilter')(data, filterParams)[0];
-                return res && res.value ? res.value : '';
-            };
 
             var keyDataParams = ['data', 'metaData', 'reportPeriods', 'bta', 'selectedDataElementGroupSets', 'dataElementGroups'];
 
@@ -590,12 +591,91 @@ var ndpFrameworkServices = angular.module('ndpFrameworkServices', ['ngResource']
                 }
             }
 
+            var btaDimensions = {category: dataParams.bta.category};
+            angular.forEach(dataParams.bta.options, function(op){
+               btaDimensions[op.id] = op.btaDimensionType;
+            });
+
             var reportPeriods = orderByFilter( dataParams.reportPeriods, '-id').reverse();
             var data = dataParams.data;
             var baseLineTargetActualDimensions = $.map(dataParams.bta.options, function(d){return d.id;});
             var dataExists = false;
             var dataHeaders = [];
-            var finalData = [];
+            var performanceHeaders = orderByFilter( dataParams.reportPeriods, '-id').reverse();
+            var resultData = [];
+            var performanceData = [];
+
+            var mergeBtaData = function( _data ){
+                var data = angular.copy( _data );
+                var res = {};
+                if ( data && data.length && data.length > 0 ){
+                    angular.forEach(data, function(r){
+                        for( var k in r ){
+                            if ( k === btaDimensions.category ){
+                                var dim = btaDimensions[r[k]];
+                                r[dim] = r.value;
+                                delete r.value;
+                                break;
+                            }
+                        }
+                        res = Object.assign( res, r );
+                    });
+                }
+                return res;
+            };
+
+            var getBaseData = function( current, data ){
+                var base = null;
+                var c = angular.copy( current );
+                delete c.target; delete c.actual; delete c.baseline; delete c[btaDimensions.category];
+                if ( current && current.pe && data ){
+                    var currentBasePeriod = PeriodService.getBasePeriod( current.pe, dataParams.allPeriods );
+                    if( currentBasePeriod && currentBasePeriod.period && currentBasePeriod.period.id ){
+                        c.pe = currentBasePeriod.period.id;
+                        var _d = $filter('dataFilter')(data, c);
+                        base = mergeBtaData( _d, data );
+
+                        return base;
+                    }
+                }
+
+                return base;
+            };
+
+            var filterResultData = function(header, dataElement, oc, data, reportParams){
+                if(!header || !data || !header.periodId || !header.dimensionId || !dataElement) return;
+
+                var filterParams = {
+                    dx: dataElement,
+                    pe: header.periodId,
+                    co: oc
+                };
+
+                filterParams[reportParams.bta.category] = header.dimensionId;
+                var res = $filter('dataFilter')(data, filterParams)[0];
+                return res && res.value ? res.value : '';
+            };
+
+            var filterPerformanceData = function(header, dataElement, oc, data, reportParams){
+                if(!header || !data || !header.id || !dataElement) return;
+
+                var filterParams = {
+                    dx: dataElement,
+                    pe: header.id,
+                    co: oc
+                };
+
+                var rs = $filter('dataFilter')(data, filterParams);
+                var currentData = mergeBtaData( rs );
+                var baseData = getBaseData( currentData, data );
+
+                if ( baseData ){
+                    return CommonUtils.getPercent( currentData.actual - baseData.actual, currentData.target - baseData.actual );
+                }
+                else{
+                    return $translate.instant("no_target");
+                }
+            };
 
             angular.forEach(reportPeriods, function(pe){
                 var colSpan = 0;
@@ -619,12 +699,14 @@ var ndpFrameworkServices = angular.module('ndpFrameworkServices', ['ngResource']
             }
             else{
                 dataExists = true;
-                finalData = [];
-                var currRow = [], parsedRow = [];
+                resultData = [];
+                performanceData = [];
+                var resultRow = [], parsedResultRow = [], performanceRow = [], parsedPerformanceRow = [];
 
                 angular.forEach(dataParams.selectedDataElementGroupSets, function(degs){
                     var groupSet = {val: degs.displayName, span: 0};
-                    currRow.push(groupSet);
+                    resultRow.push(groupSet);
+                    performanceRow.push(groupSet);
 
                     var generateRow = function(group, deg){
                         if( deg && deg.dataElements ){
@@ -637,12 +719,22 @@ var ndpFrameworkServices = angular.module('ndpFrameworkServices', ['ngResource']
                                     if( de.categoryOptionCombos.length > 1 ){
                                         name = name + " - " + oc.displayName;
                                     }
-                                    currRow.push({val: name , span: 1, info: de.id});
+
+                                    //Result data
+                                    resultRow.push({val: name , span: 1, info: de.id});
                                     angular.forEach(dataHeaders, function(dh){
-                                        currRow.push({val: filterData(dh, de.id, oc.id, data, dataParams), span: 1});
+                                        resultRow.push({val: filterResultData(dh, de.id, oc.id, data, dataParams), span: 1});
                                     });
-                                    parsedRow.push(currRow);
-                                    currRow = [];
+                                    parsedResultRow.push(resultRow);
+                                    resultRow = [];
+
+                                    //Performance data
+                                    performanceRow.push({val: name , span: 1, info: de.id});
+                                    angular.forEach(performanceHeaders, function(dh){
+                                        performanceRow.push({val: filterPerformanceData(dh, de.id, oc.id, data, dataParams), span: 1});
+                                    });
+                                    parsedPerformanceRow.push(performanceRow);
+                                    performanceRow = [];
                                 });
                             });
                         }
@@ -652,24 +744,28 @@ var ndpFrameworkServices = angular.module('ndpFrameworkServices', ['ngResource']
                         if( dataParams.selectedDataElementGroup && dataParams.selectedDataElementGroup.id ){
                             if ( deg.id === dataParams.selectedDataElementGroup.id ){
                                 var group = {val: deg.displayName, span: 0};
-                                currRow.push(group);
+                                resultRow.push(group);
+                                performanceRow.push(group);
                                 var _deg = $filter('filter')(dataParams.dataElementGroups, {id: deg.id})[0];
                                 generateRow(group, _deg);
                             }
                         }
                         else{
                             var group = {val: deg.displayName, span: 0};
-                            currRow.push(group);
+                            resultRow.push(group);
+                            performanceRow.push(group);
                             var _deg = $filter('filter')(dataParams.dataElementGroups, {id: deg.id})[0];
                             generateRow(group, _deg);
                         }
                     });
                 });
-                finalData = parsedRow;
+                resultData = parsedResultRow;
+                performanceData = parsedPerformanceRow;
             }
 
             return {
-                finalData: finalData,
+                performanceData: performanceData,
+                resultData: resultData,
                 dataExists: dataExists,
                 dataHeaders: dataHeaders,
                 reportPeriods: reportPeriods
@@ -691,19 +787,6 @@ var ndpFrameworkServices = angular.module('ndpFrameworkServices', ['ngResource']
 
     var getByOrgUnitAndProgram = function(orgUnit, ouMode, program, typeDataElement, fileDataElement, optionSets, dataElementById){
         var url = DHIS2URL + '/events.json?' + 'orgUnit=' + orgUnit + '&ouMode='+ ouMode + '&program=' + program + skipPaging;
-
-        /*if( startDate && endDate ){
-            url += '&startDate=' + startDate + '&endDate=' + endDate;
-        }
-
-        if( attributeCategoryUrl && !attributeCategoryUrl.default ){
-            url += '&attributeCc=' + attributeCategoryUrl.cc + '&attributeCos=' + attributeCategoryUrl.cp;
-        }
-
-        if( categoryOptionCombo ){
-            url += '&coc=' + categoryOptionCombo;
-        }*/
-
         var promise = $http.get( url ).then(function(response){
             var events = response.data && response.data.events ? response.data.events : [];
             var documents = [];

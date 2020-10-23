@@ -310,10 +310,10 @@ function filterMissingPrograms( objs ){
 }
 
 function getPrograms( ids ){
-    return dhis2.metadata.getBatches( ids, batchSize, 'programs', 'programs', dhis2.ndp.apiUrl + '/programs.json', 'paging=false&fields=*,programTrackedEntityAttributes[*,trackedEntityAttribute[*]],categoryCombo[id],attributeValues[value,attribute[id,name,valueType,code]],organisationUnits[id,level],programStages[*,programStageDataElements[id,dataElement[*,attributeValues[value,attribute[id,name,valueType,code]]]]]', 'idb', dhis2.ndp.store, dhis2.metadata.processObject);
+    return dhis2.metadata.getBatches( ids, batchSize, 'programs', 'programs', dhis2.ndp.apiUrl + '/programs.json', 'paging=false&fields=*,programTrackedEntityAttributes[*],categoryCombo[id],attributeValues[value,attribute[id,name,valueType,code]],organisationUnits[id,level],programStages[*,programStageDataElements[id,dataElement[*,attributeValues[value,attribute[id,name,valueType,code]]]]]', 'idb', dhis2.ndp.store, dhis2.metadata.processObject);
 }
 
-/*function getMetaTrackedEntityAttributes(){
+function getMetaTrackedEntityAttributes(){
     return dhis2.metadata.getMetaObjectIds('trackedEntityAttributes', dhis2.ndp.apiUrl + '/trackedEntityAttributes.json', 'paging=false&fields=id,version');
 }
 
@@ -322,5 +322,5 @@ function filterMissingTrackedEntityAttributes( objs ){
 }
 
 function getTrackedEntityAttributes( ids ){
-    return dhis2.metadata.getBatches( ids, batchSize, 'trackedEntityAttributes', 'trackedEntityAttributes', dhis2.ndp.apiUrl + '/trackedEntityAttributes.json', 'paging=false&fields=*', 'idb', dhis2.ndp.store, dhis2.metadata.processObject);
-}*/
+    return dhis2.metadata.getBatches( ids, batchSize, 'trackedEntityAttributes', 'trackedEntityAttributes', dhis2.ndp.apiUrl + '/trackedEntityAttributes.json', 'paging=false&fields=*,attributeValues[value,attribute[id,name,valueType,code]]', 'idb', dhis2.ndp.store, dhis2.metadata.processObject);
+}
