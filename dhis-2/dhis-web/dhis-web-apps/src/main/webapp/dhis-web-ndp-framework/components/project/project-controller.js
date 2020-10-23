@@ -44,8 +44,20 @@ ndpFramework.controller('ProjectController',
         {id: 'library', title: 'library', order: 3, view: 'components/project/library.html'}
     ];
 
-    $scope.$watch('model.selectedNdpProgram', function(){
-        $scope.setNdpProgram();
+    $scope.$watch('model.selectedNDP', function(){
+        $scope.model.selectedProgram = null;
+        $scope.model.ndpPrograms = [];
+        $scope.resetData();
+        if( angular.isObject($scope.model.selectedNDP) && $scope.model.selectedNDP.id && $scope.model.selectedNDP.code){
+            $scope.model.ndpPrograms = $filter('filter')($scope.model.programs, {ndp: $scope.model.selectedNDP.code});
+        }
+    });
+
+    $scope.$watch('model.selectedProgram', function(){
+        $scope.resetData();
+        if ( $scope.model.selectedNDP && $scope.model.selectedNDP.code ){
+            $scope.fetchProgramDetails();
+        }
     });
 
     MetaDataFactory.getAll('optionSets').then(function(optionSets){
@@ -55,6 +67,8 @@ ndpFramework.controller('ProjectController',
         angular.forEach(optionSets, function(optionSet){
             $scope.model.optionSetsById[optionSet.id] = optionSet;
         });
+
+        $scope.model.ndp = $filter('filter')($scope.model.optionSets, {code: 'ndp'})[0];
 
         MetaDataFactory.getAll('programs').then(function(programs){
             $scope.model.programs = $filter('filter')(programs, {programType: 'WITH_REGISTRATION'}, true);
@@ -149,46 +163,31 @@ ndpFramework.controller('ProjectController',
         }
     };
 
-    $scope.setNdpProgram = function(){
+    $scope.fetchProgramDetails = function(){
+        if( $scope.model.selectedNDP && $scope.model.selectedNDP.code && $scope.model.selectedProgram && $scope.model.selectedProgram.id && $scope.model.selectedProgram.programTrackedEntityAttributes ){
 
-        $scope.model.attributesById = [];
-        $scope.model.dataElementsById = [];
-        $scope.model.projectsFetched = false;
+            $scope.model.projectFetchStarted = true;
 
-        if( $scope.model.selectedNdpProgram && $scope.model.selectedNdpProgram.code ){
+            $scope.model.attributesById = $scope.model.selectedProgram.programTrackedEntityAttributes.reduce(function(map, obj){
+                map[obj.trackedEntityAttribute.id] = obj.trackedEntityAttribute;
+                return map;
+            }, {});
 
-            var prs = $filter('filter')($scope.model.programs, {ndpProgramme: $scope.model.selectedNdpProgram.code}, true);
-            $scope.model.selectedProgram = prs[0] || null;
-
-            if( $scope.model.selectedProgram && $scope.model.selectedProgram.id && $scope.model.selectedProgram.programTrackedEntityAttributes ){
-
-                $scope.model.projects = [];
-                $scope.model.projectFetchStarted = true;
-
-                $scope.model.attributesById = $scope.model.selectedProgram.programTrackedEntityAttributes.reduce(function(map, obj){
-                    map[obj.trackedEntityAttribute.id] = obj.trackedEntityAttribute;
-                    return map;
-                }, {});
-
-                angular.forEach($scope.model.selectedProgram.programStages, function(stage){
-                    angular.forEach(stage.programStageDataElements, function(prstDe){
-                        var de = prstDe.dataElement;
-                        if( de ){
-                            $scope.model.dataElementsById[de.id] = de;
-                        }
-                    });
+            angular.forEach($scope.model.selectedProgram.programStages, function(stage){
+                angular.forEach(stage.programStageDataElements, function(prstDe){
+                    var de = prstDe.dataElement;
+                    if( de ){
+                        $scope.model.dataElementsById[de.id] = de;
+                    }
                 });
+            });
 
 
-                ProjectService.getByProgram($scope.selectedOrgUnit, $scope.model.selectedProgram, $scope.model.optionSetsById, $scope.model.attributesById ).then(function( data ){
-                    $scope.model.projects = data;
-                    $scope.model.projectsFetched = true;
-                    $scope.model.projectFetchStarted = false;
-                });
-            }
-            else{
-                NotificationService.showNotifcationDialog($translate.instant("error"), $translate.instant("invalid_project_tracking_config"));
-            }
+            ProjectService.getByProgram($scope.selectedOrgUnit, $scope.model.selectedProgram, $scope.model.optionSetsById, $scope.model.attributesById ).then(function( data ){
+                $scope.model.projects = data;
+                $scope.model.projectsFetched = true;
+                $scope.model.projectFetchStarted = false;
+            });
         }
     };
 
@@ -207,17 +206,11 @@ ndpFramework.controller('ProjectController',
         }
     };
 
-    $scope.resetView = function(horizontalMenu){
-        $scope.model.activeHorizontalMenu = horizontalMenu;
-
-        $scope.resetDataView();
-    };
-
-    $scope.resetDataView = function(){
-        $scope.model.data = null;
-        $scope.model.reportReady = false;
-        $scope.model.dataExists = false;
-        $scope.model.dataHeaders = [];
+    $scope.resetData = function(){
+        $scope.model.attributesById = [];
+        $scope.model.dataElementsById = [];
+        $scope.model.projectsFetched = false;
+        $scope.model.projects = [];
     };
 
     $scope.showOrgUnitTree = function(){
@@ -250,18 +243,10 @@ ndpFramework.controller('ProjectController',
             type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=utf-8"
         });
 
-        var reportName = $scope.model.selectedNdpProgram.displayName + " - project status" + " .xls";
+        var reportName = $scope.model.selectedProgram.displayName + " - project status" + " .xls";
         if( name ){
             reportName = name + ' performance.xls';
         }
         saveAs(blob, reportName);
     };
-
-    $scope.resetDataView = function(){
-        $scope.model.data = null;
-        $scope.model.reportReady = false;
-        $scope.model.dataExists = false;
-        $scope.model.dataHeaders = [];
-    };
-
 });
