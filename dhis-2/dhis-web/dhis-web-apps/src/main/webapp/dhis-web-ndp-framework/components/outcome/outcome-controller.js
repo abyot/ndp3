@@ -53,7 +53,7 @@ ndpFramework.controller('OutcomeController',
         {id: 'performance', title: 'physical_performance', order: 2, view: 'components/outcome/performance.html', class: 'main-horizontal-menu'},
         {id: 'cumulative', title: 'cumulative_progress', order: 3, view: 'components/outcome/progress.html', class: 'main-horizontal-menu'},
         {id: 'cost', title: 'cost', order: 4, view: 'components/outcome/cost.html', class: 'main-horizontal-menu'},
-        {id: 'efficiency', title: 'cost_efficiency', order: 5, view: 'components/outcome/efficiency.html', class: 'main-horizontal-menu'},
+        {id: 'efficiency', title: 'cost_effectiveness', order: 5, view: 'components/outcome/efficiency.html', class: 'main-horizontal-menu'},
         {id: 'dashboard', title: 'dashboard', order: 6, view: 'components/outcome/dashboard.html', class: 'external-horizontal-menu'},
         {id: 'library', title: 'library', order: 7, view: 'components/outcome/library.html', class: 'external-horizontal-menu'}
     ];

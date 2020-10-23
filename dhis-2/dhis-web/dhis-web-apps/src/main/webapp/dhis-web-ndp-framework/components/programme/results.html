@@ -16,21 +16,6 @@
                     </ui-select>
                 </div>
             </div>
-            <!--<div class="row small-vertical-spacing">
-                <div class="col-sm-2">
-                    {{'kra'| translate}}
-                </div>
-                <div class="col-sm-10">
-                    <ui-select ng-model="model.selectedKra"
-                               theme="select2"
-                               style="width:100%;">
-                        <ui-select-match allow-clear="true" class="form-control-ui-select" placeholder="{{model.selectedObjective && model.selectedObjective.dataElementGroups && model.selectedObjective.dataElementGroups.length > 0 ? 'all' : 'empty'| translate}}">{{$select.selected.displayName|| $select.selected}}</ui-select-match>
-                        <ui-select-choices repeat="deg in model.selectedObjective.dataElementGroups | filter: $select.search | limitTo:maxOptionSize | orderBy: ['displayName']">
-                            <span ng-bind-html="deg.displayName | highlight: $select.search"></span>
-                        </ui-select-choices>
-                    </ui-select>
-                </div>
-            </div>-->
             <div class="row vertical-spacing pull-right">
                 <div class="col-sm-12">
                     <button type="button"
@@ -80,7 +65,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <tr ng-repeat="row in model.finalData">
+                    <tr ng-repeat="row in model.resultData">
                         <td class="vertical-center" ng-repeat="col in row" rowspan="{{col.span}}">
                             {{col.val}}
                             <span ng-if="col.info" ng-click="getIndicatorDictionary(col.info)">

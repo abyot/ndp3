@@ -3,25 +3,25 @@
         <div class="col-sm-7 green-info-area">
             <div class="row small-vertical-spacing">
                 <div class="col-sm-2">
-                    {{'objectives'| translate}}
+                    {{'programme'| translate}}
                 </div>
                 <div class="col-sm-10">
-                    <ui-select ng-model="model.selectedObjective"
+                    <ui-select ng-model="model.selectedNdpProgram"
                                theme="select2"
                                style="width:100%;">
-                        <ui-select-match allow-clear="true" class="form-control-ui-select" placeholder="{{model.objectives && model.objectives.length > 0 ? 'all' : 'empty'| translate}}">{{$select.selected.displayName|| $select.selected}}</ui-select-match>
-                        <ui-select-choices repeat="degs in model.objectives | filter: $select.search | limitTo:maxOptionSize | orderBy: ['displayName']">
-                            <span ng-bind-html="degs.displayName | highlight: $select.search"></span>
+                        <ui-select-match allow-clear="true" class="form-control-ui-select" placeholder="{{model.ndpProgram && model.ndpProgram.options && model.ndpProgram.options.length > 0 ? 'please_select_program' : 'empty'| translate}}">{{$select.selected.displayName|| $select.selected}}</ui-select-match>
+                        <ui-select-choices repeat="option in model.ndpProgram.options | filter: $select.search | limitTo:maxOptionSize | orderBy: ['code']">
+                            <span ng-bind-html="option.displayName | highlight: $select.search"></span>
                         </ui-select-choices>
                     </ui-select>
                 </div>
             </div>
             <div class="row small-vertical-spacing">
                 <div class="col-sm-2">
-                    {{'sub-programmes'| translate}}
+                    {{'sub-programme'| translate}}
                 </div>
                 <div class="col-sm-10">
-                    <ui-select ng-model="model.selectedSubProgram"
+                    <ui-select ng-model="model.selectedSubProgramme"
                                theme="select2"
                                style="width:100%;">
                         <ui-select-match allow-clear="true" class="form-control-ui-select" placeholder="{{model.subPrograms && model.subPrograms.length > 0 ? 'all' : 'empty'| translate}}">{{$select.selected.displayName|| $select.selected}}</ui-select-match>
@@ -29,21 +29,6 @@
                             <span ng-bind-html="degs.displayName | highlight: $select.search"></span>
                         </ui-select-choices>
                     </ui-select>
-                </div>
-            </div>
-            <div class="row small-vertical-spacing">
-                <div class="col-sm-2">
-                    {{'performance'| translate}}
-                </div>
-                <div class="col-sm-10">
-                    <label class="checkbox-inline">
-                        <input type="checkbox" ng-model="model.physicalPerformance">
-                        <span>{{'physical' | translate}}</span>
-                    </label>
-                    <label class="checkbox-inline">
-                        <input type="checkbox" ng-model="model.financialPerformance">
-                        <span>{{'financial' | translate}}</span>
-                    </label>
                 </div>
             </div>
             <div class="row vertical-spacing pull-right">
@@ -86,8 +71,8 @@
                         </th>
                     </tr>
                     <tr>
-                        <th>{{'objective'| translate}}</th>
-                        <th>{{'outcomes'| translate}}</th>
+                        <th>{{model.selectedMenu.ndp}} {{'objectives'| translate}}</th>
+                        <th>{{'kra'| translate}}</th>
                         <th>{{'indicator'| translate}}</th>
                         <th class="center" ng-repeat="header in model.dataHeaders">
                             {{model.metaData.items[header.dimensionId].name}}
@@ -95,11 +80,11 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <tr ng-repeat="row in model.finalData">
+                    <tr ng-repeat="row in model.performanceData">
                         <td class="vertical-center" ng-repeat="col in row" rowspan="{{col.span}}">
                             {{col.val}}
                             <span ng-if="col.info" ng-click="getIndicatorDictionary(col.info)">
-                                <i class="fa fa-info-circle info-icon cursor-pointer" aria-hidden="true" title="{{'indicator_dictionary' | translate}}"></i>
+                                <i class="fa fa-info-circle info-icon cursor-pointer" aria-hidden="true" title="{{'indicator_dictionary'| translate}}"></i>
                             </span>
                         </td>
                     </tr>
