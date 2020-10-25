@@ -1,9 +1,10 @@
 <div ng-controller="LOGController">
-    <div equal-height-nav-tabs>
+    <div ng-include="'views/horizontal-menu.html'"></div>
+    <!--<div equal-height-nav-tabs>
         <tabset justified="true">
             <tab heading="{{horizontalMenu.title| translate}}" class="horizontal-menu font-16" ng-repeat="horizontalMenu in model.horizontalMenus" active="horizontalMenu.active" ng-click="resetView(horizontalMenu)">
                 <div ng-include="horizontalMenu.view"></div>
             </tab>
         </tabset>
-    </div>
+    </div>-->
 </div>

@@ -49,6 +49,13 @@ ndpFramework.controller('SubProgrammeController',
         {id: 'library', title: 'library', order: 7, view: 'components/sub-programme/library.html', class: 'external-horizontal-menu'}
     ];
 
+    $scope.model.performanceMenu = [
+        {id: 'trafficLight', title: 'traffic_light', order: 1, view: 'components/sub-programme/traffic-light.html', active: true, class: 'main-horizontal-menu'},
+        {id: 'budgetPerformance', title: 'budget_performance', order: 2, view: 'components/sub-programme/budget-performance.html', class: 'main-horizontal-menu'},
+        {id: 'budgetCompliance', title: 'budget_compliance', order: 3, view: 'components/sub-programme/budget-compliance.html', class: 'main-horizontal-menu'},
+        {id: 'completeness', title: 'completeness', order: 4, view: 'components/sub-programme/completeness.html', class: 'main-horizontal-menu'}
+    ];
+
     //Get orgunits for the logged in user
     OrgUnitFactory.getViewTreeRoot().then(function(response) {
         $scope.orgUnits = response.organisationUnits;
@@ -232,7 +239,7 @@ ndpFramework.controller('SubProgrammeController',
         }
 
         if( $scope.model.dataElementGroup.length === 0 || !$scope.model.dataElementGroup ){
-            NotificationService.showNotifcationDialog($translate.instant("error"), $translate.instant("missing_objective"));
+            NotificationService.showNotifcationDialog($translate.instant("error"), $translate.instant("missing_piap"));
         }
 
         $scope.getBasePeriod();

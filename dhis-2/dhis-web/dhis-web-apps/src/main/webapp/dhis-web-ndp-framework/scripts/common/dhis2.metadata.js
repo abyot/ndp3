@@ -339,9 +339,14 @@ dhis2.metadata.getMetaObjects = function( store, objs, url, filter, storage, db,
                     _.each(obj.programStages, function(stage){
                         _.each(stage.programStageDataElements, function(pstde){
                             if( pstde.dataElement ){
-                                pstde.dataElement = dhis2.metadata.processMetaDataAttribute( pstde.dataElement )
+                                pstde.dataElement = dhis2.metadata.processMetaDataAttribute( pstde.dataElement );
                             }
                         });
+                    });
+                }
+                else if( store === 'optionSets' ){
+                    _.each(obj.options, function(op){
+                        op = dhis2.metadata.processMetaDataAttribute( op );
                     });
                 }
                 count++;

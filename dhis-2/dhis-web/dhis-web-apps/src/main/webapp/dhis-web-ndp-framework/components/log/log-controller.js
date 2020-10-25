@@ -43,9 +43,13 @@ ndpFramework.controller('LOGController',
     };
 
     $scope.model.horizontalMenus = [
-        {id: 'performance', title: 'results', order: 3, view: 'components/log/performance.html', active: true},
+        /*{id: 'performance', title: 'results', order: 3, view: 'components/log/performance.html', active: true},
         {id: 'dashboard', title: 'dashboards', order: 4, view: 'components/log/dashboard.html'},
-        {id: 'library', title: 'library', order: 1, view: 'components/log/library.html'}
+        {id: 'library', title: 'library', order: 1, view: 'components/log/library.html'}*/
+        {id: 'trafficLight', title: 'traffic_light', order: 1, view: 'components/log/traffic-light.html', active: true, class: 'main-horizontal-menu'},
+        {id: 'budgetPerformance', title: 'budget_performance', order: 2, view: 'components/log/budget-performance.html', class: 'main-horizontal-menu'},
+        {id: 'budgetCompliance', title: 'budget_compliance', order: 3, view: 'components/log/budget-compliance.html', class: 'main-horizontal-menu'},
+        {id: 'completeness', title: 'completeness', order: 4, view: 'components/log/completeness.html', class: 'main-horizontal-menu'}
     ];
 
     //Get orgunits for the logged in user
@@ -121,6 +125,8 @@ ndpFramework.controller('LOGController',
             angular.forEach(optionSets, function(optionSet){
                 $scope.model.optionSetsById[optionSet.id] = optionSet;
             });
+
+            $scope.model.ndp = $filter('getFirst')($scope.model.optionSets, {code: 'ndp'});
 
             OptionComboService.getBtaDimensions().then(function( bta ){
 

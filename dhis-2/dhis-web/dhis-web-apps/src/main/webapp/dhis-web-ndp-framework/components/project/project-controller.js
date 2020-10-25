@@ -182,6 +182,7 @@ ndpFramework.controller('ProjectController',
                 });
             });
 
+            console.log('selectedProgram:  ', $scope.model.selectedProgram);
 
             ProjectService.getByProgram($scope.selectedOrgUnit, $scope.model.selectedProgram, $scope.model.optionSetsById, $scope.model.attributesById ).then(function( data ){
                 $scope.model.projects = data;

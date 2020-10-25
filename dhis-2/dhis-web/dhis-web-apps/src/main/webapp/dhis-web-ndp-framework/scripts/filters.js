@@ -60,4 +60,31 @@ var ndpFrameworkFilters = angular.module('ndpFrameworkFilters', [])
             });
         }
     };
+})
+
+.filter('getFirst', function(){
+    return function(data, obj){
+        if(!data ){
+            return;
+        }
+        if(!obj){
+            return data;
+        }
+        else{
+            var res = data.filter(function(item){
+                var match = true;
+                for( var k in obj ){
+                    match = match && item[k] === obj[k];
+                    if( !match ){
+                        return match;
+                    }
+                }
+                return match;
+            });
+            if(res && res.length > 0){
+                return res[0];
+            }
+            return null;
+        }
+    };
 });

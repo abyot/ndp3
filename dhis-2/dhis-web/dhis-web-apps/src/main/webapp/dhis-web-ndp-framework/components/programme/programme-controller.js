@@ -49,6 +49,13 @@ ndpFramework.controller('ProgrammeController',
         {id: 'library', title: 'library', order: 7, view: 'components/programme/library.html', class: 'external-horizontal-menu'}
     ];
 
+    $scope.model.performanceMenu = [
+        {id: 'trafficLight', title: 'traffic_light', order: 1, view: 'components/programme/traffic-light.html', active: true, class: 'main-horizontal-menu'},
+        {id: 'budgetPerformance', title: 'budget_performance', order: 2, view: 'components/programme/budget-performance.html', class: 'main-horizontal-menu'},
+        {id: 'budgetCompliance', title: 'budget_compliance', order: 3, view: 'components/programme/budget-compliance.html', class: 'main-horizontal-menu'},
+        {id: 'completeness', title: 'completeness', order: 4, view: 'components/programme/completeness.html', class: 'main-horizontal-menu'}
+    ];
+
     //Get orgunits for the logged in user
     OrgUnitFactory.getViewTreeRoot().then(function(response) {
         $scope.orgUnits = response.organisationUnits;
@@ -77,6 +84,18 @@ ndpFramework.controller('ProgrammeController',
             });
         });
     };
+
+    $scope.$watch('model.selectedNDP', function(){
+        $scope.resetDataView();
+        $scope.model.selectedDataElementGroupSets = [];
+        $scope.model.dataElementGroup = [];
+        $scope.model.selectedProgram = null;
+        $scope.model.objectives = [];
+        if( angular.isObject($scope.model.selectedNDP) && $scope.model.selectedNDP.id && $scope.model.selectedNDP.code){
+            $scope.model.selectedDataElementGroupSets = $filter('filter')($scope.model.dataElementGroupSets, {ndp: $scope.model.selectedNDP.code, indicatorGroupSetType: 'program'}, true);
+            $scope.model.ndpProgram = $filter('filter')($scope.model.optionSets, {ndp: $scope.model.selectedNDP.code, code: 'program'}, true)[0];
+        }
+    });
 
     $scope.$watch('model.selectedNdpProgram', function(){
         $scope.resetDataView();
@@ -119,6 +138,8 @@ ndpFramework.controller('ProgrammeController',
         angular.forEach(optionSets, function(optionSet){
             $scope.model.optionSetsById[optionSet.id] = optionSet;
         });
+
+        $scope.model.ndp = $filter('getFirst')($scope.model.optionSets, {code: 'ndp'});
 
         OptionComboService.getBtaDimensions().then(function( bta ){
 
