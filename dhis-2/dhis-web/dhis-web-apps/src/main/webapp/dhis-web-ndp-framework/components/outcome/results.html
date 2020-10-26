@@ -24,8 +24,8 @@
                     <ui-select ng-model="model.selectedKra"
                                theme="select2"
                                style="width:100%;">
-                        <ui-select-match allow-clear="true" class="form-control-ui-select" placeholder="{{model.selectedObjective && model.selectedObjective.dataElementGroups && model.selectedObjective.dataElementGroups.length > 0 ? 'all' : 'empty'| translate}}">{{$select.selected.displayName|| $select.selected}}</ui-select-match>
-                        <ui-select-choices repeat="deg in model.selectedObjective.dataElementGroups | filter: $select.search | limitTo:maxOptionSize | orderBy: ['displayName']">
+                        <ui-select-match allow-clear="true" class="form-control-ui-select" placeholder="{{model.kras && model.kras.length > 0 ? 'all' : 'empty'| translate}}">{{$select.selected.displayName|| $select.selected}}</ui-select-match>
+                        <ui-select-choices repeat="deg in model.kras | filter: $select.search | limitTo:maxOptionSize | orderBy: ['displayName']">
                             <span ng-bind-html="deg.displayName | highlight: $select.search"></span>
                         </ui-select-choices>
                     </ui-select>

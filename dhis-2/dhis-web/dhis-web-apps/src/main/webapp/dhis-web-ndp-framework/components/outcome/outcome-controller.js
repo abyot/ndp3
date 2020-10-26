@@ -58,20 +58,9 @@ ndpFramework.controller('OutcomeController',
         {id: 'library', title: 'library', order: 7, view: 'components/outcome/library.html', class: 'external-horizontal-menu'}
     ];
 
-    //Get orgunits for the logged in user
-    OrgUnitFactory.getViewTreeRoot().then(function(response) {
-        $scope.orgUnits = response.organisationUnits;
-        angular.forEach($scope.orgUnits, function(ou){
-            ou.show = true;
-            angular.forEach(ou.children, function(o){
-                o.hasChildren = o.children && o.children.length > 0 ? true : false;
-            });
-        });
-        $scope.selectedOrgUnit = $scope.orgUnits[0] ? $scope.orgUnits[0] : null;
-    });
-
     $scope.$watch('model.selectedObjective', function(){
         $scope.model.selectedKra = null;
+        $scope.model.kras = [];
         $scope.model.dataElementGroup = [];
         $scope.resetDataView();
         if( angular.isObject($scope.model.selectedObjective) && $scope.model.selectedObjective.id){
@@ -82,6 +71,8 @@ ndpFramework.controller('OutcomeController',
                     $scope.model.dataElementGroup.push( _deg[0] );
                 }
             });
+
+            $scope.model.kras = $scope.model.selectedObjective.dataElementGroups;
         }
         else{
             $scope.model.selectedDataElementGroupSets = angular.copy( $scope.model.objectives );
@@ -177,7 +168,19 @@ ndpFramework.controller('OutcomeController',
                     }
                 });
 
-                $scope.populateMenu();
+                //Get orgunits for the logged in user
+                OrgUnitFactory.getViewTreeRoot().then(function(response) {
+                    $scope.orgUnits = response.organisationUnits;
+                    angular.forEach($scope.orgUnits, function(ou){
+                        ou.show = true;
+                        angular.forEach(ou.children, function(o){
+                            o.hasChildren = o.children && o.children.length > 0 ? true : false;
+                        });
+                    });
+                    $scope.selectedOrgUnit = $scope.orgUnits[0] ? $scope.orgUnits[0] : null;
+
+                    $scope.populateMenu();
+                });
             });
         });
     });

@@ -31,6 +31,7 @@ ndpFramework.controller('SubProgrammeController',
         selectedDataElementGroupSets: [],
         dataElementGroups: [],
         selectedNdpProgram: null,
+        selectedSubProgramme: null,
         selectedPeriods: [],
         periods: [],
         allPeriods: [],
@@ -83,6 +84,7 @@ ndpFramework.controller('SubProgrammeController',
     $scope.$watch('model.selectedNdpProgram', function(){
         $scope.model.objectives = [];
         $scope.model.subPrograms = [];
+        $scope.model.selectedSubProgramme = null;
         $scope.model.selectedDataElementGroupSets = [];
         $scope.resetDataView();
         if( angular.isObject($scope.model.selectedNdpProgram) ){

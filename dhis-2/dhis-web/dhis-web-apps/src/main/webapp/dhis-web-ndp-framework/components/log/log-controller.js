@@ -10,7 +10,6 @@ ndpFramework.controller('LOGController',
         $filter,
         NotificationService,
         SelectedMenuService,
-        orderByFilter,
         PeriodService,
         MetaDataFactory,
         OrgUnitFactory,
@@ -39,7 +38,8 @@ ndpFramework.controller('LOGController',
         periods: [],
         periodOffset: 0,
         openFuturePeriods: 10,
-        selectedPeriodType: 'FinancialJuly'
+        selectedPeriodType: 'FinancialJuly',
+        ndp: null
     };
 
     $scope.model.horizontalMenus = [
@@ -70,6 +70,34 @@ ndpFramework.controller('LOGController',
                 $scope.model.selectedVote = data;
                 $scope.getInterventions();
             });
+        }
+    });
+
+    $scope.$watch('model.selectedNDP', function(){
+        $scope.model.selectedNdpProgram = null;
+        $scope.model.ndpProgram = null;
+        $scope.model.objectives = [];
+        $scope.model.subPrograms = [];
+        $scope.model.selectedSubProgramme = null;
+        $scope.model.selectedDataElementGroupSets = [];
+
+        if( angular.isObject($scope.model.selectedNDP) && $scope.model.selectedNDP.id && $scope.model.selectedNDP.code){
+            $scope.model.ndpProgram = $filter('getFirst')($scope.model.optionSets, {ndp: $scope.model.selectedNDP.code, code: 'program'}, true);
+        }
+    });
+
+    $scope.$watch('model.selectedNdpProgram', function(){
+        $scope.model.objectives = [];
+        $scope.model.subPrograms = [];
+        $scope.model.selectedSubProgramme = null;
+        $scope.model.selectedDataElementGroupSets = [];
+        $scope.resetDataView();
+        if( angular.isObject($scope.model.selectedNdpProgram) ){
+            if( $scope.model.selectedNdpProgram && $scope.model.selectedNdpProgram.code ){
+                $scope.model.objectives = $filter('filter')($scope.model.dataElementGroupSets, {ndp: $scope.model.selectedMenu.ndp, indicatorGroupSetType: $scope.model.selectedMenu.code, ndpProgramme: $scope.model.selectedNdpProgram.code}, true);
+                $scope.model.subPrograms = $filter('filter')($scope.model.dataElementGroupSets, {ndp: $scope.model.selectedMenu.ndp, indicatorGroupSetType: 'sub-programme', ndpProgramme: $scope.model.selectedNdpProgram.code}, true);
+                $scope.model.selectedDataElementGroupSets = angular.copy( $scope.model.objectives );
+            }
         }
     });
 
@@ -127,6 +155,11 @@ ndpFramework.controller('LOGController',
             });
 
             $scope.model.ndp = $filter('getFirst')($scope.model.optionSets, {code: 'ndp'});
+
+            if( !$scope.model.ndp || !$scope.model.ndp.code ){
+                NotificationService.showNotifcationDialog($translate.instant("error"), $translate.instant("missing_ndp_configuration"));
+                return;
+            }
 
             OptionComboService.getBtaDimensions().then(function( bta ){
 
@@ -202,9 +235,6 @@ ndpFramework.controller('LOGController',
             $scope.model.selectedDataElementGroupSets = $filter('filter')($scope.model.selectedDataElementGroupSets, {indicatorGroupSetType: 'intervention'}, true);
 
             $scope.getObjectives();
-
-            //var goals = $filter('filter')($scope.model.selectedDataElementGroupSets, {indicatorGroupSetType: 'goal'}, true);
-            //var objectives = $filter('filter')($scope.model.selectedDataElementGroupSets, {indicatorGroupSetType: 'objective'}, true);
         }
     };
 

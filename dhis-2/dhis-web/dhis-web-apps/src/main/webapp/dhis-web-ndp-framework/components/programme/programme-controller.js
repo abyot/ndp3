@@ -85,6 +85,19 @@ ndpFramework.controller('ProgrammeController',
         });
     };
 
+    /*$scope.$watch('model.selectedNDP', function(){
+        $scope.model.selectedNdpProgram = null;
+        $scope.model.ndpProgram = null;
+        $scope.model.objectives = [];
+        $scope.model.subPrograms = [];
+        $scope.model.selectedSubProgramme = null;
+        $scope.model.selectedDataElementGroupSets = [];
+
+        if( angular.isObject($scope.model.selectedNDP) && $scope.model.selectedNDP.id && $scope.model.selectedNDP.code){
+            $scope.model.ndpProgram = $filter('getFirst')($scope.model.optionSets, {ndp: $scope.model.selectedNDP.code, code: 'program'}, true);
+        }
+    });*/
+
     $scope.$watch('model.selectedNDP', function(){
         $scope.resetDataView();
         $scope.model.selectedDataElementGroupSets = [];
@@ -93,7 +106,7 @@ ndpFramework.controller('ProgrammeController',
         $scope.model.objectives = [];
         if( angular.isObject($scope.model.selectedNDP) && $scope.model.selectedNDP.id && $scope.model.selectedNDP.code){
             $scope.model.selectedDataElementGroupSets = $filter('filter')($scope.model.dataElementGroupSets, {ndp: $scope.model.selectedNDP.code, indicatorGroupSetType: 'program'}, true);
-            $scope.model.ndpProgram = $filter('filter')($scope.model.optionSets, {ndp: $scope.model.selectedNDP.code, code: 'program'}, true)[0];
+            $scope.model.ndpProgram = $filter('getFirst')($scope.model.optionSets, {ndp: $scope.model.selectedNDP.code, code: 'program'}, true);
         }
     });
 
@@ -141,6 +154,11 @@ ndpFramework.controller('ProgrammeController',
 
         $scope.model.ndp = $filter('getFirst')($scope.model.optionSets, {code: 'ndp'});
 
+        if( !$scope.model.ndp || !$scope.model.ndp.code ){
+            NotificationService.showNotifcationDialog($translate.instant("error"), $translate.instant("missing_ndp_configuration"));
+            return;
+        }
+
         OptionComboService.getBtaDimensions().then(function( bta ){
 
             if( !bta || !bta.category || !bta.options || bta.options.length !== 3 ){
@@ -174,8 +192,7 @@ ndpFramework.controller('ProgrammeController',
                     $scope.model.selectedMenu = SelectedMenuService.getSelectedMenu();
 
                     if( $scope.model.selectedMenu && $scope.model.selectedMenu.ndp && $scope.model.selectedMenu.code ){
-
-                        $scope.model.ndpProgram = $filter('filter')($scope.model.optionSets, {ndp: $scope.model.selectedMenu.ndp, code: 'program'}, true)[0];
+                        $scope.model.ndpProgram = $filter('getFirst')($scope.model.optionSets, {ndp: $scope.model.selectedMenu.ndp, code: 'program'}, true);
                         $scope.model.ndpObjectives = $filter('filter')($scope.model.dataElementGroupSets, {ndp: $scope.model.selectedMenu.ndp, indicatorGroupSetType: 'resultsFrameworkObjective'}, true);
                         $scope.model.ndpProgrammes = $filter('filter')($scope.model.dataElementGroupSets, {ndp: $scope.model.selectedMenu.ndp, indicatorGroupSetType: 'programme'}, true);
 

@@ -68,7 +68,7 @@ ndpFramework.controller('ProjectController',
             $scope.model.optionSetsById[optionSet.id] = optionSet;
         });
 
-        $scope.model.ndp = $filter('filter')($scope.model.optionSets, {code: 'ndp'})[0];
+        $scope.model.ndp = $filter('getFirst')($scope.model.optionSets, {code: 'ndp'});
 
         MetaDataFactory.getAll('programs').then(function(programs){
             $scope.model.programs = $filter('filter')(programs, {programType: 'WITH_REGISTRATION'}, true);
