@@ -61,8 +61,8 @@ var ndpFrameworkServices = angular.module('ndpFrameworkServices', ['ngResource']
         return d2Periods;
     };
 
-    this.getBasePeriod = function( periodId, allPeriods ){
-        var index = -1, basePeriod = null;
+    this.getPreviousPeriod = function( periodId, allPeriods ){
+        var index = -1, previousPeriod = null;
         if ( periodId && allPeriods && allPeriods.length > 0 ){
             allPeriods = orderByFilter( allPeriods, '-id').reverse();
             for( var i=0; i<allPeriods.length; i++){
@@ -71,10 +71,10 @@ var ndpFrameworkServices = angular.module('ndpFrameworkServices', ['ngResource']
                 }
             }
             if( index > 0 ){
-                basePeriod = allPeriods[index - 1];
+                previousPeriod = allPeriods[index - 1];
             }
         }
-        return {location: index, period: basePeriod};
+        return {location: index, period: previousPeriod};
     };
 })
 
@@ -604,6 +604,7 @@ var ndpFrameworkServices = angular.module('ndpFrameworkServices', ['ngResource']
             var performanceHeaders = orderByFilter( dataParams.reportPeriods, '-id').reverse();
             var resultData = [];
             var performanceData = [];
+            var cumulativeData = [];
 
             var mergeBtaData = function( _data ){
                 var data = angular.copy( _data );
@@ -624,22 +625,37 @@ var ndpFrameworkServices = angular.module('ndpFrameworkServices', ['ngResource']
                 return res;
             };
 
-            var getBaseData = function( current, data ){
-                var base = null;
-                var c = angular.copy( current );
-                delete c.target; delete c.actual; delete c.baseline; delete c[btaDimensions.category];
+            var getPreviousData = function( current, data ){
+                var previous = null;
+                var param = angular.copy( current );
+                delete param.target; delete param.actual; delete param.baseline; delete param[btaDimensions.category];
                 if ( current && current.pe && data ){
-                    var currentBasePeriod = PeriodService.getBasePeriod( current.pe, dataParams.allPeriods );
-                    if( currentBasePeriod && currentBasePeriod.period && currentBasePeriod.period.id ){
-                        c.pe = currentBasePeriod.period.id;
-                        var _d = $filter('dataFilter')(data, c);
-                        base = mergeBtaData( _d, data );
+                    var previousPeriod = PeriodService.getPreviousPeriod( current.pe, dataParams.allPeriods );
+                    if( previousPeriod && previousPeriod.period && previousPeriod.period.id ){
+                        param.pe = previousPeriod.period.id;
+                        var _d = $filter('dataFilter')(data, param);
+                        previous = mergeBtaData( _d, data );
 
-                        return base;
+                        return previous;
                     }
                 }
 
-                return base;
+                return previous;
+            };
+
+            var getPeriodData = function( period, current, data ){
+                var periodData = null;
+                var param = angular.copy( current );
+                delete param.target; delete param.actual; delete param.baseline; delete param[btaDimensions.category];
+                if ( current && current.pe && data && period && period.id ){
+                    param.pe = period.id;
+                    var _d = $filter('dataFilter')(data, param);
+                    periodData = mergeBtaData( _d, data );
+
+                    return periodData;
+                }
+
+                return periodData;
             };
 
             var filterResultData = function(header, dataElement, oc, data, reportParams){
@@ -667,10 +683,38 @@ var ndpFrameworkServices = angular.module('ndpFrameworkServices', ['ngResource']
 
                 var rs = $filter('dataFilter')(data, filterParams);
                 var currentData = mergeBtaData( rs );
-                var baseData = getBaseData( currentData, data );
+                var previousData = getPreviousData( currentData, data );
 
-                if ( baseData ){
-                    return CommonUtils.getPercent( currentData.actual - baseData.actual, currentData.target - baseData.actual );
+                if ( previousData ){
+                    return CommonUtils.getPercent( currentData.actual - previousData.actual, currentData.target - previousData.actual );
+                }
+                else{
+                    return $translate.instant("no_target");
+                }
+            };
+
+            var filterCumulativeData = function(header, dataElement, oc, data, reportParams){
+                if(!header || !data || !header.id || !dataElement || !reportParams) return;
+
+                var filterParams = {
+                    dx: dataElement,
+                    pe: header.id,
+                    co: oc
+                };
+
+                if ( !reportParams.basePeriod || !reportParams.maxPeriod ){
+                    $translate.instant("invalid_period");
+                }
+
+                console.log('anchor periods:  ', reportParams);
+                var rs = $filter('dataFilter')(data, filterParams);
+                var currentData = mergeBtaData( rs );
+                var baseData = getPeriodData( reportParams.basePeriod, currentData, data );
+                var maxData = getPeriodData( reportParams.maxPeriod, currentData, data );
+
+
+                if ( baseData && maxData ){
+                    return CommonUtils.getPercent( currentData.actual - baseData.actual, maxData.target - baseData.actual );
                 }
                 else{
                     return $translate.instant("no_target");
@@ -701,12 +745,15 @@ var ndpFrameworkServices = angular.module('ndpFrameworkServices', ['ngResource']
                 dataExists = true;
                 resultData = [];
                 performanceData = [];
-                var resultRow = [], parsedResultRow = [], performanceRow = [], parsedPerformanceRow = [];
+                var resultRow = [], parsedResultRow = [],
+                    performanceRow = [], parsedPerformanceRow = [],
+                    cumulativeRow = [], parsedCumulativeRow = [];
 
                 angular.forEach(dataParams.selectedDataElementGroupSets, function(degs){
                     var groupSet = {val: degs.displayName, span: 0};
                     resultRow.push(groupSet);
                     performanceRow.push(groupSet);
+                    cumulativeRow.push(groupSet);
 
                     var generateRow = function(group, deg){
                         if( deg && deg.dataElements ){
@@ -735,6 +782,14 @@ var ndpFrameworkServices = angular.module('ndpFrameworkServices', ['ngResource']
                                     });
                                     parsedPerformanceRow.push(performanceRow);
                                     performanceRow = [];
+
+                                    //Cumulative data
+                                    cumulativeRow.push({val: name , span: 1, info: de.id});
+                                    angular.forEach(performanceHeaders, function(dh){
+                                        cumulativeRow.push({val: filterCumulativeData(dh, de.id, oc.id, data, dataParams), span: 1});
+                                    });
+                                    parsedCumulativeRow.push(cumulativeRow);
+                                    cumulativeRow = [];
                                 });
                             });
                         }
@@ -746,6 +801,7 @@ var ndpFrameworkServices = angular.module('ndpFrameworkServices', ['ngResource']
                                 var group = {val: deg.displayName, span: 0};
                                 resultRow.push(group);
                                 performanceRow.push(group);
+                                cumulativeRow.push(group);
                                 var _deg = $filter('filter')(dataParams.dataElementGroups, {id: deg.id})[0];
                                 generateRow(group, _deg);
                             }
@@ -754,6 +810,7 @@ var ndpFrameworkServices = angular.module('ndpFrameworkServices', ['ngResource']
                             var group = {val: deg.displayName, span: 0};
                             resultRow.push(group);
                             performanceRow.push(group);
+                            cumulativeRow.push(group);
                             var _deg = $filter('filter')(dataParams.dataElementGroups, {id: deg.id})[0];
                             generateRow(group, _deg);
                         }
@@ -761,11 +818,13 @@ var ndpFrameworkServices = angular.module('ndpFrameworkServices', ['ngResource']
                 });
                 resultData = parsedResultRow;
                 performanceData = parsedPerformanceRow;
+                cumulativeData = parsedCumulativeRow;
             }
 
             return {
                 performanceData: performanceData,
                 resultData: resultData,
+                cumulativeData: cumulativeData,
                 dataExists: dataExists,
                 dataHeaders: dataHeaders,
                 reportPeriods: reportPeriods

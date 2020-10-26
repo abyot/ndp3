@@ -131,7 +131,7 @@ ndpFramework.controller('ProgrammeController',
         var getBase = function(){
             $scope.model.selectedPeriods = orderByFilter( $scope.model.selectedPeriods, '-id').reverse();
             var p = $scope.model.selectedPeriods[0];
-            var res = PeriodService.getBasePeriod( p.id, $scope.model.allPeriods );
+            var res = PeriodService.getPreviousPeriod( p.id, $scope.model.allPeriods );
             $scope.model.basePeriod = res.period;
             location = res.location;
         };
@@ -292,6 +292,7 @@ ndpFramework.controller('ProgrammeController',
                         selectedDataElementGroup: $scope.model.selectedKra,
                         dataElementGroups: $scope.model.dataElementGroups,
                         basePeriod: $scope.model.basePeriod,
+                        maxPeriod: $scope.model.selectedPeriods.slice(-1)[0],
                         allPeriods: $scope.model.allPeriods
                     };
 

@@ -113,7 +113,7 @@ ndpFramework.controller('OutcomeController',
         var getBase = function(){
             $scope.model.selectedPeriods = orderByFilter( $scope.model.selectedPeriods, '-id').reverse();
             var p = $scope.model.selectedPeriods[0];
-            var res = PeriodService.getBasePeriod( p.id, $scope.model.allPeriods );
+            var res = PeriodService.getPreviousPeriod( p.id, $scope.model.allPeriods );
             $scope.model.basePeriod = res.period;
             location = res.location;
         };
@@ -294,16 +294,18 @@ ndpFramework.controller('OutcomeController',
                         selectedDataElementGroup: $scope.model.selectedKra,
                         dataElementGroups: $scope.model.dataElementGroups,
                         basePeriod: $scope.model.basePeriod,
+                        maxPeriod: $scope.model.selectedPeriods.slice(-1)[0],
                         allPeriods: $scope.model.allPeriods
                     };
 
                     var processedData = Analytics.processData( dataParams );
 
                     $scope.model.dataHeaders = processedData.dataHeaders;
-                    $scope.model.resultData = processedData.resultData;
                     $scope.model.reportPeriods = processedData.reportPeriods;
                     $scope.model.dataExists = processedData.dataExists;
+                    $scope.model.resultData = processedData.resultData || [];
                     $scope.model.performanceData = processedData.performanceData || [];
+                    $scope.model.cumulativeData = processedData.cumulativeData || [];
                 }
             });
         }
