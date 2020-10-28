@@ -66,7 +66,7 @@ ndpFramework.controller('HomeController',
                             op.hasChildren = true;
                             op.show = true;
                             op.children.push( {
-                                id: 'SDG',
+                                id: op.code + '-SDG',
                                 domain: 'SDG',
                                 code: 'sdg',
                                 ndp: op.code,
@@ -106,7 +106,7 @@ ndpFramework.controller('HomeController',
                                 view: 'components/programme/programme-status.html'
                             } );
 
-                            op.children.push( {
+                            /*op.children.push( {
                                 id: op.code + '-SUB',
                                 domain: 'SUBO',
                                 code: 'sub-programme',
@@ -135,7 +135,7 @@ ndpFramework.controller('HomeController',
                                         view: 'components/department/output-status.html'
                                     }
                                 ]
-                            } );
+                            } );*/
                         }
 
                         ndpMenus.push( op );
@@ -172,14 +172,14 @@ ndpFramework.controller('HomeController',
                                     children: [],
                                     view: 'components/programme/programme-performance.html'
                                 },
-                                {
+                                /*{
                                     id: 'SUBP',
                                     domain: 'SUBP',
                                     displayName: $translate.instant('sub_programme_performance'),
                                     order: 4,
                                     children: [],
                                     view: 'components/sub-programme/sub-programme-performance.html'
-                                },
+                                },*/
                                 {
                                     id: 'PRJP',
                                     domain: 'PRJP',

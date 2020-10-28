@@ -43,9 +43,13 @@ ndpFramework.controller('MDAController',
     };
 
     $scope.model.horizontalMenus = [
-        {id: 'performance', title: 'results', order: 3, view: 'components/mda/performance.html', active: true},
+        /*{id: 'performance', title: 'results', order: 3, view: 'components/mda/performance.html', active: true},
         {id: 'dashboard', title: 'dashboards', order: 4, view: 'components/mda/dashboard.html'},
-        {id: 'library', title: 'library', order: 1, view: 'components/mda/library.html'}
+        {id: 'library', title: 'library', order: 1, view: 'components/mda/library.html'}*/
+        {id: 'trafficLight', title: 'traffic_light', order: 1, view: 'components/mda/traffic-light.html', active: true, class: 'main-horizontal-menu'},
+        {id: 'budgetPerformance', title: 'budget_performance', order: 2, view: 'components/mda/budget-performance.html', class: 'main-horizontal-menu'},
+        {id: 'budgetCompliance', title: 'budget_compliance', order: 3, view: 'components/mda/budget-compliance.html', class: 'main-horizontal-menu'},
+        {id: 'completeness', title: 'completeness', order: 4, view: 'components/mda/completeness.html', class: 'main-horizontal-menu'}
     ];
 
     //Get orgunits for the logged in user
@@ -66,6 +70,34 @@ ndpFramework.controller('MDAController',
                 $scope.model.selectedVote = data;
                 $scope.getInterventions();
             });
+        }
+    });
+
+    $scope.$watch('model.selectedNDP', function(){
+        $scope.model.selectedNdpProgram = null;
+        $scope.model.ndpProgram = null;
+        $scope.model.objectives = [];
+        $scope.model.subPrograms = [];
+        $scope.model.selectedSubProgramme = null;
+        $scope.model.selectedDataElementGroupSets = [];
+
+        if( angular.isObject($scope.model.selectedNDP) && $scope.model.selectedNDP.id && $scope.model.selectedNDP.code){
+            $scope.model.ndpProgram = $filter('getFirst')($scope.model.optionSets, {ndp: $scope.model.selectedNDP.code, code: 'program'}, true);
+        }
+    });
+
+    $scope.$watch('model.selectedNdpProgram', function(){
+        $scope.model.objectives = [];
+        $scope.model.subPrograms = [];
+        $scope.model.selectedSubProgramme = null;
+        $scope.model.selectedDataElementGroupSets = [];
+        $scope.resetDataView();
+        if( angular.isObject($scope.model.selectedNdpProgram) ){
+            if( $scope.model.selectedNdpProgram && $scope.model.selectedNdpProgram.code ){
+                $scope.model.objectives = $filter('filter')($scope.model.dataElementGroupSets, {ndp: $scope.model.selectedMenu.ndp, indicatorGroupSetType: $scope.model.selectedMenu.code, ndpProgramme: $scope.model.selectedNdpProgram.code}, true);
+                $scope.model.subPrograms = $filter('filter')($scope.model.dataElementGroupSets, {ndp: $scope.model.selectedMenu.ndp, indicatorGroupSetType: 'sub-programme', ndpProgramme: $scope.model.selectedNdpProgram.code}, true);
+                $scope.model.selectedDataElementGroupSets = angular.copy( $scope.model.objectives );
+            }
         }
     });
 
@@ -120,6 +152,12 @@ ndpFramework.controller('MDAController',
                 $scope.model.optionSetsById[optionSet.id] = optionSet;
             });
 
+            $scope.model.ndp = $filter('getFirst')($scope.model.optionSets, {code: 'ndp'});
+
+            if( !$scope.model.ndp || !$scope.model.ndp.code ){
+                NotificationService.showNotifcationDialog($translate.instant("error"), $translate.instant("missing_ndp_configuration"));
+                return;
+            }
 
             OptionComboService.getBtaDimensions().then(function( bta ){
 

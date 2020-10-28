@@ -706,7 +706,6 @@ var ndpFrameworkServices = angular.module('ndpFrameworkServices', ['ngResource']
                     $translate.instant("invalid_period");
                 }
 
-                console.log('anchor periods:  ', reportParams);
                 var rs = $filter('dataFilter')(data, filterParams);
                 var currentData = mergeBtaData( rs );
                 var baseData = getPeriodData( reportParams.basePeriod, currentData, data );

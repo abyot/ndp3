@@ -35,10 +35,12 @@
         </div>
         <div class="col-sm-5 blue-info-area add-small-left-padding">
             <!--<div ng-include="'components/report-filter/report-filters.html'"></div>-->
-            <label class="checkbox-inline" ng-if="model.projects.length > 0">
-                <input type="checkbox" ng-model="model.showOnlyCoreProject">
-                <span>{{'show_only_core'| translate}}</span>
-            </label>
+            <form>
+                <label class="checkbox-inline" ng-if="model.projects.length > 0">
+                    <input type="checkbox" ng-model="model.showOnlyCoreProject">
+                    <span>{{'show_only_core'| translate}}</span>
+                </label>
+            </form>
         </div>
     </div>
 
