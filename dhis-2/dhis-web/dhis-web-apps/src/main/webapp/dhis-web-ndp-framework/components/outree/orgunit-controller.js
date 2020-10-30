@@ -9,16 +9,19 @@ ndpFramework.controller('OuTreeController',
                 orgUnits,
                 selectedOrgUnit,
                 validOrgUnits,
-                OrgUnitFactory){ 
-                
+                OrgUnitFactory){
+
     $scope.orgUnits = orgUnits;
     $scope.selectedOrgUnit = selectedOrgUnit;
     $scope.validOrgUnits = validOrgUnits;
-    
+    $scope.treeLoadingStarted = false;
+    $scope.treeLoaded = true;
     //expand/collapse of search orgunit tree
     $scope.expandCollapse = function(orgUnit) {
         if( orgUnit.hasChildren ){
             //Get children for the selected orgUnit
+            $scope.treeLoadingStarted = true;
+            $scope.treeLoaded = false;
             OrgUnitFactory.getChildren(orgUnit.id).then(function(ou) {
                 orgUnit.show = !orgUnit.show;
                 orgUnit.hasChildren = false;
@@ -26,6 +29,8 @@ ndpFramework.controller('OuTreeController',
                 angular.forEach(orgUnit.children, function(ou){
                     ou.hasChildren = ou.children && ou.children.length > 0 ? true : false;
                 });
+                $scope.treeLoadingStarted = false;
+                $scope.treeLoaded = true;
             });
         }
         else{
@@ -37,7 +42,7 @@ ndpFramework.controller('OuTreeController',
     	$scope.selectedOrgUnit = orgUnit;
     };
 
-    $scope.select = function () {        
+    $scope.select = function () {
         $modalInstance.close( $scope.selectedOrgUnit );
     };
 
