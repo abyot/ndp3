@@ -75,6 +75,7 @@ ndpDataEntry.controller('DataEntryController',
         $scope.model.selectedPeriod = null;
         $scope.dataValues = {};
         $scope.dataValuesCopy = {};
+        $scope.saveStatus = {};
     };
 
     //load datasets associated with the selected org unit.
@@ -103,6 +104,7 @@ ndpDataEntry.controller('DataEntryController',
     $scope.$watch('model.selectedPeriod', function(){
         $scope.dataValues = {};
         $scope.dataValuesCopy = {};
+        $scope.saveStatus = {};
         $scope.loadDataEntryForm();
     });
 
@@ -147,6 +149,7 @@ ndpDataEntry.controller('DataEntryController',
     };
 
     $scope.loadDataEntryForm = function(){
+        $scope.saveStatus = {};
         if( $scope.selectedOrgUnit && $scope.selectedOrgUnit.id &&
                 $scope.model.selectedDataSet && $scope.model.selectedDataSet.id &&
                 $scope.model.selectedPeriod && $scope.model.selectedPeriod.id ){

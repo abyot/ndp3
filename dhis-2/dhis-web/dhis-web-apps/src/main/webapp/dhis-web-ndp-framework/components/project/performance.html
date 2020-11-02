@@ -34,13 +34,13 @@
             </div>
         </div>
         <div class="col-sm-5 blue-info-area add-small-left-padding">
-            <!--<div ng-include="'components/report-filter/report-filters.html'"></div>-->
-            <form>
+            <div ng-include="'components/report-filter/report-filters-orgunit.html'"></div>
+            <!--<form>
                 <label class="checkbox-inline" ng-if="model.projects.length > 0">
                     <input type="checkbox" ng-model="model.showOnlyCoreProject">
                     <span>{{'show_only_core'| translate}}</span>
                 </label>
-            </form>
+            </form>-->
         </div>
     </div>
 
@@ -62,6 +62,12 @@
                         <li><a href onclick="javascript:window.print()">{{'pdf'| translate}}</a></li>
                     </ul>
                 </span>
+            </span>
+            <span class="horizontal-spacing hideInPrint">
+                <label class="checkbox-inline" ng-if="model.projects.length > 0">
+                    <input type="checkbox" ng-model="model.showOnlyCoreProject">
+                    <span>{{'show_only_core'| translate}}</span>
+                </label>
             </span>
             <div id="exportTable">
                 <table class="listTable dhis2-table-striped-border dhis2-table-hover">

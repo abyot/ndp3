@@ -2,7 +2,7 @@
 
 /* global ndpFramework */
 
-ndpFramework.controller('SubProgrammeController',
+ndpFramework.controller('PIAPController',
     function($scope,
         $translate,
         $modal,
@@ -41,20 +41,20 @@ ndpFramework.controller('SubProgrammeController',
     };
 
     $scope.model.horizontalMenus = [
-        {id: 'result', title: 'results', order: 1, view: 'components/sub-programme/results.html', active: true, class: 'main-horizontal-menu'},
-        {id: 'performance', title: 'physical_performance', order: 2, view: 'components/sub-programme/performance.html', class: 'main-horizontal-menu'},
-        {id: 'cumulative', title: 'cumulative_progress', order: 3, view: 'components/sub-programme/progress.html', class: 'main-horizontal-menu'},
-        {id: 'cost', title: 'cost', order: 4, view: 'components/sub-programme/cost.html', class: 'main-horizontal-menu'},
-        {id: 'efficiency', title: 'cost_effectiveness', order: 5, view: 'components/sub-programme/efficiency.html', class: 'main-horizontal-menu'},
-        {id: 'dashboard', title: 'dashboard', order: 6, view: 'components/sub-programme/dashboard.html', class: 'external-horizontal-menu'},
-        {id: 'library', title: 'library', order: 7, view: 'components/sub-programme/library.html', class: 'external-horizontal-menu'}
+        {id: 'result', title: 'results', order: 1, view: 'components/piap/results.html', active: true, class: 'main-horizontal-menu'},
+        {id: 'performance', title: 'physical_performance', order: 2, view: 'components/piap/performance.html', class: 'main-horizontal-menu'},
+        {id: 'cumulative', title: 'cumulative_progress', order: 3, view: 'components/piap/progress.html', class: 'main-horizontal-menu'},
+        {id: 'cost', title: 'cost', order: 4, view: 'components/piap/cost.html', class: 'main-horizontal-menu'},
+        {id: 'efficiency', title: 'cost_effectiveness', order: 5, view: 'components/piap/efficiency.html', class: 'main-horizontal-menu'},
+        {id: 'dashboard', title: 'dashboard', order: 6, view: 'components/piap/dashboard.html', class: 'external-horizontal-menu'},
+        {id: 'library', title: 'library', order: 7, view: 'components/piap/library.html', class: 'external-horizontal-menu'}
     ];
 
     $scope.model.performanceMenu = [
-        {id: 'trafficLight', title: 'traffic_light', order: 1, view: 'components/sub-programme/traffic-light.html', active: true, class: 'main-horizontal-menu'},
-        {id: 'budgetPerformance', title: 'budget_performance', order: 2, view: 'components/sub-programme/budget-performance.html', class: 'main-horizontal-menu'},
-        {id: 'budgetCompliance', title: 'budget_compliance', order: 3, view: 'components/sub-programme/budget-compliance.html', class: 'main-horizontal-menu'},
-        {id: 'completeness', title: 'completeness', order: 4, view: 'components/sub-programme/completeness.html', class: 'main-horizontal-menu'}
+        {id: 'trafficLight', title: 'traffic_light', order: 1, view: 'components/piap/traffic-light.html', active: true, class: 'main-horizontal-menu'},
+        {id: 'budgetPerformance', title: 'budget_performance', order: 2, view: 'components/piap/budget-performance.html', class: 'main-horizontal-menu'},
+        {id: 'budgetCompliance', title: 'budget_compliance', order: 3, view: 'components/piap/budget-compliance.html', class: 'main-horizontal-menu'},
+        {id: 'completeness', title: 'completeness', order: 4, view: 'components/piap/completeness.html', class: 'main-horizontal-menu'}
     ];
 
     //Get orgunits for the logged in user

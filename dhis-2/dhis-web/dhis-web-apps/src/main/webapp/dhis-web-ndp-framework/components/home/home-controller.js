@@ -106,36 +106,17 @@ ndpFramework.controller('HomeController',
                                 view: 'components/programme/programme-status.html'
                             } );
 
-                            /*op.children.push( {
-                                id: op.code + '-SUB',
-                                domain: 'SUBO',
+                            op.children.push( {
+                                id: op.code + '-PIA',
+                                domain: 'PIAP',
                                 code: 'sub-programme',
                                 ndp: op.code,
                                 order: 2,
-                                displayName: $translate.instant('sub_programme_outcomes'),
+                                displayName: $translate.instant('piap_outputs'),
                                 show: true,
-                                view: 'components/sub-programme/sub-programme-status.html',
-                                children: [
-                                    {
-                                        id: op.code + '-SUB-PRJ',
-                                        domain: 'PRJO',
-                                        code: 'objective',
-                                        ndp: op.code,
-                                        order: 2,
-                                        displayName: $translate.instant('output_projects'),
-                                        view: 'components/project/output-status.html'
-                                    },
-                                    {
-                                        id: op.code + '-SUB-DEP',
-                                        domain: 'DEPO',
-                                        code: 'objective',
-                                        ndp: op.code,
-                                        order: 2,
-                                        displayName: $translate.instant('output_departments'),
-                                        view: 'components/department/output-status.html'
-                                    }
-                                ]
-                            } );*/
+                                view: 'components/piap/piap-status.html',
+                                children: []
+                            } );
                         }
 
                         ndpMenus.push( op );
@@ -178,7 +159,7 @@ ndpFramework.controller('HomeController',
                                     displayName: $translate.instant('sub_programme_performance'),
                                     order: 4,
                                     children: [],
-                                    view: 'components/sub-programme/sub-programme-performance.html'
+                                    view: 'components/piap/sub-programme-performance.html'
                                 },*/
                                 {
                                     id: 'PRJP',
