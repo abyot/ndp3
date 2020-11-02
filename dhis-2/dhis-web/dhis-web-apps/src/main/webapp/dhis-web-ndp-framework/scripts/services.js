@@ -577,7 +577,7 @@ var ndpFrameworkServices = angular.module('ndpFrameworkServices', ['ngResource']
         },
         processData: function( dataParams ){
 
-            var keyDataParams = ['data', 'metaData', 'reportPeriods', 'bta', 'selectedDataElementGroupSets', 'dataElementGroups'];
+            var keyDataParams = ['data', 'metaData', 'cost', 'reportPeriods', 'bta', 'selectedDataElementGroupSets', 'dataElementGroups', 'dataElementsById'];
 
             if( !dataParams ){
                 NotificationService.showNotifcationDialog($translate.instant("error"), $translate.instant("invalid_report_parameters"));
@@ -605,6 +605,8 @@ var ndpFrameworkServices = angular.module('ndpFrameworkServices', ['ngResource']
             var resultData = [];
             var performanceData = [];
             var cumulativeData = [];
+            var costData = [];
+            var costEffData = [];
 
             var mergeBtaData = function( _data ){
                 var data = angular.copy( _data );
@@ -693,6 +695,45 @@ var ndpFrameworkServices = angular.module('ndpFrameworkServices', ['ngResource']
                 }
             };
 
+            var getPerforAndCostData = function(header, dataElement, oc, data, reportParams){
+                if(!header || !data || !header.id || !dataElement) return;
+
+                var filterParams = {
+                    dx: dataElement,
+                    pe: header.id,
+                    co: oc
+                };
+
+                var rs = $filter('dataFilter')(data, filterParams);
+                var currentData = mergeBtaData( rs );
+                var previousData = getPreviousData( currentData, data );
+
+                var p = $translate.instant("no_target"), c = '', e = '';
+
+                if ( previousData ){
+                    p = CommonUtils.getPercent( currentData.actual - previousData.actual, currentData.target - previousData.actual );
+                }
+
+                var de = reportParams.dataElementsById[dataElement];
+
+                if ( de && de.coaCode ){
+                    var outCome = $filter('getFirst')(reportParams.cost.outCome, {code: de.coaCode}, true);
+                    var filterParams = {
+                        period: header.id
+                    };
+
+                    var costs = $filter('dataFilter')(outCome.costs, filterParams);
+
+                    c = CommonUtils.getTotal( costs, 'value' );
+
+                    if ( previousData ){
+                        e = CommonUtils.getPercent( currentData.actual - previousData.actual, c, true );
+                    }
+                }
+
+                return {performance: p, cost: c, costEff: e};
+            };
+
             var filterCumulativeData = function(header, dataElement, oc, data, reportParams){
                 if(!header || !data || !header.id || !dataElement || !reportParams) return;
 
@@ -744,15 +785,20 @@ var ndpFrameworkServices = angular.module('ndpFrameworkServices', ['ngResource']
                 dataExists = true;
                 resultData = [];
                 performanceData = [];
+                costData = [];
                 var resultRow = [], parsedResultRow = [],
                     performanceRow = [], parsedPerformanceRow = [],
-                    cumulativeRow = [], parsedCumulativeRow = [];
+                    cumulativeRow = [], parsedCumulativeRow = [],
+                    costRow = [], parsedCostRow = [],
+                    costEffRow = [], parsedCostEffRow = [];
 
                 angular.forEach(dataParams.selectedDataElementGroupSets, function(degs){
                     var groupSet = {val: degs.displayName, span: 0};
                     resultRow.push(groupSet);
                     performanceRow.push(groupSet);
                     cumulativeRow.push(groupSet);
+                    costRow.push(groupSet);
+                    costEffRow.push(groupSet);
 
                     var generateRow = function(group, deg){
                         if( deg && deg.dataElements ){
@@ -774,21 +820,29 @@ var ndpFrameworkServices = angular.module('ndpFrameworkServices', ['ngResource']
                                     parsedResultRow.push(resultRow);
                                     resultRow = [];
 
-                                    //Performance data
+                                    //Performance, Cumulative, Cost and CostEff data
                                     performanceRow.push({val: name , span: 1, info: de.id});
+                                    cumulativeRow.push({val: name , span: 1, info: de.id});
+                                    costRow.push({val: name , span: 1, info: de.id});
+                                    costEffRow.push({val: name , span: 1, info: de.id});
                                     angular.forEach(performanceHeaders, function(dh){
-                                        performanceRow.push({val: filterPerformanceData(dh, de.id, oc.id, data, dataParams), span: 1});
+                                        cumulativeRow.push({val: filterCumulativeData(dh, de.id, oc.id, data, dataParams), span: 1});
+                                        //performanceRow.push({val: filterPerformanceData(dh, de.id, oc.id, data, dataParams), span: 1});
+                                        //costRow.push({val: filterCostData(dh, de.id, oc.id, data, dataParams), span: 1});
+                                        //costEffRow.push({val: filterCostEffData(dh, de.id, oc.id, data, dataParams), span: 1});
+                                        var pce = getPerforAndCostData(dh, de.id, oc.id, data, dataParams);
+                                        performanceRow.push({val: pce.performance, span: 1});
+                                        costRow.push({val: pce.cost, span: 1});
+                                        costEffRow.push({val: pce.costEff, span: 1});
                                     });
                                     parsedPerformanceRow.push(performanceRow);
                                     performanceRow = [];
-
-                                    //Cumulative data
-                                    cumulativeRow.push({val: name , span: 1, info: de.id});
-                                    angular.forEach(performanceHeaders, function(dh){
-                                        cumulativeRow.push({val: filterCumulativeData(dh, de.id, oc.id, data, dataParams), span: 1});
-                                    });
                                     parsedCumulativeRow.push(cumulativeRow);
                                     cumulativeRow = [];
+                                    parsedCostRow.push(costRow);
+                                    costRow = [];
+                                    parsedCostEffRow.push(costEffRow);
+                                    costEffRow = [];
                                 });
                             });
                         }
@@ -801,6 +855,8 @@ var ndpFrameworkServices = angular.module('ndpFrameworkServices', ['ngResource']
                                 resultRow.push(group);
                                 performanceRow.push(group);
                                 cumulativeRow.push(group);
+                                costRow.push(group);
+                                costEffRow.push(group);
                                 var _deg = $filter('filter')(dataParams.dataElementGroups, {id: deg.id})[0];
                                 generateRow(group, _deg);
                             }
@@ -810,6 +866,8 @@ var ndpFrameworkServices = angular.module('ndpFrameworkServices', ['ngResource']
                             resultRow.push(group);
                             performanceRow.push(group);
                             cumulativeRow.push(group);
+                            costRow.push(group);
+                            costEffRow.push(group);
                             var _deg = $filter('filter')(dataParams.dataElementGroups, {id: deg.id})[0];
                             generateRow(group, _deg);
                         }
@@ -818,16 +876,34 @@ var ndpFrameworkServices = angular.module('ndpFrameworkServices', ['ngResource']
                 resultData = parsedResultRow;
                 performanceData = parsedPerformanceRow;
                 cumulativeData = parsedCumulativeRow;
+                costData = parsedCostRow;
+                costEffData = parsedCostEffRow;
             }
 
             return {
                 performanceData: performanceData,
                 resultData: resultData,
                 cumulativeData: cumulativeData,
+                costData: costData,
+                costEffData: costEffData,
                 dataExists: dataExists,
                 dataHeaders: dataHeaders,
                 reportPeriods: reportPeriods
             };
+        }
+    };
+})
+
+.service('FinancialDataService', function($http, CommonUtils){
+    return {
+        getLocalData: function( fileName ){
+            var promise = $http.get( fileName ).then(function(response){
+                return response.data;
+            }, function(response){
+                CommonUtils.errorNotifier(response);
+                return response.data;
+            });
+            return promise;
         }
     };
 })

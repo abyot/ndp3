@@ -15,7 +15,8 @@ ndpFramework.controller('OutcomeController',
         MetaDataFactory,
         OrgUnitFactory,
         OptionComboService,
-        Analytics) {
+        Analytics,
+        FinancialDataService) {
 
     $scope.showReportFilters = false;
 
@@ -148,38 +149,46 @@ ndpFramework.controller('OutcomeController',
         $scope.model.bta = bta;
         $scope.model.baseLineTargetActualDimensions = $.map($scope.model.bta.options, function(d){return d.id;});
 
-        MetaDataFactory.getDataElementGroups().then(function(dataElementGroups){
+        MetaDataFactory.getAll('dataElements').then(function(dataElements){
 
-            $scope.model.dataElementGroups = dataElementGroups;
+            $scope.model.dataElementsById = dataElements.reduce( function(map, obj){
+                map[obj.id] = obj;
+                return map;
+            }, {});
 
-            MetaDataFactory.getAll('dataElementGroupSets').then(function(dataElementGroupSets){
+            MetaDataFactory.getDataElementGroups().then(function(dataElementGroups){
 
-                $scope.model.dataElementGroupSets = dataElementGroupSets;
+                $scope.model.dataElementGroups = dataElementGroups;
 
-                var periods = PeriodService.getPeriods($scope.model.selectedPeriodType, $scope.model.periodOffset, $scope.model.openFuturePeriods);
-                $scope.model.allPeriods = angular.copy( periods );
-                $scope.model.periods = periods;
+                MetaDataFactory.getAll('dataElementGroupSets').then(function(dataElementGroupSets){
 
-                var selectedPeriodNames = ['2020/21', '2021/22', '2022/23', '2023/24', '2024/25'];
+                    $scope.model.dataElementGroupSets = dataElementGroupSets;
 
-                angular.forEach($scope.model.periods, function(pe){
-                    if(selectedPeriodNames.indexOf(pe.displayName) > -1 ){
-                       $scope.model.selectedPeriods.push(pe);
-                    }
-                });
+                    var periods = PeriodService.getPeriods($scope.model.selectedPeriodType, $scope.model.periodOffset, $scope.model.openFuturePeriods);
+                    $scope.model.allPeriods = angular.copy( periods );
+                    $scope.model.periods = periods;
 
-                //Get orgunits for the logged in user
-                OrgUnitFactory.getViewTreeRoot().then(function(response) {
-                    $scope.orgUnits = response.organisationUnits;
-                    angular.forEach($scope.orgUnits, function(ou){
-                        ou.show = true;
-                        angular.forEach(ou.children, function(o){
-                            o.hasChildren = o.children && o.children.length > 0 ? true : false;
-                        });
+                    var selectedPeriodNames = ['2020/21', '2021/22', '2022/23', '2023/24', '2024/25'];
+
+                    angular.forEach($scope.model.periods, function(pe){
+                        if(selectedPeriodNames.indexOf(pe.displayName) > -1 ){
+                           $scope.model.selectedPeriods.push(pe);
+                        }
                     });
-                    $scope.selectedOrgUnit = $scope.orgUnits[0] ? $scope.orgUnits[0] : null;
 
-                    $scope.populateMenu();
+                    //Get orgunits for the logged in user
+                    OrgUnitFactory.getViewTreeRoot().then(function(response) {
+                        $scope.orgUnits = response.organisationUnits;
+                        angular.forEach($scope.orgUnits, function(ou){
+                            ou.show = true;
+                            angular.forEach(ou.children, function(o){
+                                o.hasChildren = o.children && o.children.length > 0 ? true : false;
+                            });
+                        });
+                        $scope.selectedOrgUnit = $scope.orgUnits[0] ? $scope.orgUnits[0] : null;
+
+                        $scope.populateMenu();
+                    });
                 });
             });
         });
@@ -278,35 +287,43 @@ ndpFramework.controller('OutcomeController',
 
             analyticsUrl += '&dimension=dx:' + des.join(';');
 
-            Analytics.getData( analyticsUrl ).then(function(data){
-                if( data && data.data && data.metaData ){
-                    $scope.model.data = data.data;
-                    $scope.model.metaData = data.metaData;
-                    $scope.model.reportReady = true;
-                    $scope.model.reportStarted = false;
+            FinancialDataService.getLocalData('data/cost.json').then(function(cost){
+                $scope.model.cost = cost;
 
-                    var dataParams = {
-                        data: data.data,
-                        metaData: data.metaData,
-                        reportPeriods: angular.copy( $scope.model.selectedPeriods ),
-                        bta: $scope.model.bta,
-                        selectedDataElementGroupSets: $scope.model.selectedDataElementGroupSets,
-                        selectedDataElementGroup: $scope.model.selectedKra,
-                        dataElementGroups: $scope.model.dataElementGroups,
-                        basePeriod: $scope.model.basePeriod,
-                        maxPeriod: $scope.model.selectedPeriods.slice(-1)[0],
-                        allPeriods: $scope.model.allPeriods
-                    };
+                Analytics.getData( analyticsUrl ).then(function(data){
+                    if( data && data.data && data.metaData ){
+                        $scope.model.data = data.data;
+                        $scope.model.metaData = data.metaData;
+                        $scope.model.reportReady = true;
+                        $scope.model.reportStarted = false;
 
-                    var processedData = Analytics.processData( dataParams );
+                        var dataParams = {
+                            data: data.data,
+                            metaData: data.metaData,
+                            reportPeriods: angular.copy( $scope.model.selectedPeriods ),
+                            bta: $scope.model.bta,
+                            selectedDataElementGroupSets: $scope.model.selectedDataElementGroupSets,
+                            selectedDataElementGroup: $scope.model.selectedKra,
+                            dataElementGroups: $scope.model.dataElementGroups,
+                            basePeriod: $scope.model.basePeriod,
+                            maxPeriod: $scope.model.selectedPeriods.slice(-1)[0],
+                            allPeriods: $scope.model.allPeriods,
+                            dataElementsById: $scope.model.dataElementsById,
+                            cost: $scope.model.cost
+                        };
 
-                    $scope.model.dataHeaders = processedData.dataHeaders;
-                    $scope.model.reportPeriods = processedData.reportPeriods;
-                    $scope.model.dataExists = processedData.dataExists;
-                    $scope.model.resultData = processedData.resultData || [];
-                    $scope.model.performanceData = processedData.performanceData || [];
-                    $scope.model.cumulativeData = processedData.cumulativeData || [];
-                }
+                        var processedData = Analytics.processData( dataParams );
+
+                        $scope.model.dataHeaders = processedData.dataHeaders;
+                        $scope.model.reportPeriods = processedData.reportPeriods;
+                        $scope.model.dataExists = processedData.dataExists;
+                        $scope.model.resultData = processedData.resultData || [];
+                        $scope.model.performanceData = processedData.performanceData || [];
+                        $scope.model.cumulativeData = processedData.cumulativeData || [];
+                        $scope.model.costData = processedData.costData || [];
+                        $scope.model.costEffData = processedData.costEffData || [];
+                    }
+                });
             });
         }
     };

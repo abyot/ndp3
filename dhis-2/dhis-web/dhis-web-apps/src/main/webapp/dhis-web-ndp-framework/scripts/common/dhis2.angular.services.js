@@ -371,7 +371,18 @@ var d2Services = angular.module('d2Services', ['ngResource'])
             op2 = dhis2.validation.isNumber(op2) ? parseInt(op2) : 0;
             return op1 + op2;
         },
-        getPercent: function(op1, op2){
+        getTotal: function( arr, prop){
+            var getValue = function(item){
+                return item[prop];
+            };
+
+            var sum = function(a, b){
+                return a + b;
+            };
+
+            return arr.map(getValue).reduce(sum);
+        },
+        getPercent: function(op1, op2, turnOffPercent ){
             op1 = dhis2.validation.isNumber(op1) ? parseInt(op1) : 0;
             op2 = dhis2.validation.isNumber(op2) ? parseInt(op2) : 0;
             if( op1 === 0){
@@ -379,6 +390,9 @@ var d2Services = angular.module('d2Services', ['ngResource'])
             }
             if( op2 === 0 ){
                 return $translate.instant('missing_target');
+            }
+            if ( turnOffPercent ){
+                return parseFloat((op1 / op2)).toFixed(2);
             }
             return parseFloat((op1 / op2)*100).toFixed(2) + '%';
         },

@@ -80,7 +80,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <tr ng-repeat="row in model.costEffectivenessData">
+                    <tr ng-repeat="row in model.costEffData">
                         <td class="vertical-center" ng-repeat="col in row" rowspan="{{col.span}}">
                             {{col.val}}
                             <span ng-if="col.info" ng-click="getIndicatorDictionary(col.info)">

@@ -1,6 +1,6 @@
 {
-    "outcome": {
-        "code": "09",
+    "outCome": [
+        {"code": "09",
         "costs": [
             {
                 "code": "02",
@@ -152,6 +152,6 @@
                 "period": "2024July",
                 "value": 21
             }
-        ]
-    }
+        ]}
+    ]
 }
