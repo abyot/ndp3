@@ -6,8 +6,7 @@
                      class="{{getMenuStyle(horizontalMenu)}}"
                      ng-repeat="horizontalMenu in model.horizontalMenus"
                      active="horizontalMenu.active"
-                     ng-click="resetView(horizontalMenu)">
-                    {{}}
+                     ng-click="resetView(horizontalMenu, $event)">
                     <div ng-include="horizontalMenu.view"></div>
                 </tab>
             </tabset>

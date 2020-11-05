@@ -35,13 +35,22 @@ ndpFramework.controller('ProjectController',
         periods: [],
         periodOffset: 0,
         openFuturePeriods: 10,
-        selectedPeriodType: 'FinancialJuly'
+        selectedPeriodType: 'FinancialJuly',
+        coreProjectAttribute: null
     };
 
     $scope.model.horizontalMenus = [
-        {id: 'performance', title: 'ndp_results', order: 1, view: 'components/project/performance.html', active: true},
-        {id: 'dashboard', title: 'dashboards', order: 2, view: 'components/project/dashboard.html'},
-        {id: 'library', title: 'library', order: 3, view: 'components/project/library.html'}
+        {id: 'synthesis', title: 'project_synthesis', order: 1, view: 'components/project/synthesis.html', active: true, class: 'main-horizontal-menu'},
+        {id: 'time_performance', title: 'time_performance', order: 2, view: 'components/project/time-performance.html', class: 'main-horizontal-menu'},
+        {id: 'cost_performance', title: 'cost_performance', order: 3, view: 'components/project/cost-performance.html', class: 'main-horizontal-menu'}
+    ];
+
+    $scope.model.performanceHeaders = [
+        {id: 'KPI', displayName: $translate.instant("kpi"), order: 1},
+        {id: 'IND', displayName: $translate.instant('indicator'), order: 2},
+        {id: 'INT', displayName: $translate.instant('interpretation'), order: 3},
+        {id: 'UNI', displayName: $translate.instant('unit'), order: 4},
+        {id: 'BSL', displayName: $translate.instant('baseline'), order: 5}
     ];
 
     $scope.$watch('model.selectedNDP', function(){
@@ -164,14 +173,17 @@ ndpFramework.controller('ProjectController',
     };
 
     $scope.fetchProgramDetails = function(){
+        $scope.model.coreProjectAttribute = null;
         if( $scope.model.selectedNDP && $scope.model.selectedNDP.code && $scope.model.selectedProgram && $scope.model.selectedProgram.id && $scope.model.selectedProgram.programTrackedEntityAttributes ){
 
             $scope.model.projectFetchStarted = true;
 
-            $scope.model.attributesById = $scope.model.selectedProgram.programTrackedEntityAttributes.reduce(function(map, obj){
-                map[obj.trackedEntityAttribute.id] = obj.trackedEntityAttribute;
-                return map;
-            }, {});
+            angular.forEach($scope.model.selectedProgram.programTrackedEntityAttributes, function(pta){
+                $scope.model.attributesById[pta.trackedEntityAttribute.id] = pta.trackedEntityAttribute;
+                if( pta.trackedEntityAttribute.isCoreProject ){
+                    $scope.model.coreProjectAttribute = pta.trackedEntityAttribute;
+                }
+            });
 
             angular.forEach($scope.model.selectedProgram.programStages, function(stage){
                 angular.forEach(stage.programStageDataElements, function(prstDe){
@@ -181,8 +193,6 @@ ndpFramework.controller('ProjectController',
                     }
                 });
             });
-
-            console.log('selectedProgram:  ', $scope.model.selectedProgram);
 
             ProjectService.getByProgram($scope.selectedOrgUnit, $scope.model.selectedProgram, $scope.model.optionSetsById, $scope.model.attributesById ).then(function( data ){
                 $scope.model.projects = data;
@@ -198,12 +208,11 @@ ndpFramework.controller('ProjectController',
         }
         else{
             $scope.model.showProjectDetails = true;
-        }
-
-        if( project && project.trackedEntityInstance && $scope.model.selectedProgram ){
-            ProjectService.get( project, $scope.model.selectedProgram, $scope.model.optionSetsById, $scope.model.attributesById , $scope.model.dataElementsById ).then(function( data ){
-                $scope.model.selectedProject = data;
-            });
+            if( project && project.trackedEntityInstance && $scope.model.selectedProgram ){
+                ProjectService.get( project, $scope.model.selectedProgram, $scope.model.optionSetsById, $scope.model.attributesById , $scope.model.dataElementsById ).then(function( data ){
+                    $scope.model.selectedProject = data;
+                });
+            }
         }
     };
 
@@ -213,6 +222,18 @@ ndpFramework.controller('ProjectController',
         $scope.model.projectsFetched = false;
         $scope.model.projects = [];
     };
+
+    $scope.resetView = function(horizontalMenu, e){
+        $scope.model.activeHorizontalMenu = horizontalMenu;
+
+
+        if(e){
+            console.log('preventing default ...');
+            e.stopPropagation();
+            e.preventDefault();
+        }
+    };
+
 
     $scope.showOrgUnitTree = function(){
         var modalInstance = $modal.open({

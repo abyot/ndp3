@@ -310,7 +310,7 @@ function filterMissingPrograms( objs ){
 }
 
 function getPrograms( ids ){
-    return dhis2.metadata.getBatches( ids, dhis2.ndp.batchSize, 'programs', 'programs', dhis2.ndp.apiUrl + '/programs.json', 'paging=false&fields=*,programTrackedEntityAttributes[*,trackedEntityAttribute[*,attributeValues[value,attribute[id,name,valueType,code]]]],categoryCombo[id],attributeValues[value,attribute[id,name,valueType,code]],organisationUnits[id,level],programStages[*,programStageDataElements[id,dataElement[*,attributeValues[value,attribute[id,name,valueType,code]]]]]', 'idb', dhis2.ndp.store, dhis2.metadata.processObject);
+    return dhis2.metadata.getBatches( ids, dhis2.ndp.batchSize, 'programs', 'programs', dhis2.ndp.apiUrl + '/programs.json', 'paging=false&fields=*,programSections[sortOrder,displayName,trackedEntityAttributes],programTrackedEntityAttributes[*,trackedEntityAttribute[*,attributeValues[value,attribute[id,name,valueType,code]]]],categoryCombo[id],attributeValues[value,attribute[id,name,valueType,code]],organisationUnits[id,level],programStages[*,programStageDataElements[id,dataElement[*,attributeValues[value,attribute[id,name,valueType,code]]]]]', 'idb', dhis2.ndp.store, dhis2.metadata.processObject);
 }
 
 function getMetaTrackedEntityAttributes(){

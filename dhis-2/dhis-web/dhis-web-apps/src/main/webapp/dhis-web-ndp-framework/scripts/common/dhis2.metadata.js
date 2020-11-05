@@ -343,6 +343,12 @@ dhis2.metadata.getMetaObjects = function( store, objs, url, filter, storage, db,
                             }
                         });
                     });
+
+                    _.each(obj.programTrackedEntityAttributes, function(pta){
+                        if( pta.trackedEntityAttribute ){
+                            pta.trackedEntityAttribute = dhis2.metadata.processMetaDataAttribute( pta.trackedEntityAttribute );
+                        }
+                    });
                 }
                 else if( store === 'optionSets' ){
                     _.each(obj.options, function(op){

@@ -480,3 +480,9 @@ ul.tree ul li:last-child:before {
 .word-wrap {
     word-wrap: break-word
 }
+
+.bordered-div {
+    border: 3px solid #cad5e5;
+    padding: 10px;
+    border-radius: 10px;
+}

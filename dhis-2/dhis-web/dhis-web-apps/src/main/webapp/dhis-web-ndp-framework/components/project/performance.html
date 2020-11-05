@@ -35,12 +35,6 @@
         </div>
         <div class="col-sm-5 blue-info-area add-small-left-padding">
             <div ng-include="'components/report-filter/report-filters-orgunit.html'"></div>
-            <!--<form>
-                <label class="checkbox-inline" ng-if="model.projects.length > 0">
-                    <input type="checkbox" ng-model="model.showOnlyCoreProject">
-                    <span>{{'show_only_core'| translate}}</span>
-                </label>
-            </form>-->
         </div>
     </div>
 
@@ -63,7 +57,7 @@
                     </ul>
                 </span>
             </span>
-            <span class="horizontal-spacing hideInPrint">
+            <span class="horizontal-spacing hideInPrint" ng-if="model.coreProjectAttribute && model.coreProjectAttribute.id">
                 <label class="checkbox-inline" ng-if="model.projects.length > 0">
                     <input type="checkbox" ng-model="model.showOnlyCoreProject">
                     <span>{{'show_only_core'| translate}}</span>
@@ -78,22 +72,17 @@
                             </th>
                         </tr>
                     </thead>
-                    <tbody ng-repeat="project in model.projects" ng-click="getProjectDetails(project)" ng-if="!model.showOnlyCoreProject">
+                    <tbody ng-repeat="project in model.projects" ng-click="getProjectDetails(project)">
                         <tr>
                             <td class="vertical-center word-wrap"
                                 ng-repeat="att in model.selectedProgram.programTrackedEntityAttributes| filter: {displayInList: true}"
                                 ng-class="{true: 'col-sm-4', false: 'col-sm-1'} [project[att.trackedEntityAttribute.id].length > 70]">
                                 <span ng-switch="att.valueType">
                                     <span ng-switch-when="BOOLEAN">
-                                        <!--<span ng-if="project[att.trackedEntityAttribute.id] === 'true'">{{'yes'| translate}}</span>
-                                        <span ng-if="project[att.trackedEntityAttribute.id] === 'false'">{{ 'no' | translate}}</span>-->
                                         <span ng-if="project[att.trackedEntityAttribute.id] === 'true'"><i class="fa fa-check"></i></span>
                                     </span>
                                     <span ng-switch-when="TRUE_ONLY">
                                         <span ng-if="project[att.trackedEntityAttribute.id] === 'true'"><i class="fa fa-check"></i></span>
-                                    </span>
-                                    <span ng-switch-when="ORGANISATION_UNIT">
-                                        {{trackedEntity[gridColumn.id] && orgUnitNames[trackedEntity[gridColumn.id]] ? orgUnitNames[trackedEntity[gridColumn.id]] : trackedEntity[gridColumn.id]}}
                                     </span>
                                     <span ng-switch-default>
                                         {{project[att.trackedEntityAttribute.id]}}
@@ -103,37 +92,12 @@
                         </tr>
                         <tr class="project-details" ng-if="model.showProjectDetails && model.selectedProject.trackedEntityInstance === project.trackedEntityInstance">
                             <td colspan="100%">
-                                <table class="table table-responsive green-background">
-                                    <tr>
-                                        <td colspan="100%">
-                                            <span class="bold">{{'details'| translate}}</span>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td class="col-sm-1" ng-repeat="att in model.selectedProgram.programTrackedEntityAttributes">
-                                            <span class="bold">{{att.trackedEntityAttribute.displayName}}</span>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td class="vertical-center" ng-repeat="att in model.selectedProgram.programTrackedEntityAttributes">
-                                            <span ng-switch="att.valueType">
-                                                <span ng-switch-when="BOOLEAN">
-                                                    <!--<span ng-if="project[att.trackedEntityAttribute.id] === 'true'">{{'yes'| translate}}</span>
-                                                    <span ng-if="project[att.trackedEntityAttribute.id] === 'false'">{{ 'no' | translate}}</span>-->
-                                                    <span ng-if="project[att.trackedEntityAttribute.id] === 'true'"><i class="fa fa-check"></i></span>
-                                                </span>
-                                                <span ng-switch-when="TRUE_ONLY">
-                                                    <span ng-if="project[att.trackedEntityAttribute.id] === 'true'"><i class="fa fa-check"></i></span>
-                                                </span>
-                                                <span ng-switch-when="ORGANISATION_UNIT">
-                                                    {{trackedEntity[gridColumn.id] && orgUnitNames[trackedEntity[gridColumn.id]] ? orgUnitNames[trackedEntity[gridColumn.id]] : trackedEntity[gridColumn.id]}}
-                                                </span>
-                                                <span ng-switch-default>{{project[att.trackedEntityAttribute.id]}}</span>
-                                            </span>
-                                        </td>
-                                    </tr>
-                                </table>
-                                <div ng-repeat="enrollment in model.selectedProject.enrollments">
+
+
+                                <div ng-include="'views/horizontal-menu.html'"></div>
+
+
+                                <!--<div ng-repeat="enrollment in model.selectedProject.enrollments">
                                     <table class="table table-responsive yellow-background">
                                         <tr>
                                             <th class="col-sm-1">{{model.selectedProgram.enrollmentDateLabel}}</th>
@@ -194,18 +158,17 @@
                                             </table>
                                         </div>
                                     </div>
-                                </div>
+                                </div>-->
                             </td>
-
                         </tr>
                     </tbody>
-                    <tbody ng-repeat="project in model.projects | filter: {xR2SRSZxDSl: true}" ng-click="getProjectDetails(project)" ng-if="model.showOnlyCoreProject">
+                    <!--<tbody ng-repeat="project in model.projects | filter: {[model.coreProjectAttribute.id]: true}" ng-click="getProjectDetails(project)" ng-if="model.showOnlyCoreProject">
                         <tr>
-                            <td class="vertical-center" ng-repeat="att in model.selectedProgram.programTrackedEntityAttributes| filter: {displayInList: true}">
+                            <td class="vertical-center word-wrap"
+                                ng-repeat="att in model.selectedProgram.programTrackedEntityAttributes| filter: {displayInList: true}"
+                                ng-class="{true: 'col-sm-4', false: 'col-sm-1'} [project[att.trackedEntityAttribute.id].length > 70]">
                                 <span ng-switch="att.valueType">
                                     <span ng-switch-when="BOOLEAN">
-                                        <!--<span ng-if="project[att.trackedEntityAttribute.id] === 'true'">{{'yes'| translate}}</span>
-                                        <span ng-if="project[att.trackedEntityAttribute.id] === 'false'">{{ 'no' | translate}}</span>-->
                                         <span ng-if="project[att.trackedEntityAttribute.id] === 'true'"><i class="fa fa-check"></i></span>
                                     </span>
                                     <span ng-switch-when="TRUE_ONLY">
@@ -242,8 +205,6 @@
                                         <td class="vertical-center" ng-repeat="att in model.selectedProgram.programTrackedEntityAttributes">
                                             <span ng-switch="att.valueType">
                                                 <span ng-switch-when="BOOLEAN">
-                                                    <!--<span ng-if="project[att.trackedEntityAttribute.id] === 'true'">{{'yes'| translate}}</span>
-                                                    <span ng-if="project[att.trackedEntityAttribute.id] === 'false'">{{ 'no' | translate}}</span>-->
                                                     <span ng-if="project[att.trackedEntityAttribute.id] === 'true'"><i class="fa fa-check"></i></span>
                                                 </span>
                                                 <span ng-switch-when="TRUE_ONLY">
@@ -322,7 +283,7 @@
                             </td>
 
                         </tr>
-                    </tbody>
+                    </tbody>-->
                 </table>
             </div>
         </div>

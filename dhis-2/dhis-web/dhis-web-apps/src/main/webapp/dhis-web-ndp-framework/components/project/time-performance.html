@@ -1,0 +1,16 @@
+<div class="small-vertical-spacing" ng-if="model.showProjectDetails && model.selectedProject.trackedEntityInstance === project.trackedEntityInstance">
+    <div class="bordered-div">
+        <table class="table table-responsive table-bordered">
+            <thead>
+                <tr>
+                    <th ng-repeat="header in model.performanceHeaders">
+                        {{header.displayName}}
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+
+            </tbody>
+        </table>
+    </div>
+</div>
