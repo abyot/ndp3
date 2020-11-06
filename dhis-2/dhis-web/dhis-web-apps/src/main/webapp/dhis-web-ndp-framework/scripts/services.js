@@ -1109,6 +1109,34 @@ var ndpFrameworkServices = angular.module('ndpFrameworkServices', ['ngResource']
                 CommonUtils.errorNotifier(response);
             });
             return promise;
+        },
+        getProjectKpi: function( project, ind ){
+            var indVal = 0, numerator = null;
+            var indRegex = /[A#]{\w+.?\w*}/g;
+            if( ind.expression ) {
+
+                var expression = angular.copy( ind.expression );
+                var matcher = expression.match( indRegex );
+
+                for ( var k in matcher )
+                {
+                    var match = matcher[k];
+
+                    var operand = match.replace( dhis2.metadata.operatorRegex, '' );
+
+                    if ( !numerator ){
+                        numerator = operand.substring(1, operand.length);
+                    }
+                    var value = project[operand.substring(1, operand.length)];
+
+                    expression = expression.replace( match, value );
+                }
+                indVal = eval( expression );
+                indVal = isNaN( indVal ) ? '-' : parseFloat(indVal * 100).toFixed(2) + '%';
+            }
+
+
+            return {value: indVal, numerator: numerator};
         }
     };
 });

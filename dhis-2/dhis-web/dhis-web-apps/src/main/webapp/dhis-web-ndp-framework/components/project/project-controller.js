@@ -221,10 +221,32 @@ ndpFramework.controller('ProjectController',
             $scope.model.showProjectDetails = true;
             $scope.model.timePerformance = [];
             $scope.model.costPerformance = [];
+            $scope.model.indicatorValuesById = [];
             if( project && project.trackedEntityInstance && $scope.model.selectedProgram ){
                 ProjectService.get( project, $scope.model.selectedProgram, $scope.model.optionSetsById, $scope.model.attributesById , $scope.model.dataElementsById ).then(function( data ){
 
                     $scope.model.selectedProject = data;
+
+                    angular.forEach($scope.model.selectedProgram.programIndicators, function(ind){
+                        var res = ProjectService.getProjectKpi(project, ind);
+                        if ( res.numerator && res.value ){
+                            ind.position = res.numerator;
+                            ind.value = res.value;
+                            $scope.model.indicatorValuesById[res.numerator] = ind;
+                        }
+                    });
+
+                    angular.forEach($scope.model.selectedProgram.programSections, function(sec){
+                        var atts = [];
+                        angular.forEach(sec.trackedEntityAttributes, function(att){
+                            atts.push( att );
+                            var indVal = $scope.model.indicatorValuesById[att.id];
+                            if ( indVal ){
+                                atts.push({id: att.id, displayName: indVal.displayName, isIndicator: true, value: indVal.value});
+                            }
+                        });
+                        sec.trackedEntityAttributes = atts;
+                    });
 
                     //Get BAC
                     var atvs = $scope.model.selectedProject.attributes;
