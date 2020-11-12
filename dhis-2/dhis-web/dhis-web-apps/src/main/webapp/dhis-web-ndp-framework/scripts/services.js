@@ -587,7 +587,7 @@ var ndpFrameworkServices = angular.module('ndpFrameworkServices', ['ngResource']
             for(var i=0; i<keyDataParams.length; i++){
                 if( !dataParams[keyDataParams[i]] ){
                     NotificationService.showNotifcationDialog($translate.instant("error"), $translate.instant("invalid_report_parameters") + ' - ' + keyDataParams[i] );
-                    return;
+                    //return;
                 }
             }
 
