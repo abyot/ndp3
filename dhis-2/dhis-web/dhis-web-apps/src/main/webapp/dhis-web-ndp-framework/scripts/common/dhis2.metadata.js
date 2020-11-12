@@ -92,7 +92,7 @@ dhis2.metadata.processMetaDataAttribute = function( obj )
         return;
     }
 
-    if(obj.attributeValues && obj.attributeValues.length > 0){
+    if(obj.attributeValues){
         for(var i=0; i<obj.attributeValues.length; i++){
             if(obj.attributeValues[i].value && obj.attributeValues[i].attribute && obj.attributeValues[i].attribute.code && obj.attributeValues[i].attribute.valueType){
             	if( obj.attributeValues[i].attribute.valueType === 'BOOLEAN' || obj.attributeValues[i].attribute.valueType === 'TRUE_ONLY' ){
@@ -115,15 +115,45 @@ dhis2.metadata.processMetaDataAttribute = function( obj )
     return obj;
 };
 
+dhis2.metadata.getMetaDataAttribute = function( obj )
+{
+    if(!obj){
+        return;
+    }
+
+    var metaAttribute = {};
+    if(obj.attributeValues){
+        for(var i=0; i<obj.attributeValues.length; i++){
+            if(obj.attributeValues[i].value && obj.attributeValues[i].attribute && obj.attributeValues[i].attribute.code && obj.attributeValues[i].attribute.valueType){
+            	if( obj.attributeValues[i].attribute.valueType === 'BOOLEAN' || obj.attributeValues[i].attribute.valueType === 'TRUE_ONLY' ){
+                    if( obj.attributeValues[i].value === 'true' ){
+                        metaAttribute[obj.attributeValues[i].attribute.code] = true;
+                    }
+            	}
+            	else if( obj.attributeValues[i].attribute.valueType === 'NUMBER' && obj.attributeValues[i].value ){
+                    obj[obj.attributeValues[i].attribute.code] = parseInt( obj.attributeValues[i].value );
+                    metaAttribute[obj.attributeValues[i].attribute.code] = parseInt( obj.attributeValues[i].value );
+            	}
+                else{
+                    metaAttribute[obj.attributeValues[i].attribute.code] = obj.attributeValues[i].value;
+                }
+            }
+        }
+    }
+
+    //delete obj.attributeValues;
+
+    return metaAttribute;
+};
+
 dhis2.metadata.getMetaObjectIds = function( objNames, url, filter )
 {
     var def = $.Deferred();
     var objs = [];
-    var url = encodeURI( url );
     $.ajax({
-        url: url,
+        url: encodeURI( url ),
         type: 'GET',
-        data:filter
+        data: encodeURI( filter )
     }).done( function(response) {
         _.each( _.values( response[objNames] ), function ( obj ) {
         	objs.push( obj );
@@ -236,12 +266,10 @@ dhis2.metadata.getMetaObjects = function( store, objs, url, filter, storage, db,
 {
     var def = $.Deferred();
 
-    url = encodeURI( url );
-
     $.ajax({
-        url: url,
+        url: encodeURI( url ),
         type: 'GET',
-        data: filter
+        data: encodeURI( filter )
     }).done(function(response) {
         if(response[objs]){
             var count = 0;
@@ -284,7 +312,7 @@ dhis2.metadata.getMetaObjects = function( store, objs, url, filter, storage, db,
                                 var opts = obj.categoryOptionCombos[i].displayName.split(', ');
                                 var itsc = _.intersection(opts, coc);
                                 if( itsc.length === opts.length && itsc.length === coc.length ){
-                                    sortedOptionCombos.push({id: obj.categoryOptionCombos[i].id, displayName: coc.join(',')} );
+                                    sortedOptionCombos.push({id: obj.categoryOptionCombos[i].id, displayName: coc.join(','), access: obj.categoryOptionCombos[i].access, categoryOptions: obj.categoryOptionCombos[i].categoryOptions} );
                                     break;
                                 }
                             }
@@ -326,6 +354,12 @@ dhis2.metadata.getMetaObjects = function( store, objs, url, filter, storage, db,
                     });
                     obj.dataElements = dataElements;
                     delete obj.dataSetElements;
+                    var mappedOrgUnits = [];
+                    if( obj.organisationUnits && obj.organisationUnits.length > 0 ){
+                        mappedOrgUnits = $.map(obj.organisationUnits, function(ou){return ou.id;});
+
+                        obj.organisationUnits = mappedOrgUnits;
+                    }
                 }
                 else if( store === 'validationRules' ){
                     obj.params = [];
@@ -383,7 +417,7 @@ dhis2.metadata.getMetaObjects = function( store, objs, url, filter, storage, db,
     return def.promise();
 };
 
-dhis2.metadata.getMetaObject = function( id, store, url, filter, storage, db )
+dhis2.metadata.getMetaObject = function( id, store, url, filter, storage, db, func )
 {
     var def = $.Deferred();
 
@@ -391,13 +425,15 @@ dhis2.metadata.getMetaObject = function( id, store, url, filter, storage, db )
         url = url + '/' + id + '.json';
     }
 
-    url = encodeURI( url );
-
     $.ajax({
-        url: url,
+        url: encodeURI( url ),
         type: 'GET',
-        data: filter
+        data: encodeURI( filter )
     }).done( function( response ){
+        if( func ) {
+            response = func(response);
+        }
+
         if(storage === 'idb'){
             if( response && response.id) {
                 db.set( store, response );
@@ -436,4 +472,48 @@ dhis2.metadata.processObject = function(obj, prop){
         obj[prop] = oo;
     }
     return obj;
+};
+
+dhis2.metadata.processOptionCombos = function( data ){
+
+    var getSharingSetting = function( coc ){
+
+        var dWrite = true, dRead = true, mRead = true, mWrite = true;
+
+        coc.categoryOptions.forEach(function(co){
+            dWrite = co.access.data.write && dWrite;
+            dRead = co.access.data.read && dRead;
+            mRead = co.access.read && mRead;
+            mWrite = co.access.write && mWrite;
+            var att = dhis2.metadata.getMetaDataAttribute( co );
+            if( coc.categoryOptions.length === 1 && Object.keys(att).length > 0 ){
+                for( var key in att ){
+                    coc[key] = att[key];
+                }
+            }
+        });
+
+        coc.dWrite = dWrite;
+        coc.dRead = dRead;
+        coc.mRead = mRead;
+        coc.mWrite = mWrite;
+
+        return coc;
+    };
+
+    if( data && data.categoryCombos && data.categoryCombos.length > 0 ){
+        var optionCombos = {};
+        data.categoryCombos.forEach( function(cc) {
+            if( cc.categoryOptionCombos ){
+                var cocs = $.map(cc.categoryOptionCombos, function(coc){ return getSharingSetting(coc); });
+                cocs.forEach(function(coc){
+                    optionCombos[coc.id] = coc;
+                });
+            }
+        });
+
+        return optionCombos;
+    }
+
+    return data;
 };

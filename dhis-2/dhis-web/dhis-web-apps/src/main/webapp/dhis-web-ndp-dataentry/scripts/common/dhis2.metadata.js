@@ -150,11 +150,10 @@ dhis2.metadata.getMetaObjectIds = function( objNames, url, filter )
 {
     var def = $.Deferred();
     var objs = [];
-    var url = encodeURI( url );
     $.ajax({
-        url: url,
+        url: encodeURI( url ),
         type: 'GET',
-        data:filter
+        data: encodeURI( filter )
     }).done( function(response) {
         _.each( _.values( response[objNames] ), function ( obj ) {
         	objs.push( obj );
@@ -267,12 +266,10 @@ dhis2.metadata.getMetaObjects = function( store, objs, url, filter, storage, db,
 {
     var def = $.Deferred();
 
-    url = encodeURI( url );
-
     $.ajax({
-        url: url,
+        url: encodeURI( url ),
         type: 'GET',
-        data: filter
+        data: encodeURI( filter )
     }).done(function(response) {
         if(response[objs]){
             var count = 0;
@@ -283,10 +280,12 @@ dhis2.metadata.getMetaObjects = function( store, objs, url, filter, storage, db,
                 }
                 if( store === 'categoryCombos' ){
 
-                	if( obj.categories ){
+                    if( obj.categories ){
                         _.each( _.values( obj.categories ), function ( ca ) {
+                            ca = dhis2.metadata.processMetaDataAttribute( ca );
                             if( ca.categoryOptions ){
                                 _.each( _.values( ca.categoryOptions ), function ( co ) {
+                                    co = dhis2.metadata.processMetaDataAttribute( co );
                                     co.mappedOrganisationUnits = [];
                                     if( co.organisationUnits && co.organisationUnits.length > 0 ){
                                         co.mappedOrganisationUnits = $.map(co.organisationUnits, function(ou){return ou.id;});
@@ -374,9 +373,20 @@ dhis2.metadata.getMetaObjects = function( store, objs, url, filter, storage, db,
                     _.each(obj.programStages, function(stage){
                         _.each(stage.programStageDataElements, function(pstde){
                             if( pstde.dataElement ){
-                                pstde.dataElement = dhis2.metadata.processMetaDataAttribute( pstde.dataElement )
+                                pstde.dataElement = dhis2.metadata.processMetaDataAttribute( pstde.dataElement );
                             }
                         });
+                    });
+
+                    _.each(obj.programTrackedEntityAttributes, function(pta){
+                        if( pta.trackedEntityAttribute ){
+                            pta.trackedEntityAttribute = dhis2.metadata.processMetaDataAttribute( pta.trackedEntityAttribute );
+                        }
+                    });
+                }
+                else if( store === 'optionSets' ){
+                    _.each(obj.options, function(op){
+                        op = dhis2.metadata.processMetaDataAttribute( op );
                     });
                 }
                 count++;
@@ -415,12 +425,10 @@ dhis2.metadata.getMetaObject = function( id, store, url, filter, storage, db, fu
         url = url + '/' + id + '.json';
     }
 
-    url = encodeURI( url );
-
     $.ajax({
-        url: url,
+        url: encodeURI( url ),
         type: 'GET',
-        data: filter
+        data: encodeURI( filter )
     }).done( function( response ){
         if( func ) {
             response = func(response);
