@@ -674,27 +674,6 @@ var ndpFrameworkServices = angular.module('ndpFrameworkServices', ['ngResource']
                 return res && res.value ? res.value : '';
             };
 
-            var filterPerformanceData = function(header, dataElement, oc, data, reportParams){
-                if(!header || !data || !header.id || !dataElement) return;
-
-                var filterParams = {
-                    dx: dataElement,
-                    pe: header.id,
-                    co: oc
-                };
-
-                var rs = $filter('dataFilter')(data, filterParams);
-                var currentData = mergeBtaData( rs );
-                var previousData = getPreviousData( currentData, data );
-
-                if ( previousData ){
-                    return CommonUtils.getPercent( currentData.actual - previousData.actual, currentData.target - previousData.actual );
-                }
-                else{
-                    return $translate.instant("no_target");
-                }
-            };
-
             var getPerforAndCostData = function(header, dataElement, oc, data, reportParams){
                 if(!header || !data || !header.id || !dataElement) return;
 
