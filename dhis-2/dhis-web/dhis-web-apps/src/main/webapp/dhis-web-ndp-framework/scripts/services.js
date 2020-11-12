@@ -448,7 +448,7 @@ var ndpFrameworkServices = angular.module('ndpFrameworkServices', ['ngResource']
     return {
         getSectors: function(){
             var filter = '?paging=false&fields=id,displayName,organisationUnitGroups[id,displayName,code,attributeValues[value,attribute[id,code,valueType]],organisationUnits[id,displayName,code,dataSets[dataSetElements[dataElement[dataElementGroups[groupSets[id]]]]]]],attributeValues[value,attribute[id,code,valueType]]';
-            var url = dhis2.ndp.apiUrl + '/organisationUnitGroupSets.json' + filter;
+            var url = dhis2.ndp.apiUrl + '/organisationUnitGroupSets.json' + encodeURI( filter );
             var promise = $http.get( url ).then(function(response){
                 var sectors = [];
                 if( response && response.data && response.data.organisationUnitGroupSets){
@@ -471,7 +471,7 @@ var ndpFrameworkServices = angular.module('ndpFrameworkServices', ['ngResource']
         },
         getMdas: function(){
             var filter = '?paging=false&fields=id,displayName,organisationUnitGroups[id,displayName,code,attributeValues[value,attribute[id,code,valueType]],organisationUnits[id,displayName,code,dataSets[dataSetElements[dataElement[dataElementGroups[groupSets[id]]]]]]],attributeValues[value,attribute[id,code,valueType]]';
-            var url = dhis2.ndp.apiUrl + '/organisationUnitGroupSets.json' + filter;
+            var url = dhis2.ndp.apiUrl + '/organisationUnitGroupSets.json' + encodeURI( filter );
             var promise = $http.get( url ).then(function(response){
                 var mdas = [];
                 if( response && response.data && response.data.organisationUnitGroupSets){
@@ -499,7 +499,7 @@ var ndpFrameworkServices = angular.module('ndpFrameworkServices', ['ngResource']
         },
         getLgs: function(){
             var filter = '?paging=false&fields=id,displayName,organisationUnitGroups[id,displayName,code,attributeValues[value,attribute[id,code,valueType]],organisationUnits[id,displayName,code,dataSets[dataSetElements[dataElement[dataElementGroups[groupSets[id]]]]]]],attributeValues[value,attribute[id,code,valueType]]';
-            var url = dhis2.ndp.apiUrl + '/organisationUnitGroupSets.json' + filter;
+            var url = dhis2.ndp.apiUrl + '/organisationUnitGroupSets.json' + encodeURI( filter );
             var promise = $http.get( url ).then(function(response){
                 var lgs = [];
                 if( response && response.data && response.data.organisationUnitGroupSets){
@@ -527,7 +527,7 @@ var ndpFrameworkServices = angular.module('ndpFrameworkServices', ['ngResource']
         },
         getByVote: function( id ){
             var filter = '?paging=false&fields=id,displayName,code,dataSets[dataSetElements[dataElement[dataElementGroups[groupSets[id]]]]],attributeValues[value,attribute[id,code,valueType]]';
-            var url = dhis2.ndp.apiUrl + '/organisationUnits/' + id + '.json' + filter;
+            var url = dhis2.ndp.apiUrl + '/organisationUnits/' + id + '.json' + encodeURI( filter );
             var promise = $http.get( url ).then(function(response){
                 return response.data;
             }, function(response){
@@ -542,7 +542,7 @@ var ndpFrameworkServices = angular.module('ndpFrameworkServices', ['ngResource']
 .service('Analytics', function($http, $filter, $translate, PeriodService, orderByFilter, CommonUtils, NotificationService){
     return {
         getData: function( url ){
-            url = dhis2.ndp.apiUrl + '/analytics?' + url;
+            url = dhis2.ndp.apiUrl + '/analytics?' + encodeURI( url );
             var promise = $http.get( url ).then(function(response){
 
                 var data = response.data;
