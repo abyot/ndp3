@@ -806,9 +806,6 @@ var ndpFrameworkServices = angular.module('ndpFrameworkServices', ['ngResource']
                                     costEffRow.push({val: name , span: 1, info: de.id});
                                     angular.forEach(performanceHeaders, function(dh){
                                         cumulativeRow.push({val: filterCumulativeData(dh, de.id, oc.id, data, dataParams), span: 1});
-                                        //performanceRow.push({val: filterPerformanceData(dh, de.id, oc.id, data, dataParams), span: 1});
-                                        //costRow.push({val: filterCostData(dh, de.id, oc.id, data, dataParams), span: 1});
-                                        //costEffRow.push({val: filterCostEffData(dh, de.id, oc.id, data, dataParams), span: 1});
                                         var pce = getPerforAndCostData(dh, de.id, oc.id, data, dataParams);
                                         performanceRow.push({val: pce.performance, span: 1});
                                         costRow.push({val: pce.cost, span: 1});
