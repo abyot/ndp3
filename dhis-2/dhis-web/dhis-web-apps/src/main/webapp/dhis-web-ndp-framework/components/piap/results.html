@@ -72,23 +72,14 @@
                     </tr>
                     <tr>
                         <th>{{model.selectedMenu.ndp}} {{'objectives'| translate}}</th>
-                        <th>{{'kra'| translate}}</th>
+                        <th>{{'outputs'| translate}}</th>
                         <th>{{'indicator'| translate}}</th>
                         <th class="center" ng-repeat="header in model.dataHeaders">
                             {{model.metaData.items[header.dimensionId].name}}
                         </th>
                     </tr>
                 </thead>
-                <tbody>
-                    <tr ng-repeat="row in model.resultData">
-                        <td class="vertical-center" ng-repeat="col in row" rowspan="{{col.span}}">
-                            {{col.val}}
-                            <span ng-if="col.info" ng-click="getIndicatorDictionary(col.info)">
-                                <i class="fa fa-info-circle info-icon cursor-pointer" aria-hidden="true" title="{{'indicator_dictionary'| translate}}"></i>
-                            </span>
-                        </td>
-                    </tr>
-                </tbody>
+                <tbody ng-include="'components/report-data/result-body.html'"></tbody>
             </table>
         </div>
     </div>

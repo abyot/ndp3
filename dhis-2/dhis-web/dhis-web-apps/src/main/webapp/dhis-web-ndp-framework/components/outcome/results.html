@@ -80,22 +80,6 @@
                     </tr>
                 </thead>
                 <tbody ng-include="'components/report-data/result-body.html'"></tbody>
-                <!--<tbody>
-                    <tr ng-repeat="row in model.resultData">
-                        <td class="vertical-center" ng-repeat="col in row" rowspan="{{col.span}}">
-                            <span ng-if="col.details">
-                                <a href ng-click="getDataValueExplanation(col.details)" title="{{'click_here_for_explanation' | translate}}">{{col.val}}</a>
-                            </span>
-                            <span ng-if="!col.details && !col.info">
-                                {{col.val}}
-                            </span>
-                            <span ng-if="col.info" ng-click="getIndicatorDictionary(col.info)">
-                                {{col.val}}
-                                <i class="fa fa-info-circle info-icon cursor-pointer" aria-hidden="true" title="{{'indicator_dictionary'| translate}}"></i>
-                            </span>
-                        </td>
-                    </tr>
-                </tbody>-->
             </table>
         </div>
     </div>
