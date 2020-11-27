@@ -69,6 +69,32 @@ ndpFramework.controller('SDGController',
         $scope.selectedOrgUnit = $scope.orgUnits[0] ? $scope.orgUnits[0] : null;
     });
 
+    $scope.$watch('model.selectedNDP', function(){
+
+        $scope.model.selectedSdg = null;
+        $scope.model.selectedKra = null;
+        $scope.model.sdgs = [];
+        $scope.model.selectedDataElementGroupSets = [];
+
+        if( $scope.model.selectedNDP && $scope.model.selectedNDP.id && $scope.model.selectedNDP.code ){
+            var objs = $filter('filter')($scope.model.dataElementGroupSets, {ndp: $scope.model.selectedNDP.code, indicatorGroupSetType: 'sdg'}, true);
+            $scope.model.sdgs = objs.filter(function(obj){
+                return !obj.ndpProgramme;
+            });
+
+            $scope.model.sdgs = orderByFilter( $scope.model.sdgs, '-displayName').reverse();
+
+            $scope.model.selectedDataElementGroupSets = angular.copy( $scope.model.sdgs );
+
+            if( $scope.model.sdgs && $scope.model.sdgs.length === 1 ){
+                $scope.model.selectedSdg = $scope.model.sdgs[0];
+            }
+            else{
+                $scope.getObjectives();
+            }
+        }
+    });
+
     $scope.$watch('model.selectedSdg', function(){
         $scope.model.selectedKra = null;
         $scope.model.dataElementGroup = [];
@@ -111,37 +137,49 @@ ndpFramework.controller('SDGController',
         });
     };
 
-    OptionComboService.getBtaDimensions().then(function( bta ){
+    MetaDataFactory.getAll('optionSets').then(function(optionSets){
 
-        if( !bta || !bta.category || !bta.options || bta.options.length !== 3 ){
-            NotificationService.showNotifcationDialog($translate.instant("error"), $translate.instant("invalid_bta_dimensions"));
-            return;
-        }
+        $scope.model.optionSets = optionSets;
 
-        $scope.model.bta = bta;
-        $scope.model.baseLineTargetActualDimensions = $.map($scope.model.bta.options, function(d){return d.id;});
+        angular.forEach(optionSets, function(optionSet){
+            $scope.model.optionSetsById[optionSet.id] = optionSet;
+        });
 
-        MetaDataFactory.getDataElementGroups().then(function(dataElementGroups){
+        $scope.model.ndp = $filter('getFirst')($scope.model.optionSets, {code: 'ndp'});
 
-            $scope.model.dataElementGroups = dataElementGroups;
+        OptionComboService.getBtaDimensions().then(function( bta ){
 
-            MetaDataFactory.getAll('dataElementGroupSets').then(function(dataElementGroupSets){
+            if( !bta || !bta.category || !bta.options || bta.options.length !== 3 ){
+                NotificationService.showNotifcationDialog($translate.instant("error"), $translate.instant("invalid_bta_dimensions"));
+                return;
+            }
 
-                $scope.model.dataElementGroupSets = dataElementGroupSets;
+            $scope.model.bta = bta;
+            $scope.model.baseLineTargetActualDimensions = $.map($scope.model.bta.options, function(d){return d.id;});
 
-                $scope.model.periods = PeriodService.getPeriods($scope.model.selectedPeriodType, $scope.model.periodOffset, $scope.model.openFuturePeriods);
+            MetaDataFactory.getDataElementGroups().then(function(dataElementGroups){
 
-                var selectedPeriodNames = ['2020/21', '2021/22', '2022/23', '2023/24', '2024/25'];
+                $scope.model.dataElementGroups = dataElementGroups;
 
-                angular.forEach($scope.model.periods, function(pe){
-                    if(selectedPeriodNames.indexOf(pe.displayName) > -1 ){
-                       $scope.model.selectedPeriods.push(pe);
-                    }
+                MetaDataFactory.getAll('dataElementGroupSets').then(function(dataElementGroupSets){
+
+                    $scope.model.dataElementGroupSets = dataElementGroupSets;
+
+                    $scope.model.periods = PeriodService.getPeriods($scope.model.selectedPeriodType, $scope.model.periodOffset, $scope.model.openFuturePeriods);
+
+                    var selectedPeriodNames = ['2020/21', '2021/22', '2022/23', '2023/24', '2024/25'];
+
+                    angular.forEach($scope.model.periods, function(pe){
+                        if(selectedPeriodNames.indexOf(pe.displayName) > -1 ){
+                           $scope.model.selectedPeriods.push(pe);
+                        }
+                    });
+
+                    $scope.populateMenu();
                 });
-
-                $scope.populateMenu();
             });
         });
+
     });
 
     $scope.populateMenu = function(){

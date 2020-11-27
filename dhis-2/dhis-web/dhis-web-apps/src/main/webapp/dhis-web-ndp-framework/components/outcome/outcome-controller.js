@@ -68,7 +68,7 @@ ndpFramework.controller('OutcomeController',
             $scope.model.selectedDataElementGroupSets = $filter('filter')($scope.model.dataElementGroupSets, {id: $scope.model.selectedObjective.id});
             angular.forEach($scope.model.selectedObjective.dataElementGroups, function(deg){
                 var _deg = $filter('filter')($scope.model.dataElementGroups, {id: deg.id});
-                if ( _deg.length > 0 ){
+                if ( _deg.length > 0 && _deg[0].indicatorGroupType === 'outcome'){
                     $scope.model.dataElementGroup.push( _deg[0] );
                 }
             });
@@ -80,7 +80,7 @@ ndpFramework.controller('OutcomeController',
             angular.forEach($scope.model.objectives, function(degs){
                 angular.forEach(degs.dataElementGroups, function(deg){
                     var _deg = $filter('filter')($scope.model.dataElementGroups, {id: deg.id});
-                    if ( _deg.length > 0 ){
+                    if ( _deg.length > 0 && _deg[0].indicatorGroupType === 'outcome'){
                         $scope.model.dataElementGroup.push( _deg[0] );
                     }
                 });
@@ -97,7 +97,7 @@ ndpFramework.controller('OutcomeController',
         $scope.model.dataElementGroup = [];
         if( angular.isObject($scope.model.selectedKra) && $scope.model.selectedKra.id){
             var _deg = $filter('filter')($scope.model.dataElementGroups, {id: $scope.model.selectedKra.id});
-            if ( _deg.length > 0 ){
+            if ( _deg.length > 0 && _deg[0].indicatorGroupType === 'outcome'){
                 $scope.model.dataElementGroup.push( _deg[0] );
             }
             $scope.getAnalyticsData();
@@ -132,7 +132,7 @@ ndpFramework.controller('OutcomeController',
         angular.forEach($scope.model.selectedDataElementGroupSets, function(degs){
             angular.forEach(degs.dataElementGroups, function(deg){
                 var _deg = $filter('filter')($scope.model.dataElementGroups, {id: deg.id});
-                if ( _deg.length > 0 ){
+                if ( _deg.length > 0 && _deg[0].indicatorGroupType === 'outcome'){
                     $scope.model.dataElementGroup.push( _deg[0] );
                 }
             });
@@ -372,6 +372,22 @@ ndpFramework.controller('OutcomeController',
             resolve: {
                 dictionaryItem: function(){
                     return item;
+                }
+            }
+        });
+
+        modalInstance.result.then(function () {
+
+        });
+    };
+
+    $scope.getDataValueExplanation = function(dataElementId, periodId){
+        var modalInstance = $modal.open({
+            templateUrl: 'components/explanation/explanation-modal.html',
+            controller: 'DataValueExplanationController',
+            resolve: {
+                dataElement: function(){
+                    return dataElementId;
                 }
             }
         });

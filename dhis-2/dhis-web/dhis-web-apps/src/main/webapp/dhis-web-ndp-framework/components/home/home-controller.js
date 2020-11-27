@@ -62,7 +62,7 @@ ndpFramework.controller('HomeController',
 
                         op.children = [];
 
-                        if( sdgs.length > 0 ){
+                        /*if( sdgs.length > 0 ){
                             op.hasChildren = true;
                             op.show = true;
                             op.children.push( {
@@ -75,7 +75,7 @@ ndpFramework.controller('HomeController',
                                 children: [],
                                 view: 'components/sdg/sdg-status.html'
                             } );
-                        }
+                        }*/
 
                         if( objectives.length > 0 || goals.length > 0 ){
                             op.hasChildren = true;
@@ -146,10 +146,24 @@ ndpFramework.controller('HomeController',
                                     children: []
                                 },
                                 {
+                                    id: 'SDG',
+                                    domain: 'SDG',
+                                    displayName: $translate.instant('sdg_outcomes'),
+                                    order: 3,
+                                    children: [],
+                                    view: 'components/sdg/sdg-status.html'
+                                },
+                                {
+                                    id: 'SPACE',
+                                    displayName: $translate.instant('space'),
+                                    order: 4,
+                                    children: []
+                                },
+                                {
                                     id: 'PRGP',
                                     domain: 'PRGP',
                                     displayName: $translate.instant('programme_performance'),
-                                    order: 3,
+                                    order: 5,
                                     children: [],
                                     view: 'components/programme/programme-performance.html'
                                 },
@@ -165,7 +179,7 @@ ndpFramework.controller('HomeController',
                                     id: 'PRJP',
                                     domain: 'PRJP',
                                     displayName: $translate.instant('project_performance'),
-                                    order: 5,
+                                    order: 6,
                                     children: [],
                                     view: 'components/project/performance.html'
                                 },
@@ -173,7 +187,7 @@ ndpFramework.controller('HomeController',
                                     id: 'MDA',
                                     domain: 'MDA',
                                     displayName: $translate.instant('mda_performance'),
-                                    order: 6,
+                                    order: 7,
                                     children: [],
                                     view: 'components/mda/mda-status.html'
                                 },
@@ -181,7 +195,7 @@ ndpFramework.controller('HomeController',
                                     id: 'LOG',
                                     domain: 'LOG',
                                     displayName: $translate.instant('log_performance'),
-                                    order: 7,
+                                    order: 8,
                                     children: [],
                                     view: 'components/log/log-status.html'
                                 }

@@ -794,7 +794,7 @@ var ndpFrameworkServices = angular.module('ndpFrameworkServices', ['ngResource']
                                     //Result data
                                     resultRow.push({val: name , span: 1, info: de.id});
                                     angular.forEach(dataHeaders, function(dh){
-                                        resultRow.push({val: filterResultData(dh, de.id, oc.id, data, dataParams), span: 1});
+                                        resultRow.push({val: filterResultData(dh, de.id, oc.id, data, dataParams), span: 1, details: de.id, period: dh.periodId});
                                     });
                                     parsedResultRow.push(resultRow);
                                     resultRow = [];

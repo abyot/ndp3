@@ -22,7 +22,7 @@
                 {{menuItem.displayName}}
             </span>
             <span ng-show="menuItem.id === 'SPACE'" class="vertical-center">
-                <br>
+                &nbsp;
             </span>
             <ul class="tree" id="tree" ng-show="menuItem.show">
                 <li ng-class="{'active-menu-item': menuItem.id !== 'SPACE'}" ng-repeat="menuItem in menuItem.children | orderBy:'order'" ng-include="'treeMenu.html'"></li>
