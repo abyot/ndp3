@@ -3,18 +3,54 @@
 </div>
 
 <div class="modal-body page">
-    <div class="scroll">
-        <!--<table class="listTable dhis2-table-striped-border">
-            <tr ng-repeat="col in model.dictionaryHeaders">
-                <td>
-                    {{col.name | translate}}
-                </td>
-                <td>
-                    {{model.dataElementsById[dictionaryItem][col.id]}}
-                </td>
-            </tr>
-        </table>-->
-        Need to fetch explanation here ...
+    <div class="scroll" ng-if="fetchExplanation">
+        <h5 class="bold">
+            {{selectedItem.displayName}} ({{selectedAoc.displayName}})
+        </h5>
+        <table class="table table-bordered table-responsive">
+            <thead>
+                <tr>
+                    <th>
+                        {{'vote' | translate}}
+                    </th>
+                    <th>
+                        {{'value' | translate}}
+                    </th>
+                    <th>
+                        {{'attachment' | translate}}
+                    </th>
+                    <th>
+                        {{'explanation' | translate}}
+                    </th>
+                </tr>
+            </thead>
+            <tbody ng-repeat="vote in dataVotes"
+                   ng-init="dv = (dataValues | filter: {orgUnit: vote.id})[0]">
+                <tr>
+                    <td>
+                        {{'vote' | translate}} - {{vote.code}}
+                    </td>
+                    <td>
+                        {{dv.value}}
+                    </td>
+                    <td>
+                        <ul class="list-group">
+                            <li class="list-group-item-borderless" ng-repeat="att in dv.comment.attachment" ng-if="documents[att] && documents[att].path && documents[att].name">
+                                <a href ng-click="downloadFile(documents[att].path, $event)">{{documents[att].name}} ({{documents[att].size}})</a>
+                            </li>
+                        </ul>
+                    </td>
+                    <td>
+                        {{dv.comment.explanation}}
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    <div ng-if="!fetchExplanation">
+        <div class="alert alert-danger">
+            {{'missing_information' | translate}}
+        </div>
     </div>
 </div>
 

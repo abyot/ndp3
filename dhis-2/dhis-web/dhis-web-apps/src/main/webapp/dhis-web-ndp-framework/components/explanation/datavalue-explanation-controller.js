@@ -5,121 +5,160 @@
 ndpFramework.controller('DataValueExplanationController',
     function($scope,
             $modalInstance,
-            dataElement,
+            $filter,
+            $window,
+            DHIS2URL,
+            item,
+            DataValueService,
+            EventService,
             MetaDataFactory){
 
-    $scope.selectedDataElement = dataElement;
-    $scope.model = {
-        dataElementsById: [],
-        dataSetsById: {},
-        categoryCombosById: {},
-        optionSets: [],
-        optionSetsById: [],
-        attributes: [],
-        dictionaryHeaders: [],
-        completeness: {
-            green: ['displayName', 'code', 'periodType', 'computationMethod', 'indicatorType', 'preferredDataSource', 'rationale', 'responsibilityForIndicator', 'unit'],
-            yellow: ['displayName', 'code', 'accountabilityForIndicator', 'computationMethod', 'preferredDataSource', 'unit'],
-            invalid: ['isProgrammeDocument', 'isDocumentFolder']
-        }
-    };
 
+    $scope.selectedItem = {};
+    $scope.fetchExplanation = true;
+    $scope.categoryCombosById = [];
+    $scope.dataPeriods = [];
+    $scope.dataVotes = [];
+    $scope.votesById = {};
 
-    MetaDataFactory.getAll('attributes').then(function(attributes){
+    if ( !item || !item.details || !item.period || !item.aoc || !item.coc ){
+        $scope.fetchExplanation = false;
+    }
+    else{
+        $scope.dataElementId = item.details;
+        $scope.period = item.period;
+        $scope.aoc = item.aoc;
+        $scope.coc = item.coc;
 
-        $scope.model.attributes = attributes;
+        $scope.selectedItem = {
+            dataElementId: item.details,
+            period: item.period,
+            aoc: item.aoc,
+            coc: item.coc.id
+        };
 
-        MetaDataFactory.getAll('programs').then(function( programs ){
+        MetaDataFactory.getAll('categoryCombos').then(function(categoryCombos){
+            angular.forEach(categoryCombos, function(cc){
+                $scope.categoryCombosById[cc.id] = cc;
+            });
+            MetaDataFactory.getAll('dataSets').then(function(dataSets){
 
-            $scope.model.programs = programs;
-
-            MetaDataFactory.getAll('categoryCombos').then(function(categoryCombos){
-                angular.forEach(categoryCombos, function(cc){
-                    $scope.model.categoryCombosById[cc.id] = cc;
+                angular.forEach(dataSets, function(ds){
+                    ds.dataElements = ds.dataElements.map(function(de){ return de.id; });
                 });
 
-                MetaDataFactory.getAll('optionSets').then(function(optionSets){
+                MetaDataFactory.getAll('dataElements').then(function(dataElements){
+                    for( var j=0; j<dataElements.length; j++){
+                        var de = dataElements[j];
+                        if ( de.id === $scope.selectedItem.dataElementId ){
+                            de.votes = [];
+                            de.periodTypes = [];
+                            de.dataSets = [];
 
-                    $scope.model.optionSets = optionSets;
+                            de.decc = $scope.categoryCombosById[de.categoryCombo.id];
+                            for( var k=0; k<de.decc.categoryOptionCombos.length; k++ ){
+                                if ( de.decc.categoryOptionCombos[k].id === $scope.selectedItem.coc ){
+                                    $scope.selectedCoc = de.decc.categoryOptionCombos[k];
+                                    break;
+                                }
+                            }
 
-                    angular.forEach(optionSets, function(optionSet){
-                        $scope.model.optionSetsById[optionSet.id] = optionSet;
-                    });
-
-                    MetaDataFactory.getAll('dataSets').then(function(dataSets){
-
-                        angular.forEach(dataSets, function(ds){
-                            ds.dataElements = ds.dataElements.map(function(de){ return de.id; });
-                            $scope.model.dataSetsById[ds.id] = ds;
-                        });
-
-                        MetaDataFactory.getAll('dataElements').then(function(dataElements){
-
-                            angular.forEach(dataElements, function(de){
-                                $scope.model.dataElementsById[de.id] = de;
-                                var cc = $scope.model.categoryCombosById[de.categoryCombo.id];
-                                de.disaggregation = !cc || cc.isDefault ? '-' : cc.displayName;
-                                de.vote = [];
-                                de.periodType = [];
-
-                                for(var i=0; i<dataSets.length; i++){
-                                    var ds = dataSets[i];
-                                    if( ds && ds.dataElements.indexOf(de.id) !== -1 ){
-                                        var periodType = ds.periodType  === 'FinancialJuly' ? 'Fiscal year' : ds.periodType;
-                                        if( de.periodType.indexOf(periodType) === -1){
-                                            de.periodType.push(periodType);
+                            for(var i=0; i<dataSets.length; i++){
+                                var ds = dataSets[i];
+                                if( ds && ds.dataElements.indexOf(de.id) !== -1 ){
+                                    de.dscc = $scope.categoryCombosById[ds.categoryCombo.id];
+                                    for( var l=0; l<de.dscc.categoryOptionCombos.length; l++ ){
+                                        var opts = $.map(de.dscc.categoryOptionCombos[l].categoryOptions, function(op){return op.id;});
+                                        if ( opts.indexOf($scope.selectedItem.aoc) !== -1 ){
+                                            $scope.selectedAoc = de.dscc.categoryOptionCombos[l];
+                                            break;
                                         }
-                                        var votes = ds.organisationUnits.map(function(ou){return ou.code;})
-                                        angular.forEach(votes, function(vote){
-                                            if(de.vote.indexOf(vote) === -1){
-                                                de.vote.push(vote);
-                                            }
-                                        });
                                     }
+
+                                    if( de.periodTypes.indexOf(ds.periodType) === -1){
+                                        de.periodTypes.push(ds.periodType);
+                                    }
+                                    angular.forEach(ds.organisationUnits, function(ou){
+                                        $scope.votesById[ou.id] = ou;
+                                        if(de.votes.indexOf(ou.id) === -1){
+                                            de.votes.push(ou.id);
+                                        }
+                                    });
+                                    de.dataSets.push( ds.id );
                                 }
-                                if( de.vote && de.vote.length > 0 ){
-                                    de.vote = de.vote.sort();
-                                    de.vote = de.vote.join(', ');
+                            }
+
+                            if ( de.decc.isDefault ){
+                                $scope.selectedItem.displayName = de.displayName;
+                            }
+                            else{
+                                $scope.selectedItem.displayName = de.displayName + ' - ' + $scope.selectedCoc.displayName;
+                            }
+
+                            $scope.selectedItem.dscc = de.dscc;
+                            $scope.selectedItem.orgUnits = de.votes;
+                            $scope.selectedItem.dataSets = de.dataSets;
+                            $scope.selectedItem.periodTypes = de.periodTypes;
+
+                            break;
+                        }
+                    }
+
+                    var dataValueSetUrl = 'dataSet=' + $scope.selectedItem.dataSets.join(',');
+                    dataValueSetUrl += '&orgUnit=' + $scope.selectedItem.orgUnits.join(',');
+                    dataValueSetUrl += '&startDate=' + $scope.period.startDate;
+                    dataValueSetUrl += '&endDate='  + $scope.period.endDate;
+
+                    DataValueService.getDataValueSet( dataValueSetUrl ).then(function( response ){
+                        if( response.dataValues && response.dataValues.length > 0 ){
+                            $scope.dataValues = $filter('filter')(response.dataValues, {
+                                dataElement: $scope.selectedItem.dataElementId,
+                                categoryOptionCombo: $scope.selectedCoc.id,
+                                attributeOptionCombo: $scope.selectedAoc.id
+                            });
+
+                            var eventIds = [];
+
+                            angular.forEach($scope.dataValues, function(dv){
+                                if ( dv.comment ){
+                                    dv.comment = JSON.parse( dv.comment );
                                 }
 
-                                if( de.periodType && de.periodType.length > 0 ){
-                                    de.periodType = de.periodType.sort();
-                                    de.periodType = de.periodType.join(', ');
+                                if ( dv.comment.attachment ){
+                                    angular.forEach(dv.comment.attachment, function(att){
+                                        eventIds.push( att );
+                                    });
+                                };
+
+                                var ou = $scope.votesById[dv.orgUnit];
+                                $scope.dataVotes.push( ou );
+                                if ( $scope.dataPeriods.indexOf(dv.period) === -1){
+                                    $scope.dataPeriods.push( dv.period );
                                 }
                             });
 
-                            $scope.model.dictionaryHeaders = [
-                                {id: 'displayName', name: 'name', colSize: "col-sm-1", show: true, fetch: false},
-                                {id: 'code', name: 'code', colSize: "col-sm-1", show: true, fetch: false},
-                                {id: 'disaggregation', name: 'disaggregation', colSize: "col-sm-1", show: true, fetch: false},
-                                {id: 'valueType', name: 'valueType', colSize: "col-sm-1", show: true, fetch: false},
-                                {id: 'periodType', name: 'frequency', colSize: "col-sm-1", show: true, fetch: false},
-                                {id: 'vote', name: 'vote', colSize: 'col-sm-1', show: true, fetch: false}
-                            ];
-
-                            angular.forEach($scope.model.attributes, function(att){
-                                if(att['dataElementAttribute'] && $scope.model.completeness.invalid.indexOf(att.code) === -1 ){
-                                    var header = {id: att.code, name: att.name, show: false, fetch: true, colSize: "col-sm-1"};
-                                    $scope.model.dictionaryHeaders.push(header);
-                                }
+                            EventService.getMultiple( eventIds ).then(function(docs){
+                                $scope.documents = docs;
+                                console.log('documents:  ', $scope.documents);
                             });
-                        });
+                        }
                     });
                 });
             });
         });
-    });
+    }
 
-    $scope.close = function () {
-        $modalInstance.close($scope.model.dictionaryHeaders);
+    $scope.downloadFile = function(path, e){
+        if( path ){
+            $window.open(DHIS2URL + path, '_blank', '');
+        }
+        if(e){
+            e.stopPropagation();
+            e.preventDefault();
+        }
     };
 
-    $scope.showHideColumns = function(gridColumn){
-        if(gridColumn.show){
-            $scope.hiddenGridColumns--;
-        }
-        else{
-            $scope.hiddenGridColumns++;
-        }
+    $scope.close = function () {
+        $modalInstance.close();
     };
 });

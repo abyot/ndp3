@@ -382,13 +382,13 @@ ndpFramework.controller('OutcomeController',
         });
     };
 
-    $scope.getDataValueExplanation = function(dataElementId, periodId){
+    $scope.getDataValueExplanation = function( item ){
         var modalInstance = $modal.open({
             templateUrl: 'components/explanation/explanation-modal.html',
             controller: 'DataValueExplanationController',
             resolve: {
-                dataElement: function(){
-                    return dataElementId;
+                item: function(){
+                    return item;
                 }
             }
         });

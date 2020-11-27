@@ -486,3 +486,7 @@ ul.tree ul li:last-child:before {
     padding: 10px;
     border-radius: 10px;
 }
+
+.list-group-item-borderless {
+    display: block;
+}

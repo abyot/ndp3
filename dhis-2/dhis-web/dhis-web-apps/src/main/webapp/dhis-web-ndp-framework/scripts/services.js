@@ -30,7 +30,7 @@ var ndpFrameworkServices = angular.module('ndpFrameworkServices', ['ngResource']
     };
 })
 
-.service('PeriodService', function(CalendarService, orderByFilter){
+.service('PeriodService', function(CalendarService, DateUtils, orderByFilter){
 
     this.getPeriods = function(periodType, periodOffset, futurePeriods){
         if(!periodType){
@@ -52,8 +52,8 @@ var ndpFrameworkServices = angular.module('ndpFrameworkServices', ['ngResource']
         d2Periods = dhis2.period.generator.filterOpenPeriods( periodType, d2Periods, futurePeriods, null, null );
 
         angular.forEach(d2Periods, function(p){
-            //p.endDate = DateUtils.formatFromApiToUser(p.endDate);
-            //p.startDate = DateUtils.formatFromApiToUser(p.startDate);
+            p.startDate = p._startDate._year + '-' + p._startDate._month + '-' + p._startDate._day;
+            p.endDate = p._endDate._year + '-' + p._endDate._month + '-' + p._endDate._day;
             p.displayName = p.name;
             p.id = p.iso;
         });
@@ -75,6 +75,35 @@ var ndpFrameworkServices = angular.module('ndpFrameworkServices', ['ngResource']
             }
         }
         return {location: index, period: previousPeriod};
+    };
+
+    this.getForDates = function(periodType, startDate, endDate){
+        if(!periodType){
+            return [];
+        }
+
+        var calendarSetting = CalendarService.getSetting();
+
+        dhis2.period.format = calendarSetting.keyDateFormat;
+
+        dhis2.period.calendar = $.calendars.instance( calendarSetting.keyCalendar );
+
+        dhis2.period.generator = new dhis2.period.PeriodGenerator( dhis2.period.calendar, dhis2.period.format );
+
+        dhis2.period.picker = new dhis2.period.DatePicker( dhis2.period.calendar, dhis2.period.format );
+
+        var d2Periods = dhis2.period.generator.generateReversedPeriods( periodType, -5 );
+
+        d2Periods = dhis2.period.generator.filterOpenPeriods( periodType, d2Periods, 5, null, null );
+
+        angular.forEach(d2Periods, function(p){
+            p.displayName = p.name;
+            p.id = p.iso;
+        });
+
+        return d2Periods;
+
+        console.log('the period:  ', d2Periods);
     };
 })
 
@@ -750,7 +779,7 @@ var ndpFrameworkServices = angular.module('ndpFrameworkServices', ['ngResource']
                     var d = $filter('dataFilter')(data, filterParams);
                     if( d && d.length > 0 ){
                         colSpan++;
-                        dataHeaders.push({periodId: pe.id, dimensionId: dm, dimension: dataParams.bta.category});
+                        dataHeaders.push({periodId: pe.id, periodStart: pe.startDate, periodEnd: pe.endDate, dimensionId: dm, dimension: dataParams.bta.category});
                     }
                 });
                 pe.colSpan = colSpan;
@@ -794,7 +823,12 @@ var ndpFrameworkServices = angular.module('ndpFrameworkServices', ['ngResource']
                                     //Result data
                                     resultRow.push({val: name , span: 1, info: de.id});
                                     angular.forEach(dataHeaders, function(dh){
-                                        resultRow.push({val: filterResultData(dh, de.id, oc.id, data, dataParams), span: 1, details: de.id, period: dh.periodId});
+                                        var period = {
+                                            id: dh.periodId,
+                                            startDate: dh.periodStart,
+                                            endDate: dh.periodEnd
+                                        };
+                                        resultRow.push({val: filterResultData(dh, de.id, oc.id, data, dataParams), span: 1, details: de.id, period: period, coc: oc, aoc: dh.dimensionId});
                                     });
                                     parsedResultRow.push(resultRow);
                                     resultRow = [];
@@ -893,6 +927,36 @@ var ndpFrameworkServices = angular.module('ndpFrameworkServices', ['ngResource']
         return Math.round(bytes / Math.pow(1024, i), 2) + ' ' + sizes[i];
     };
 
+    var processDocuments = function(events ){
+        var documents = {};
+        if( events && events.length > 0 ){
+            angular.forEach(events, function(ev){
+                if( ev && ev.dataValues ){
+                    var doc = {
+                        dateUploaded: DateUtils.formatFromApiToUser(ev.eventDate),
+                        uploadedBy: ev.storedBy,
+                        event: ev.event
+                    };
+
+                    angular.forEach(ev.dataValues, function(dv){
+                        if( dv.dataElement && dv.value ){
+                            doc.value = dv.value;
+                            FileService.get( dv.value ).then(function(res){
+                                doc.name = res.displayName || '';
+                                doc.size = bytesToSize( res.contentLength || 0 );
+                                doc.type = res.contentType || 'undefined';
+                                doc.path = '/events/files?dataElementUid=' + dv.dataElement + '&eventUid=' + ev.event;
+                            });
+                        }
+                    });
+
+                    documents[ev.event] = doc;
+                }
+            });
+        }
+        return documents;
+    };
+
     var skipPaging = "&skipPaging=true";
 
     var getByOrgUnitAndProgram = function(orgUnit, ouMode, program, typeDataElement, fileDataElement, optionSets, dataElementById){
@@ -973,11 +1037,26 @@ var ndpFrameworkServices = angular.module('ndpFrameworkServices', ['ngResource']
         });
         return promise;
     };
+
+    var getMultiple = function( eventIds ){
+        var def = $q.defer();
+        var promises = [];
+        angular.forEach(eventIds, function(eventId){
+            promises.push( get( eventId ) );
+        });
+
+        $q.all(promises).then(function( _events ){
+            def.resolve( processDocuments(_events) );
+        });
+        return def.promise;
+    };
+
     return {
         get: get,
         create: create,
         deleteEvent: deleteEvent,
         update: update,
+        getMultiple: getMultiple,
         getByOrgUnitAndProgram: getByOrgUnitAndProgram,
         getForMultipleOptionCombos: function( orgUnit, mode, pr, attributeCategoryUrl, optionCombos, startDate, endDate ){
             var def = $q.defer();
@@ -1113,6 +1192,22 @@ var ndpFrameworkServices = angular.module('ndpFrameworkServices', ['ngResource']
 
 
             return {value: indVal, numerator: numerator};
+        }
+    };
+})
+
+
+.service('DataValueService', function($http, CommonUtils) {
+
+    return {
+        getDataValueSet: function( params ){
+            var promise = $http.get('../api/dataValueSets.json?' + params ).then(function(response){
+                return response.data;
+            }, function( response ){
+                CommonUtils.errorNotifier(response);
+                return response.data;
+            });
+            return promise;
         }
     };
 });

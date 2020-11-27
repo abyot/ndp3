@@ -650,7 +650,7 @@ var ndpDataEntryServices = angular.module('ndpDataEntryServices', ['ngResource']
         getMultiple: getMultiple,
         create: create,
         deleteEvent: deleteEvent,
-        update: update,
+        update: update
     };
 })
 

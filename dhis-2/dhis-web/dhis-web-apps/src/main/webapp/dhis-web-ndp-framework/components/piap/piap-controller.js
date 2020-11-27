@@ -22,6 +22,7 @@ ndpFramework.controller('PIAPController',
         reportReady: false,
         dataExists: false,
         dataHeaders: [],
+        dataElementsById: [],
         optionSetsById: [],
         optionSets: [],
         objectives: [],
@@ -69,12 +70,17 @@ ndpFramework.controller('PIAPController',
         $scope.selectedOrgUnit = $scope.orgUnits[0] ? $scope.orgUnits[0] : null;
     });
 
-    $scope.getSubProgrammes = function(){
+    $scope.getOutputs = function(){
+
+        $scope.model.selectedDataElementGroupSets = $scope.model.selectedDataElementGroupSets.filter(function(obj){
+            return obj.dataElementGroups && obj.dataElementGroups.length && obj.dataElementGroups.length > 0;
+        });
+
         $scope.model.dataElementGroup = [];
         angular.forEach($scope.model.selectedDataElementGroupSets, function(degs){
             angular.forEach(degs.dataElementGroups, function(deg){
-                var _deg = $filter('filter')($scope.model.dataElementGroups, {id: deg.id});
-                if ( _deg.length > 0 && _deg[0].indicatorGroupType === 'output' ){
+                var _deg = $filter('filter')($scope.model.dataElementGroups, {indicatorGroupType: 'output', id: deg.id}, true);
+                if ( _deg.length > 0 ){
                     $scope.model.dataElementGroup.push( _deg[0] );
                 }
             });
@@ -82,42 +88,18 @@ ndpFramework.controller('PIAPController',
     };
 
     $scope.$watch('model.selectedNdpProgram', function(){
+        $scope.resetDataView();
         $scope.model.objectives = [];
+        $scope.model.selectedDataElementGroupSets = [];
         $scope.model.subPrograms = [];
         $scope.model.selectedSubProgramme = null;
-        $scope.model.selectedDataElementGroupSets = [];
-        $scope.resetDataView();
         if( angular.isObject($scope.model.selectedNdpProgram) ){
             if( $scope.model.selectedNdpProgram && $scope.model.selectedNdpProgram.code ){
                 $scope.model.objectives = $filter('filter')($scope.model.dataElementGroupSets, {ndp: $scope.model.selectedMenu.ndp, indicatorGroupSetType: $scope.model.selectedMenu.code, ndpProgramme: $scope.model.selectedNdpProgram.code}, true);
                 $scope.model.subPrograms = $filter('filter')($scope.model.dataElementGroupSets, {ndp: $scope.model.selectedMenu.ndp, indicatorGroupSetType: 'sub-programme', ndpProgramme: $scope.model.selectedNdpProgram.code}, true);
-                $scope.model.selectedDataElementGroupSets = angular.copy( $scope.model.objectives );
+                $scope.model.selectedDataElementGroupSets = $filter('filter')($scope.model.dataElementGroupSets, {ndp: $scope.model.selectedMenu.ndp, ndpProgramme: $scope.model.selectedNdpProgram.code}, true);
+                $scope.getOutputs();
             }
-        }
-    });
-
-    $scope.$watch('model.selectedObjective', function(){
-        $scope.model.dataElementGroup = [];
-        $scope.resetDataView();
-        if( angular.isObject($scope.model.selectedObjective) && $scope.model.selectedObjective.id){
-            $scope.model.selectedDataElementGroupSets = $filter('filter')($scope.model.dataElementGroupSets, {id: $scope.model.selectedObjective.id});
-            angular.forEach($scope.model.selectedObjective.dataElementGroups, function(deg){
-                var _deg = $filter('filter')($scope.model.dataElementGroups, {id: deg.id});
-                if ( _deg.length > 0 && _deg[0].indicatorGroupType === 'output' ){
-                    $scope.model.dataElementGroup.push( _deg[0] );
-                }
-            });
-        }
-        else{
-            $scope.model.selectedDataElementGroupSets = angular.copy( $scope.model.objectives );
-            angular.forEach($scope.model.objectives, function(degs){
-                angular.forEach(degs.dataElementGroups, function(deg){
-                    var _deg = $filter('filter')($scope.model.dataElementGroups, {id: deg.id});
-                    if ( _deg.length > 0 && _deg[0].indicatorGroupType === 'output' ){
-                        $scope.model.dataElementGroup.push( _deg[0] );
-                    }
-                });
-            });
         }
     });
 
@@ -149,6 +131,13 @@ ndpFramework.controller('PIAPController',
             $scope.model.optionSetsById[optionSet.id] = optionSet;
         });
 
+        $scope.model.ndp = $filter('getFirst')($scope.model.optionSets, {code: 'ndp'});
+
+        if( !$scope.model.ndp || !$scope.model.ndp.code ){
+            NotificationService.showNotifcationDialog($translate.instant("error"), $translate.instant("missing_ndp_configuration"));
+            return;
+        }
+
         OptionComboService.getBtaDimensions().then(function( bta ){
 
             if( !bta || !bta.category || !bta.options || bta.options.length !== 3 ){
@@ -159,38 +148,45 @@ ndpFramework.controller('PIAPController',
             $scope.model.bta = bta;
             $scope.model.baseLineTargetActualDimensions = $.map($scope.model.bta.options, function(d){return d.id;});
 
-            MetaDataFactory.getDataElementGroups().then(function(dataElementGroups){
+            MetaDataFactory.getAll('dataElements').then(function(dataElements){
 
-                $scope.model.dataElementGroups = dataElementGroups;
+                $scope.model.dataElementsById = dataElements.reduce( function(map, obj){
+                    map[obj.id] = obj;
+                    return map;
+                }, {});
 
-                MetaDataFactory.getAll('dataElementGroupSets').then(function(dataElementGroupSets){
+                MetaDataFactory.getDataElementGroups().then(function(dataElementGroups){
 
-                    $scope.model.dataElementGroupSets = dataElementGroupSets;
+                    $scope.model.dataElementGroups = dataElementGroups;
 
-                    var periods = PeriodService.getPeriods($scope.model.selectedPeriodType, $scope.model.periodOffset, $scope.model.openFuturePeriods);
-                    $scope.model.allPeriods = angular.copy( periods );
-                    $scope.model.periods = periods;
+                    MetaDataFactory.getAll('dataElementGroupSets').then(function(dataElementGroupSets){
 
-                    var selectedPeriodNames = ['2020/21', '2021/22', '2022/23', '2023/24', '2024/25'];
+                        $scope.model.dataElementGroupSets = dataElementGroupSets;
 
-                    angular.forEach($scope.model.periods, function(pe){
-                        if(selectedPeriodNames.indexOf(pe.displayName) > -1 ){
-                           $scope.model.selectedPeriods.push(pe);
+                        var periods = PeriodService.getPeriods($scope.model.selectedPeriodType, $scope.model.periodOffset, $scope.model.openFuturePeriods);
+                        $scope.model.allPeriods = angular.copy( periods );
+                        $scope.model.periods = periods;
+
+                        var selectedPeriodNames = ['2020/21', '2021/22', '2022/23', '2023/24', '2024/25'];
+
+                        angular.forEach($scope.model.periods, function(pe){
+                            if(selectedPeriodNames.indexOf(pe.displayName) > -1 ){
+                               $scope.model.selectedPeriods.push(pe);
+                            }
+                        });
+
+                        $scope.model.selectedMenu = SelectedMenuService.getSelectedMenu();
+
+                        if( $scope.model.selectedMenu && $scope.model.selectedMenu.ndp && $scope.model.selectedMenu.code ){
+                            $scope.model.ndpProgram = $filter('getFirst')($scope.model.optionSets, {ndp: $scope.model.selectedMenu.ndp, code: 'program'}, true);
+                            $scope.model.ndpObjectives = $filter('filter')($scope.model.dataElementGroupSets, {ndp: $scope.model.selectedMenu.ndp, indicatorGroupSetType: 'resultsFrameworkObjective'}, true);
+                            $scope.model.ndpProgrammes = $filter('filter')($scope.model.dataElementGroupSets, {ndp: $scope.model.selectedMenu.ndp, indicatorGroupSetType: 'programme'}, true);
+
+                            $scope.model.ndpObjectives = $scope.model.ndpObjectives.filter(function(obj){
+                                return !obj.ndpProgramme;
+                            });
                         }
                     });
-
-                    $scope.model.selectedMenu = SelectedMenuService.getSelectedMenu();
-
-                    if( $scope.model.selectedMenu && $scope.model.selectedMenu.ndp && $scope.model.selectedMenu.code ){
-
-                        $scope.model.ndpProgram = $filter('filter')($scope.model.optionSets, {ndp: $scope.model.selectedMenu.ndp, code: 'program'}, true)[0];
-                        $scope.model.ndpObjectives = $filter('filter')($scope.model.dataElementGroupSets, {ndp: $scope.model.selectedMenu.ndp, indicatorGroupSetType: 'objective'}, true);
-                        $scope.model.ndpProgrammes = $filter('filter')($scope.model.dataElementGroupSets, {ndp: $scope.model.selectedMenu.ndp, indicatorGroupSetType: 'programme'}, true);
-
-                        $scope.model.ndpObjectives = $scope.model.ndpObjectives.filter(function(obj){
-                            return !obj.ndpProgramme;
-                        });
-                    }
                 });
             });
 
@@ -238,10 +234,12 @@ ndpFramework.controller('PIAPController',
 
         if( !$scope.selectedOrgUnit || !$scope.selectedOrgUnit.id ){
             NotificationService.showNotifcationDialog($translate.instant("error"), $translate.instant("missing_vote"));
+            return;
         }
 
         if( $scope.model.dataElementGroup.length === 0 || !$scope.model.dataElementGroup ){
-            NotificationService.showNotifcationDialog($translate.instant("error"), $translate.instant("missing_piap"));
+            NotificationService.showNotifcationDialog($translate.instant("error"), $translate.instant("missing_outcome_output"));
+            return;
         }
 
         $scope.getBasePeriod();
@@ -281,16 +279,19 @@ ndpFramework.controller('PIAPController',
                         selectedDataElementGroup: $scope.model.selectedKra,
                         dataElementGroups: $scope.model.dataElementGroups,
                         basePeriod: $scope.model.basePeriod,
-                        allPeriods: $scope.model.allPeriods
+                        maxPeriod: $scope.model.selectedPeriods.slice(-1)[0],
+                        allPeriods: $scope.model.allPeriods,
+                        dataElementsById: $scope.model.dataElementsById
                     };
 
                     var processedData = Analytics.processData( dataParams );
 
                     $scope.model.dataHeaders = processedData.dataHeaders;
-                    $scope.model.resultData = processedData.resultData;
                     $scope.model.reportPeriods = processedData.reportPeriods;
                     $scope.model.dataExists = processedData.dataExists;
+                    $scope.model.resultData = processedData.resultData || [];
                     $scope.model.performanceData = processedData.performanceData || [];
+                    $scope.model.cumulativeData = processedData.cumulativeData || [];
                 }
             });
         }
