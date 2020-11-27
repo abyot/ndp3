@@ -68,7 +68,7 @@ ndpFramework.controller('OutcomeController',
             $scope.model.selectedDataElementGroupSets = $filter('filter')($scope.model.dataElementGroupSets, {id: $scope.model.selectedObjective.id});
             angular.forEach($scope.model.selectedObjective.dataElementGroups, function(deg){
                 var _deg = $filter('filter')($scope.model.dataElementGroups, {id: deg.id});
-                if ( _deg.length > 0 && _deg[0].indicatorGroupType === 'outcome'){
+                if ( _deg.length > 0 ){
                     $scope.model.dataElementGroup.push( _deg[0] );
                 }
             });
@@ -80,7 +80,8 @@ ndpFramework.controller('OutcomeController',
             angular.forEach($scope.model.objectives, function(degs){
                 angular.forEach(degs.dataElementGroups, function(deg){
                     var _deg = $filter('filter')($scope.model.dataElementGroups, {id: deg.id});
-                    if ( _deg.length > 0 && _deg[0].indicatorGroupType === 'outcome'){
+                    console.log('_deg:  ', _deg);
+                    if ( _deg.length > 0 ){
                         $scope.model.dataElementGroup.push( _deg[0] );
                     }
                 });
@@ -97,7 +98,7 @@ ndpFramework.controller('OutcomeController',
         $scope.model.dataElementGroup = [];
         if( angular.isObject($scope.model.selectedKra) && $scope.model.selectedKra.id){
             var _deg = $filter('filter')($scope.model.dataElementGroups, {id: $scope.model.selectedKra.id});
-            if ( _deg.length > 0 && _deg[0].indicatorGroupType === 'outcome'){
+            if ( _deg.length > 0 ){
                 $scope.model.dataElementGroup.push( _deg[0] );
             }
             $scope.getAnalyticsData();
@@ -132,7 +133,7 @@ ndpFramework.controller('OutcomeController',
         angular.forEach($scope.model.selectedDataElementGroupSets, function(degs){
             angular.forEach(degs.dataElementGroups, function(deg){
                 var _deg = $filter('filter')($scope.model.dataElementGroups, {id: deg.id});
-                if ( _deg.length > 0 && _deg[0].indicatorGroupType === 'outcome'){
+                if ( _deg.length > 0 ){
                     $scope.model.dataElementGroup.push( _deg[0] );
                 }
             });
