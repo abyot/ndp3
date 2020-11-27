@@ -487,6 +487,11 @@ ul.tree ul li:last-child:before {
     border-radius: 10px;
 }
 
+.comment-modal-window .modal-dialog {
+    width: 80%;
+}
+
 .list-group-item-borderless {
     display: block;
+    padding: 0 10px;
 }

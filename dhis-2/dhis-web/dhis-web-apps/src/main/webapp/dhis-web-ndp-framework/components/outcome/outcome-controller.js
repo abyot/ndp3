@@ -386,6 +386,7 @@ ndpFramework.controller('OutcomeController',
         var modalInstance = $modal.open({
             templateUrl: 'components/explanation/explanation-modal.html',
             controller: 'DataValueExplanationController',
+            windowClass: 'comment-modal-window',
             resolve: {
                 item: function(){
                     return item;

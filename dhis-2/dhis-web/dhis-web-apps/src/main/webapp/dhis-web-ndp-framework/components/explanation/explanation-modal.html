@@ -35,7 +35,7 @@
                     </td>
                     <td>
                         <ul class="list-group">
-                            <li class="list-group-item-borderless" ng-repeat="att in dv.comment.attachment" ng-if="documents[att] && documents[att].path && documents[att].name">
+                            <li class="list-group-item" ng-repeat="att in dv.comment.attachment" ng-if="documents[att] && documents[att].path && documents[att].name">
                                 <a href ng-click="downloadFile(documents[att].path, $event)">{{documents[att].name}} ({{documents[att].size}})</a>
                             </li>
                         </ul>
