@@ -354,12 +354,12 @@ dhis2.metadata.getMetaObjects = function( store, objs, url, filter, storage, db,
                     });
                     obj.dataElements = dataElements;
                     delete obj.dataSetElements;
-                    var mappedOrgUnits = [];
+                    /*var mappedOrgUnits = [];
                     if( obj.organisationUnits && obj.organisationUnits.length > 0 ){
-                        mappedOrgUnits = $.map(obj.organisationUnits, function(ou){return ou.id;});
+                        mappedOrgUnits = $.map(obj.organisationUnits, function(ou){return ou.code;});
 
                         obj.organisationUnits = mappedOrgUnits;
-                    }
+                    }*/
                 }
                 else if( store === 'validationRules' ){
                     obj.params = [];

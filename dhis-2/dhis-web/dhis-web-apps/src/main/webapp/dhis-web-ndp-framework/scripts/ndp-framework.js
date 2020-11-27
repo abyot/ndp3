@@ -262,7 +262,7 @@ function filterMissingDataSets( objs ){
 }
 
 function getDataSets( ids ){
-    return dhis2.metadata.getBatches( ids, dhis2.ndp.batchSize, 'dataSets', 'dataSets', dhis2.ndp.apiUrl + '/dataSets.json', 'paging=false&fields=id,periodType,openFuturePeriods,displayName,version,categoryCombo[id],attributeValues[value,attribute[id,name,valueType,code]],organisationUnits[code,level],dataSetElements[id,dataElement[id]]', 'idb', dhis2.ndp.store, '');
+    return dhis2.metadata.getBatches( ids, dhis2.ndp.batchSize, 'dataSets', 'dataSets', dhis2.ndp.apiUrl + '/dataSets.json', 'paging=false&fields=id,periodType,openFuturePeriods,displayName,version,categoryCombo[id],attributeValues[value,attribute[id,name,valueType,code]],organisationUnits[code,id],dataSetElements[id,dataElement[id]]', 'idb', dhis2.ndp.store, '');
 }
 
 function getMetaOptionSets(){
