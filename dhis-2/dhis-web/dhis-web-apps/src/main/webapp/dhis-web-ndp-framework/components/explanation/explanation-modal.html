@@ -1,5 +1,5 @@
 <div class="modal-header page">
-    <h3>{{'data_value_explanation'| translate}}</h3>
+    <h3>{{'data_value_details'| translate}}</h3>
 </div>
 
 <div class="modal-body page">
@@ -7,7 +7,7 @@
         <h5 class="bold">
             {{selectedItem.displayName}} ({{selectedAoc.displayName}})
         </h5>
-        <table class="table table-bordered table-responsive">
+        <table class="table table-bordered table-responsive" ng-if="dataVotes.length > 0">
             <thead>
                 <tr>
                     <th>
@@ -46,6 +46,11 @@
                 </tr>
             </tbody>
         </table>
+        <div ng-if="dataVotes.length === 0">
+            <div class="alert alert-info">
+                {{'data_has_no_additional_info' | translate}}
+            </div>
+        </div>
     </div>
     <div ng-if="!fetchExplanation">
         <div class="alert alert-danger">

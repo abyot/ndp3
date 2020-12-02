@@ -139,7 +139,6 @@ ndpFramework.controller('DataValueExplanationController',
 
                             EventService.getMultiple( eventIds ).then(function(docs){
                                 $scope.documents = docs;
-                                console.log('documents:  ', $scope.documents);
                             });
                         }
                     });

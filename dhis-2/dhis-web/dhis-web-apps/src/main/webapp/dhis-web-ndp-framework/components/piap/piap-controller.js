@@ -350,6 +350,23 @@ ndpFramework.controller('PIAPController',
         });
     };
 
+    $scope.getDataValueExplanation = function( item ){
+        var modalInstance = $modal.open({
+            templateUrl: 'components/explanation/explanation-modal.html',
+            controller: 'DataValueExplanationController',
+            windowClass: 'comment-modal-window',
+            resolve: {
+                item: function(){
+                    return item;
+                }
+            }
+        });
+
+        modalInstance.result.then(function () {
+
+        });
+    };
+
     $scope.resetDataView = function(){
         $scope.model.data = null;
         $scope.model.reportReady = false;
