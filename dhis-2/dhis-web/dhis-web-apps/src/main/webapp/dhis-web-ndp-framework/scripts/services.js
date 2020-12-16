@@ -211,6 +211,7 @@ var ndpFrameworkServices = angular.module('ndpFrameworkServices', ['ngResource']
                                 catFound = true;
                                 dimension.category = categoryCombos[i].categories[j].id;
                                 dimension.options = categoryCombos[i].categories[j].categoryOptions;
+                                dimension.categoryCombo = categoryCombos[i];
                                 break;
                             }
                         }
@@ -610,12 +611,12 @@ var ndpFrameworkServices = angular.module('ndpFrameworkServices', ['ngResource']
 
             if( !dataParams ){
                 NotificationService.showNotifcationDialog($translate.instant("error"), $translate.instant("invalid_report_parameters"));
-                return;
+                //return;
             }
 
             for(var i=0; i<keyDataParams.length; i++){
                 if( !dataParams[keyDataParams[i]] ){
-                    NotificationService.showNotifcationDialog($translate.instant("error"), $translate.instant("invalid_report_parameters") + ' - ' + keyDataParams[i] );
+                    NotificationService.showNotifcationDialog($translate.instant("error"), $translate.instant("missing_report_parameters") + ' - ' + keyDataParams[i] );
                     //return;
                 }
             }
@@ -636,6 +637,7 @@ var ndpFrameworkServices = angular.module('ndpFrameworkServices', ['ngResource']
             var cumulativeData = [];
             var costData = [];
             var costEffData = [];
+            var redCells = 0, yellowCells = 0, greenCells = 0, totalRows = 0;
 
             var mergeBtaData = function( _data ){
                 var data = angular.copy( _data );
@@ -701,6 +703,34 @@ var ndpFrameworkServices = angular.module('ndpFrameworkServices', ['ngResource']
                 filterParams[reportParams.bta.category] = header.dimensionId;
                 var res = $filter('dataFilter')(data, filterParams)[0];
                 return res && res.value ? res.value : '';
+            };
+
+            var getTrafficLight = function( val, deId, aoc ) {
+                var color = "";
+                var de = dataParams.dataElementsById[deId];
+                if ( de && de.yellowRange && de.greenRange && de.redRange && dataParams.actualDimension && dataParams.actualDimension.id === aoc){
+                    var y1 = de.yellowRange.substring(0, de.yellowRange.indexOf('-'));
+                    var y2 = de.yellowRange.substring(de.yellowRange.indexOf('-') + 1, de.yellowRange.length);
+                    var r = de.redRange.substring(1, de.redRange.length);
+                    var g = de.greenRange.substring(1, de.greenRange.length);
+
+                    if ( val <= r ){
+                        color = 'red';
+                        redCells++;
+                    }
+                    else if( val >= y1 && val <= y2 ){
+                        color = 'yellow';
+                        yellowCells++;
+                    }
+                    else if( val >= g){
+                        color = 'green';
+                        greenCells++;
+                    }
+                    else {
+                        color = "";
+                    }
+                }
+                return color;
             };
 
             var getPerforAndCostData = function(header, dataElement, oc, data, reportParams){
@@ -828,7 +858,9 @@ var ndpFrameworkServices = angular.module('ndpFrameworkServices', ['ngResource']
                                             startDate: dh.periodStart,
                                             endDate: dh.periodEnd
                                         };
-                                        resultRow.push({val: filterResultData(dh, de.id, oc.id, data, dataParams), span: 1, details: de.id, period: period, coc: oc, aoc: dh.dimensionId});
+                                        var val = filterResultData(dh, de.id, oc.id, data, dataParams)
+                                        var trafficLight = getTrafficLight(val, de.id, dh.dimensionId);
+                                        resultRow.push({val: val, span: 1, trafficLight: trafficLight, details: de.id, period: period, coc: oc, aoc: dh.dimensionId});
                                     });
                                     parsedResultRow.push(resultRow);
                                     resultRow = [];
@@ -869,6 +901,7 @@ var ndpFrameworkServices = angular.module('ndpFrameworkServices', ['ngResource']
                                 costEffRow.push(group);
                                 var _deg = $filter('filter')(dataParams.dataElementGroups, {id: deg.id})[0];
                                 generateRow(group, _deg);
+                                totalRows++;
                             }
                         }
                         else{
@@ -880,6 +913,7 @@ var ndpFrameworkServices = angular.module('ndpFrameworkServices', ['ngResource']
                             costEffRow.push(group);
                             var _deg = $filter('filter')(dataParams.dataElementGroups, {id: deg.id})[0];
                             generateRow(group, _deg);
+                            totalRows++;
                         }
                     });
                 });
@@ -898,7 +932,11 @@ var ndpFrameworkServices = angular.module('ndpFrameworkServices', ['ngResource']
                 costEffData: costEffData,
                 dataExists: dataExists,
                 dataHeaders: dataHeaders,
-                reportPeriods: reportPeriods
+                reportPeriods: reportPeriods,
+                redCells: redCells,
+                yellowCells: yellowCells,
+                greenCells: greenCells,
+                totalRows: totalRows
             };
         }
     };

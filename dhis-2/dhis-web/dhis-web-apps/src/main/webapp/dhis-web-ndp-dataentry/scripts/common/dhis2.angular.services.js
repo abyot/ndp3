@@ -267,7 +267,7 @@ var d2Services = angular.module('d2Services', ['ngResource'])
 
     return {
         formatDataValue: function( de, val, optionSets, destination ){
-            
+
             if( de.optionSetValue ){
                 if(destination === 'USER'){
                     val = OptionSetService.getName(optionSets[de.optionSet.id].options, String(val));
@@ -295,9 +295,9 @@ var d2Services = angular.module('d2Services', ['ngResource'])
                     else if(de.valueType=== 'BOOLEAN'){
                         val = val === 'true' || val === true ? true : val === 'false' || val === false ? false : '';
                     }
-                }                
+                }
             }
-            
+
             return val;
         },
         displayBooleanAsYesNo: function(value, dataElement){
@@ -315,7 +315,7 @@ var d2Services = angular.module('d2Services', ['ngResource'])
         	if( !obj || !prop || !userRoles){
                 return false;
         	}
-        	for(var i=0; i < userRoles.length; i++){            
+        	for(var i=0; i < userRoles.length; i++){
                 if( userRoles[i].authorities && userRoles[i].authorities.indexOf('ALL') !== -1 ){
                     return true;
                 }
@@ -327,9 +327,21 @@ var d2Services = angular.module('d2Services', ['ngResource'])
                     }
                 }
             }
-            return false;            	
+            return false;
         },
-        userHasWriteAccess: function( dataSetId ){
+        userHasWriteAccess: function( storage, object, objectId ){
+            var objs = SessionStorageService.get(storage);
+            objs = objs[object];
+            if (objs && objs.length) {
+                for (var i = 0; i < objs.length; i++) {
+                    if (objs[i].id === objectId && objs[i].access && objs[i].access.data && objs[i].access.data.write) {
+                        return true;
+                    }
+                }
+            }
+            return false;
+        },
+        /*userHasWriteAccess: function( dataSetId ){
             var dataSets = SessionStorageService.get('ACCESSIBLE_DATASETS');
             dataSets = dataSets.dataSets;
             if (dataSets && dataSets.length) {
@@ -340,20 +352,20 @@ var d2Services = angular.module('d2Services', ['ngResource'])
                 }
             }
             return false;
-        },
-        getUsername: function(){            
+        },*/
+        getUsername: function(){
             var userProfile = SessionStorageService.get('USER_PROFILE');
             var username = userProfile && userProfile.userCredentials && userProfile.userCredentials.username ? userProfile.userCredentials.username : '';
             return username;
         },
         getSum: function( op1, op2 ){
             op1 = dhis2.validation.isNumber(op1) ? parseInt(op1) : 0;
-            op2 = dhis2.validation.isNumber(op2) ? parseInt(op2) : 0;        
+            op2 = dhis2.validation.isNumber(op2) ? parseInt(op2) : 0;
             return op1 + op2;
         },
-        getPercent: function(op1, op2){        
+        getPercent: function(op1, op2){
             op1 = dhis2.validation.isNumber(op1) ? parseInt(op1) : 0;
-            op2 = dhis2.validation.isNumber(op2) ? parseInt(op2) : 0;        
+            op2 = dhis2.validation.isNumber(op2) ? parseInt(op2) : 0;
             if( op1 === 0){
                 return "";
             }
@@ -363,53 +375,53 @@ var d2Services = angular.module('d2Services', ['ngResource'])
             return parseFloat((op1 / op2)*100).toFixed(2) + '%';
         },
         getRoleHeaders: function(){
-            var headers = [];            
+            var headers = [];
             headers.push({id: 'catalyst', displayName: $translate.instant('catalyst')});
             headers.push({id: 'funder', displayName: $translate.instant('funder')});
             headers.push({id: 'responsibleMinistry', displayName: $translate.instant('responsible_ministry')});
-            
+
             return headers;
         },
         getOptionComboIdFromOptionNames: function(optionComboMap, options){
-            
+
             var optionNames = [];
             angular.forEach(options, function(op){
                 optionNames.push(op.displayName);
             });
-            
-            var selectedAttributeOcboName = optionNames.join();            
+
+            var selectedAttributeOcboName = optionNames.join();
             //selectedAttributeOcboName = selectedAttributeOcboName.replace(/\,/g, ', ');
             var selectedAttributeOcobo = optionComboMap['"' + selectedAttributeOcboName + '"'];
-            
+
             if( !selectedAttributeOcobo || angular.isUndefined( selectedAttributeOcobo ) ){
                 selectedAttributeOcboName = optionNames.reverse().join();
                 //selectedAttributeOcboName = selectedAttributeOcboName.replace(",", ", ");
                 selectedAttributeOcobo = optionComboMap['"' + selectedAttributeOcboName + '"'];
             }
-            
+
             return selectedAttributeOcobo;
         },
         splitRoles: function( roles ){
-            return roles.split(","); 
+            return roles.split(",");
         },
         pushRoles: function(existingRoles, roles){
             angular.forEach(roles, function(r){
                 if( existingRoles.indexOf(r) === -1 ){
                     existingRoles.push(r);
                 }
-            });            
+            });
             return existingRoles;
         },
         extractRoles: function(existingRoles, roles){
-          
+
             return existingRoles;
         },
-        getOptionIds: function(options){            
+        getOptionIds: function(options){
             var optionNames = '';
             angular.forEach(options, function(o){
                 optionNames += o.id + ';';
-            });            
-            
+            });
+
             return optionNames.slice(0,-1);
         },
         errorNotifier: function(response){
@@ -417,7 +429,7 @@ var d2Services = angular.module('d2Services', ['ngResource'])
                 var dialogOptions = {
                     headerText: response.data.status,
                     bodyText: response.data.message ? response.data.message : $translate.instant('unable_to_fetch_data_from_server')
-                };		
+                };
                 DialogService.showDialog({}, dialogOptions);
             }
         },
@@ -425,16 +437,16 @@ var d2Services = angular.module('d2Services', ['ngResource'])
             var expressionRegx = /[#\{\}]/g;
             var num = ind.numerator.replace(expressionRegx, '');
             var den = ind.denominator.replace(expressionRegx, '');
-            
+
             if( num.indexOf('.') === -1 ){
-                num = num + '.HllvX50cXC0';                
+                num = num + '.HllvX50cXC0';
             }
             num = num.split('.');
-            
+
             if( den.indexOf('.') === -1 ){
-                den = den + '.HllvX50cXC0';                
+                den = den + '.HllvX50cXC0';
             }
-            den = den.split('.');            
+            den = den.split('.');
             return {numerator: num[0], numeratorOptionCombo: num[1], denominator: den[0], denominatorOptionCombo: den[1]};
         },
         getStakeholderCategoryFromDataSet: function(dataSet, availableCombos, existingCategories, categoryIds){
@@ -480,9 +492,9 @@ var d2Services = angular.module('d2Services', ['ngResource'])
                             }
                             else{
                                 cols.push( c );
-                            }                        
+                            }
                         }
-                    });                
+                    });
                 }
             }
             return cols.sort();
@@ -493,7 +505,7 @@ var d2Services = angular.module('d2Services', ['ngResource'])
                 var lvl = ouLevels[i];
                 ouModes.push({value: lvl, displayName: lvl, level: i});
             }
-            var selectedOuMode = ouModes[0];            
+            var selectedOuMode = ouModes[0];
             return {ouModes: ouModes, selectedOuMode: selectedOuMode};
         },
         processDataSet: function( ds ){
@@ -501,11 +513,11 @@ var d2Services = angular.module('d2Services', ['ngResource'])
             angular.forEach(ds.dataSetElements, function(dse){
                 if( dse.dataElement ){
                     dataElements.push( dhis2.metadata.processMetaDataAttribute( dse.dataElement ) );
-                }                            
+                }
             });
             ds.dataElements = dataElements;
             delete ds.dataSetElements;
-            
+
             return ds;
         },
         getReportName: function(reportType, reportRole, ouName, ouLevel, peName){
@@ -513,13 +525,13 @@ var d2Services = angular.module('d2Services', ['ngResource'])
             if( ouLevel && ouLevel.value && ouLevel.value !== 'SELECTED' ){
                 reportName += ' (' + ouLevel.displayName + ') ';
             }
-            
+
             reportName += ' - ' + reportType;
-            
+
             if( reportRole && reportRole.displayNme ){
-                reportName += ' (' + reportRole.displayName + ')'; 
+                reportName += ' (' + reportRole.displayName + ')';
             }
-            
+
             reportName += ' - ' + peName + '.xls';
             return reportName;
         },
@@ -527,25 +539,25 @@ var d2Services = angular.module('d2Services', ['ngResource'])
             var stakeholders = [{id: 'CA_ID', displayName: $translate.instant('catalyst')},{id: 'FU_ID', displayName: $translate.instant('funder')},{id: 'RM_ID', displayName: $translate.instant('responsible_ministry')}];
             return stakeholders;
         },
-        getDataElementTotal: function(dataValues, dataElement){            
+        getDataElementTotal: function(dataValues, dataElement){
             if( dataValues[dataElement] ){
                 dataValues[dataElement].total = 0;
                 angular.forEach(dataValues[dataElement], function(val, key){
-                    if( key !== 'total' && val && val.value && dhis2.validation.isNumber( val.value ) ){                        
+                    if( key !== 'total' && val && val.value && dhis2.validation.isNumber( val.value ) ){
                         dataValues[dataElement].total += parseInt( val.value );
                     }
                 });
-            }            
+            }
             return dataValues[dataElement];
         },
         getIndicatorResult: function( ind, dataValues ){
             var denVal = 1, numVal = 0;
-            
+
             if( ind.numerator ) {
-                
+
                 ind.numExpression = angular.copy( ind.numerator );
                 var matcher = ind.numExpression.match( dhis2.metadata.formulaRegex );
-                
+
                 for ( var k in matcher )
                 {
                     var match = matcher[k];
@@ -568,24 +580,24 @@ var d2Services = angular.module('d2Services', ['ngResource'])
                     {
                         var de = operand.substring( 0, operand.indexOf( dhis2.metadata.custSeparator ) );
                         var coc = operand.substring( operand.indexOf( dhis2.metadata.custSeparator ) + 1, operand.length );
-                        
-                        if( dataValues && 
-                                dataValues[de] && 
+
+                        if( dataValues &&
+                                dataValues[de] &&
                                 dataValues[de][coc] &&
                                 dataValues[de][coc].value){
                             value = dataValues[de][coc].value;
                         }
                     }
-                    ind.numExpression = ind.numExpression.replace( match, value );                    
+                    ind.numExpression = ind.numExpression.replace( match, value );
                 }
             }
-            
-            
+
+
             if( ind.denominator ) {
-                
+
                 ind.denExpression = angular.copy( ind.denominator );
                 var matcher = ind.denExpression.match( dhis2.metadata.formulaRegex );
-                
+
                 for ( var k in matcher )
                 {
                     var match = matcher[k];
@@ -608,9 +620,9 @@ var d2Services = angular.module('d2Services', ['ngResource'])
                     {
                         var de = operand.substring( 0, operand.indexOf( dhis2.metadata.custSeparator ) );
                         var coc = operand.substring( operand.indexOf( dhis2.metadata.custSeparator ) + 1, operand.length );
-                        
-                        if( dataValues && 
-                                dataValues[de] && 
+
+                        if( dataValues &&
+                                dataValues[de] &&
                                 dataValues[de][coc] &&
                                 dataValues[de][coc].value){
                             value = dataValues[de][coc].value;
@@ -619,23 +631,23 @@ var d2Services = angular.module('d2Services', ['ngResource'])
                     ind.denExpression = ind.denExpression.replace( match, value );
                 }
             }
-            
+
             if( ind.numExpression ){
                 numVal = eval( ind.numExpression );
                 numVal = isNaN( numVal ) ? '-' : roundTo( numVal, 1 );
             }
-            
+
             if( ind.denExpression ){
                 denVal = eval( ind.denExpression );
                 denVal = isNaN( denVal ) ? '-' : roundTo( denVal, 1 );
             }
-            
+
             var factor = 1;
-            
+
             /*if( ind.indicatorType && ind.indicatorType.factor ){
                 factor = ind.indicatorType.factor;
             }*/
-            
+
             return (numVal / denVal)*factor;
         },
     };
@@ -950,14 +962,14 @@ var d2Services = angular.module('d2Services', ['ngResource'])
     this.getFileNames = function(){
         return this.fileNames;
     };
-    
+
     this.setLocation = function(location){
         this.location = location;
     };
     this.getLocation = function(){
         return this.location;
     };
-    
+
     this.setAdvancedSearchOptions = function (searchOptions) {
         this.advancedSearchOptions = searchOptions;
     };
@@ -996,7 +1008,7 @@ var d2Services = angular.module('d2Services', ['ngResource'])
         var url="";
         if (dataType === "attribute") {
             url="/audits/trackedEntityAttributeValue?tei="+dataId+"&skipPaging=true";
-            
+
         } else {
             url="/audits/trackedEntityDataValue?psi="+dataId+"&skipPaging=true";
         }

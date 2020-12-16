@@ -19,7 +19,7 @@ docLibrary.controller('HomeController',
                 CommonUtils,
                 OptionSetService,
                 DHIS2URL) {
-                    
+
     $scope.model = {
         optionSets: null,
         fileDataElement: null,
@@ -36,21 +36,21 @@ docLibrary.controller('HomeController',
         selectedNdpProgram: null,
         programmeDataElement: null
     };
-    
+
     $scope.model.staticHeaders = [
         {id: 'name', title: 'file_name'},
         {id: 'size', title: 'file_size'},
         {id: 'dateUploaded', title: 'date_uploaded'},
         {id: 'uploadedBy', title: 'uploaded_by'}
     ];
-    
+
     //watch for selection of org unit from tree
     $scope.$watch('selectedOrgUnit', function() {
         if( angular.isObject($scope.selectedOrgUnit)){
             SessionStorageService.set('SELECTED_OU', $scope.selectedOrgUnit);
             if ( !$scope.model.optionSets ){
                 $scope.model.optionSets = [];
-                MetaDataFactory.getAll('optionSets').then(function(optionSets){            
+                MetaDataFactory.getAll('optionSets').then(function(optionSets){
                     angular.forEach(optionSets, function(optionSet){
                         $scope.model.optionSets[optionSet.id] = optionSet;
                     });
@@ -62,7 +62,7 @@ docLibrary.controller('HomeController',
             }
         }
     });
-    
+
     //load programs associated with the selected org unit.
     $scope.loadPrograms = function() {
         $scope.model.programs = [];
@@ -71,16 +71,16 @@ docLibrary.controller('HomeController',
         $scope.model.selectedNdpProgram = null;
         $scope.model.isProgrammeDocument = false;
         $scope.model.documents = [];
-        if (angular.isObject($scope.selectedOrgUnit)) {            
+        if (angular.isObject($scope.selectedOrgUnit)) {
             ProgramFactory.getByOu( $scope.selectedOrgUnit ).then(function(res){
                 $scope.model.programs = res.programs || [];
                 $scope.model.selectedProgram = res.selectedProgram || null;
             });
         }
     };
-    
+
     //watch for selection of program
-    $scope.$watch('model.selectedProgram', function() {        
+    $scope.$watch('model.selectedProgram', function() {
         $scope.model.selectedProgramStage = null;
         $scope.model.selectedOptionSet = null;
         $scope.model.selectedNdpProgram = null;
@@ -99,15 +99,15 @@ docLibrary.controller('HomeController',
                 NotificationService.showNotifcationDialog($translate.instant("error"), $translate.instant("invalid_document_folder"));
                 return;
             }
-            
+
             $scope.model.selectedProgramStage = $scope.model.selectedProgram.programStages[0];
 
             var prDes = $scope.model.selectedProgramStage.programStageDataElements;
-            
+
             var docDe = $filter('filter')(prDes, {dataElement: {valueType: 'FILE_RESOURCE'}});
             var typeDe = $filter('filter')(prDes, {dataElement: {isDocumentFolder: true}});
             var progDe = $filter('filter')(prDes, {dataElement: {isProgrammeDocument: true}});
-            
+
             if( docDe.length !== 1 || typeDe.length !== 1 ){
                 NotificationService.showNotifcationDialog($translate.instant("error"), $translate.instant("invalid_document_folder_configuration"));
                 return;
@@ -121,7 +121,7 @@ docLibrary.controller('HomeController',
             $scope.model.fileDataElement = docDe[0].dataElement;
             $scope.model.typeDataElement = typeDe[0].dataElement;
             $scope.model.selectedOptionSet = $scope.model.optionSets[$scope.model.typeDataElement.optionSet.id];
-            
+
             $scope.model.dynamicHeaders = [];
             $scope.model.dataElements = [];
             angular.forEach(prDes, function(prDe){
@@ -135,19 +135,19 @@ docLibrary.controller('HomeController',
                 NotificationService.showNotifcationDialog($translate.instant("error"), $translate.instant("missing_document_types"));
                 return;
             }
-            
+
             $scope.fetchEvents();
         }
     };
-    
+
     $scope.fetchEvents = function(){
-        
+
         if( $scope.selectedOrgUnit && $scope.selectedOrgUnit.id && $scope.model.selectedProgram && $scope.model.selectedProgram.id ){
-            
-            EventService.getByOrgUnitAndProgram($scope.selectedOrgUnit.id, 
-            'SELECTED', 
-            $scope.model.selectedProgram.id, 
-            $scope.model.typeDataElement, 
+
+            EventService.getByOrgUnitAndProgram($scope.selectedOrgUnit.id,
+            'SELECTED',
+            $scope.model.selectedProgram.id,
+            $scope.model.typeDataElement,
             $scope.model.fileDataElement,
             $scope.model.optionSets,
             $scope.model.dataElements).then(function(events){
@@ -155,21 +155,21 @@ docLibrary.controller('HomeController',
             });
         }
     };
-    
+
     $scope.resetFileUploadForm = function(){
         $scope.model.showFileUpload = false;
         $scope.model.fileInput = null;
         $scope.outerForm.submitted = false;
         $scope.outerForm.$setPristine();
     };
-    
+
     $scope.showFileUpload = function(){
         $scope.model.showFileUpload = true;
-        
+
     };
-    
+
     $scope.cancelFileUpload = function(){
-        
+
         var modalOptions = {
             closeButtonText: 'no',
             actionButtonText: 'yes',
@@ -177,31 +177,31 @@ docLibrary.controller('HomeController',
             bodyText: 'are_you_sure_to_cancel_file_upload'
         };
 
-        ModalService.showModal({}, modalOptions).then(function(result){            
+        ModalService.showModal({}, modalOptions).then(function(result){
             $scope.resetFileUploadForm();
         });
     };
-    
+
     $scope.uploadFile = function( fileType ){
 
         if( !fileType || !fileType.code || !$scope.model.fileInput || $scope.model.fileInput.length === 0){
             NotificationService.showNotifcationDialog($translate.instant("error"), $translate.instant("no_files_to_upload"));
             return;
         }
-        
+
         //check for form validity
-        $scope.outerForm.submitted = true;        
+        $scope.outerForm.submitted = true;
         if( $scope.outerForm.$invalid ){
             return false;
         }
-                
+
         var today = DateUtils.getToday();
         var username = CommonUtils.getUsername();
-        
+
         angular.forEach($scope.model.fileInput, function(f){
 
             FileService.upload(f).then(function(fileRes){
-                    
+
                 if(fileRes && fileRes.status === 'OK' && fileRes.response && fileRes.response.fileResource && fileRes.response.fileResource.id && fileRes.response.fileResource.name){
                     var dataValues = [{
                         dataElement: $scope.model.typeDataElement.id,
@@ -241,7 +241,7 @@ docLibrary.controller('HomeController',
                         eventDate: today,
                         dataValues: dataValues
                     };
-                    
+
                     EventService.create(ev).then(function(eventRes){
                         if (eventRes.response.importSummaries[0].status === 'ERROR') {
                             NotificationService.showNotifcationDialog($translate.instant("error"), $translate.instant("file_upload_failed") + f.name );
@@ -275,22 +275,22 @@ docLibrary.controller('HomeController',
                     NotificationService.showNotifcationDialog($translate.instant("error"), $translate.instant("file_upload_failed") + f.name );
                     return;
                 }
-                
+
                 $scope.resetFileUploadForm();
-                
+
             });
 
         });
     };
-    
+
     $scope.interacted = function(field) {
         var status = false;
-        if(field){            
+        if(field){
             status = $scope.outerForm.submitted || field.$dirty;
         }
         return status;
     };
-    
+
     $scope.downloadFile = function(path, e){
         if( path ){
             $window.open(DHIS2URL + path, '_blank', '');
@@ -302,7 +302,7 @@ docLibrary.controller('HomeController',
     };
 
     $scope.deleteFile = function(document, e){
-        
+
         var modalOptions = {
             closeButtonText: 'no',
             actionButtonText: 'yes',
@@ -310,7 +310,7 @@ docLibrary.controller('HomeController',
             bodyText: 'are_you_sure_to_delete_file'
         };
 
-        ModalService.showModal({}, modalOptions).then(function(result){            
+        ModalService.showModal({}, modalOptions).then(function(result){
             if( document ){
                 EventService.deleteEvent(document).then(function(data){
                     for( var i=0; i< $scope.model.documents.length; i++ ){

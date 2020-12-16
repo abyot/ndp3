@@ -3,29 +3,6 @@
         <div class="col-sm-7 green-info-area">
             <div class="row small-vertical-spacing">
                 <div class="col-sm-2">
-                    {{'lg'| translate}}
-                </div>
-                <div class="col-sm-10">
-                    <div class="input-group">
-                        <input type="text"
-                               name="foo"
-                               class="form-control cursor-pointer"
-                               placeholder="{{'please_select'| translate}}"
-                               title="{{'select_from_tree'| translate}}"
-                               ng-model="selectedOrgUnit.displayName"
-                               ng-readonly="{{true}}"
-                               ng-required="true"
-                               ng-click="showOrgUnitTree()">
-                        <span class="input-group-btn">
-                            <button class="btn btn-default" type="button" title="{{'select_from_tree'| translate}}" ng-disabled="d2Disabled" ng-click="showOrgUnitTree(d2Object)">
-                                <i class="fa fa-plus-square-o"></i>
-                            </button>
-                        </span>
-                    </div>
-                </div>
-            </div>
-            <div class="row small-vertical-spacing">
-                <div class="col-sm-2">
                     {{'ndp'| translate}}
                 </div>
                 <div class="col-sm-10">
@@ -54,7 +31,7 @@
                     </ui-select>
                 </div>
             </div>
-            <div class="row small-vertical-spacing">
+            <div class="row small-vertical-spacing" ng-if="model.selectedNdpProgram">
                 <div class="col-sm-2">
                     {{'sub-programme'| translate}}
                 </div>
@@ -73,7 +50,6 @@
                 <div class="col-sm-12">
                     <button type="button"
                             class="btn btn-primary"
-                            ng-disabled="!model.selectedObjective"
                             ng-click="getAnalyticsData()">
                         {{'display_report'| translate}}
                     </button>
@@ -81,7 +57,7 @@
             </div>
         </div>
         <div class="col-sm-5 blue-info-area add-small-left-padding">
-            <div ng-include="'components/report-filter/report-filters-period.html'"></div>
+            <div ng-include="'components/report-filter/report-filters.html'"></div>
         </div>
     </div>
 </div>
@@ -131,14 +107,9 @@
             </table>
         </div>
     </div>
-
     <div class="col-sm-12" ng-if="!model.dataExists">
         <div class="alert alert-warning">
             {{'no_data_exists'| translate}}
         </div>
     </div>
-</div>
-
-<div class="alert alert-warning" ng-if="selectedOrgUnit && model.dataElementGroup.length === 0">
-    {{'lg_has_no_interventions'| translate}}
 </div>

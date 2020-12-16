@@ -2,7 +2,7 @@
 
 /* global ndpFramework */
 
-ndpFramework.controller('PIAPController',
+ndpFramework.controller('ProgrammePerformanceController',
     function($scope,
         $translate,
         $modal,
@@ -14,7 +14,8 @@ ndpFramework.controller('PIAPController',
         MetaDataFactory,
         OrgUnitFactory,
         OptionComboService,
-        Analytics) {
+        Analytics,
+        FinancialDataService) {
 
     $scope.model = {
         metaDataCached: false,
@@ -32,30 +33,21 @@ ndpFramework.controller('PIAPController',
         selectedDataElementGroupSets: [],
         dataElementGroups: [],
         selectedNdpProgram: null,
-        selectedSubProgramme: null,
         selectedPeriods: [],
         periods: [],
         allPeriods: [],
         periodOffset: 0,
         openFuturePeriods: 10,
-        selectedPeriodType: 'FinancialJuly'
+        selectedPeriodType: 'FinancialJuly',
+        displayProjectOutputs: true,
+        displayDepartmentOutPuts: true
     };
 
-    $scope.model.horizontalMenus = [
-        {id: 'result', title: 'results', order: 1, view: 'components/piap/results.html', active: true, class: 'main-horizontal-menu'},
-        {id: 'performance', title: 'physical_performance', order: 2, view: 'components/piap/performance.html', class: 'main-horizontal-menu'},
-        {id: 'cumulative', title: 'cumulative_progress', order: 3, view: 'components/piap/progress.html', class: 'main-horizontal-menu'},
-        {id: 'cost', title: 'cost', order: 4, view: 'components/piap/cost.html', class: 'main-horizontal-menu'},
-        {id: 'efficiency', title: 'cost_effectiveness', order: 5, view: 'components/piap/efficiency.html', class: 'main-horizontal-menu'},
-        {id: 'dashboard', title: 'dashboard', order: 6, view: 'components/piap/dashboard.html', class: 'external-horizontal-menu'},
-        {id: 'library', title: 'library', order: 7, view: 'components/piap/library.html', class: 'external-horizontal-menu'}
-    ];
-
     $scope.model.performanceMenu = [
-        {id: 'trafficLight', title: 'traffic_light', order: 1, view: 'components/piap/traffic-light.html', active: true, class: 'main-horizontal-menu'},
-        {id: 'budgetPerformance', title: 'budget_performance', order: 2, view: 'components/piap/budget-performance.html', class: 'main-horizontal-menu'},
-        {id: 'budgetCompliance', title: 'budget_compliance', order: 3, view: 'components/piap/budget-compliance.html', class: 'main-horizontal-menu'},
-        {id: 'completeness', title: 'completeness', order: 4, view: 'components/piap/completeness.html', class: 'main-horizontal-menu'}
+        {id: 'trafficLight', title: 'traffic_light', order: 1, view: 'components/programme-performance/traffic-light.html', active: true, class: 'main-horizontal-menu'},
+        {id: 'budgetPerformance', title: 'budget_performance', order: 2, view: 'components/programme-performance/budget-performance.html', class: 'main-horizontal-menu'},
+        {id: 'budgetCompliance', title: 'budget_compliance', order: 3, view: 'components/programme-performance/budget-compliance.html', class: 'main-horizontal-menu'},
+        {id: 'completeness', title: 'completeness', order: 4, view: 'components/programme-performance/completeness.html', class: 'main-horizontal-menu'}
     ];
 
     //Get orgunits for the logged in user
@@ -70,7 +62,7 @@ ndpFramework.controller('PIAPController',
         $scope.selectedOrgUnit = $scope.orgUnits[0] ? $scope.orgUnits[0] : null;
     });
 
-    $scope.getOutputs = function(){
+    $scope.getOutput = function(){
 
         $scope.model.selectedDataElementGroupSets = $scope.model.selectedDataElementGroupSets.filter(function(obj){
             return obj.dataElementGroups && obj.dataElementGroups.length && obj.dataElementGroups.length > 0;
@@ -87,6 +79,19 @@ ndpFramework.controller('PIAPController',
         });
     };
 
+    $scope.$watch('model.selectedNDP', function(){
+        $scope.resetDataView();
+        $scope.model.selectedDataElementGroupSets = [];
+        $scope.model.dataElementGroup = [];
+        $scope.model.selectedProgram = null;
+        $scope.model.objectives = [];
+        $scope.model.ndpProgram = null;
+        if( angular.isObject($scope.model.selectedNDP) && $scope.model.selectedNDP.id && $scope.model.selectedNDP.code){
+            $scope.model.selectedDataElementGroupSets = $filter('filter')($scope.model.dataElementGroupSets, {ndp: $scope.model.selectedNDP.code, indicatorGroupSetType: 'program'}, true);
+            $scope.model.ndpProgram = $filter('getFirst')($scope.model.optionSets, {ndp: $scope.model.selectedNDP.code, code: 'program'}, true);
+        }
+    });
+
     $scope.$watch('model.selectedNdpProgram', function(){
         $scope.resetDataView();
         $scope.model.objectives = [];
@@ -98,7 +103,7 @@ ndpFramework.controller('PIAPController',
                 $scope.model.objectives = $filter('filter')($scope.model.dataElementGroupSets, {ndp: $scope.model.selectedMenu.ndp, indicatorGroupSetType: $scope.model.selectedMenu.code, ndpProgramme: $scope.model.selectedNdpProgram.code}, true);
                 $scope.model.subPrograms = $filter('filter')($scope.model.dataElementGroupSets, {ndp: $scope.model.selectedMenu.ndp, indicatorGroupSetType: 'sub-programme', ndpProgramme: $scope.model.selectedNdpProgram.code}, true);
                 $scope.model.selectedDataElementGroupSets = $filter('filter')($scope.model.dataElementGroupSets, {ndp: $scope.model.selectedMenu.ndp, ndpProgramme: $scope.model.selectedNdpProgram.code}, true);
-                $scope.getOutputs();
+                $scope.getOutput();
             }
         }
     });
@@ -147,6 +152,12 @@ ndpFramework.controller('PIAPController',
 
             $scope.model.bta = bta;
             $scope.model.baseLineTargetActualDimensions = $.map($scope.model.bta.options, function(d){return d.id;});
+            $scope.model.actualDimension = null;
+            angular.forEach(bta.options, function(op){
+                if ( op.btaDimensionType === 'actual' ){
+                    $scope.model.actualDimension = op;
+                }
+            });
 
             MetaDataFactory.getAll('dataElements').then(function(dataElements){
 
@@ -238,7 +249,7 @@ ndpFramework.controller('PIAPController',
         }
 
         if( $scope.model.dataElementGroup.length === 0 || !$scope.model.dataElementGroup ){
-            NotificationService.showNotifcationDialog($translate.instant("error"), $translate.instant("missing_output"));
+            NotificationService.showNotifcationDialog($translate.instant("error"), $translate.instant("missing_outcome"));
             return;
         }
 
@@ -263,36 +274,42 @@ ndpFramework.controller('PIAPController',
 
             analyticsUrl += '&dimension=dx:' + des.join(';');
 
-            Analytics.getData( analyticsUrl ).then(function(data){
-                if( data && data.data && data.metaData ){
-                    $scope.model.data = data.data;
-                    $scope.model.metaData = data.metaData;
-                    $scope.model.reportReady = true;
-                    $scope.model.reportStarted = false;
+            FinancialDataService.getLocalData('data/cost.json').then(function(cost){
+                $scope.model.cost = cost;
 
-                    var dataParams = {
-                        data: data.data,
-                        metaData: data.metaData,
-                        reportPeriods: angular.copy( $scope.model.selectedPeriods ),
-                        bta: $scope.model.bta,
-                        selectedDataElementGroupSets: $scope.model.selectedDataElementGroupSets,
-                        selectedDataElementGroup: $scope.model.selectedKra,
-                        dataElementGroups: $scope.model.dataElementGroups,
-                        basePeriod: $scope.model.basePeriod,
-                        maxPeriod: $scope.model.selectedPeriods.slice(-1)[0],
-                        allPeriods: $scope.model.allPeriods,
-                        dataElementsById: $scope.model.dataElementsById
-                    };
+                Analytics.getData( analyticsUrl ).then(function(data){
+                    if( data && data.data && data.metaData ){
+                        $scope.model.data = data.data;
+                        $scope.model.metaData = data.metaData;
+                        $scope.model.reportReady = true;
+                        $scope.model.reportStarted = false;
 
-                    var processedData = Analytics.processData( dataParams );
+                        var dataParams = {
+                            data: data.data,
+                            metaData: data.metaData,
+                            reportPeriods: angular.copy( $scope.model.selectedPeriods ),
+                            bta: $scope.model.bta,
+                            actualDimension: $scope.model.actualDimension,
+                            selectedDataElementGroupSets: $scope.model.selectedDataElementGroupSets,
+                            selectedDataElementGroup: $scope.model.selectedKra,
+                            dataElementGroups: $scope.model.dataElementGroups,
+                            basePeriod: $scope.model.basePeriod,
+                            maxPeriod: $scope.model.selectedPeriods.slice(-1)[0],
+                            allPeriods: $scope.model.allPeriods,
+                            dataElementsById: $scope.model.dataElementsById,
+                            cost: $scope.model.cost
+                        };
 
-                    $scope.model.dataHeaders = processedData.dataHeaders;
-                    $scope.model.reportPeriods = processedData.reportPeriods;
-                    $scope.model.dataExists = processedData.dataExists;
-                    $scope.model.resultData = processedData.resultData || [];
-                    $scope.model.performanceData = processedData.performanceData || [];
-                    $scope.model.cumulativeData = processedData.cumulativeData || [];
-                }
+                        var processedData = Analytics.processData( dataParams );
+
+                        $scope.model.dataHeaders = processedData.dataHeaders;
+                        $scope.model.reportPeriods = processedData.reportPeriods;
+                        $scope.model.dataExists = processedData.dataExists;
+                        $scope.model.resultData = processedData.resultData || [];
+                        $scope.model.performanceData = processedData.performanceData || [];
+                        $scope.model.cumulativeData = processedData.cumulativeData || [];
+                    }
+                });
             });
         }
     };
@@ -366,6 +383,34 @@ ndpFramework.controller('PIAPController',
 
         });
     };
+
+    /*$scope.getTrafficLight = function( item ){
+        var color = "";
+        if( $scope.model.actualDimension && $scope.model.actualDimension.id === item.aoc ){
+            var de = $scope.model.dataElementsById[item.details];
+            if ( de && de.yellowRange && de.greenRange && de.redRange ){
+                var y1 = de.yellowRange.substring(0, de.yellowRange.indexOf('-'));
+                var y2 = de.yellowRange.substring(de.yellowRange.indexOf('-') + 1, de.yellowRange.length);
+                var r = de.redRange.substring(1, de.redRange.length);
+                var g = de.greenRange.substring(1, de.greenRange.length);
+
+                if ( item.val <= r ){
+                    color = 'red';
+                }
+                else if( item.val >= y1 && item.val <= y2 ){
+                    color = 'yellow';
+                }
+                else if( item.val >= g){
+                    color = 'green';
+                }
+                else {
+                    color = "";
+                }
+            }
+        }
+        console.log('color:  ', color, ' - ', item.val);
+        return color;
+    };*/
 
     $scope.resetDataView = function(){
         $scope.model.data = null;

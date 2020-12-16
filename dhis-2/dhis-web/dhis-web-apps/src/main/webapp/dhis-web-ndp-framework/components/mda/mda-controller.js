@@ -83,6 +83,8 @@ ndpFramework.controller('MDAController',
 
         if( angular.isObject($scope.model.selectedNDP) && $scope.model.selectedNDP.id && $scope.model.selectedNDP.code){
             $scope.model.ndpProgram = $filter('getFirst')($scope.model.optionSets, {ndp: $scope.model.selectedNDP.code, code: 'program'}, true);
+
+            $scope.getInterventions();
         }
     });
 
@@ -144,6 +146,7 @@ ndpFramework.controller('MDAController',
 
     OrgUnitGroupSetService.getMdas().then(function(mdas){
         $scope.model.mdas = mdas;
+
         MetaDataFactory.getAll('optionSets').then(function(optionSets){
 
             $scope.model.optionSets = optionSets;
@@ -168,25 +171,40 @@ ndpFramework.controller('MDAController',
 
                 $scope.model.bta = bta;
                 $scope.model.baseLineTargetActualDimensions = $.map($scope.model.bta.options, function(d){return d.id;});
+                $scope.model.actualDimension = null;
+                angular.forEach(bta.options, function(op){
+                    if ( op.btaDimensionType === 'actual' ){
+                        $scope.model.actualDimension = op;
+                    }
+                });
 
-                MetaDataFactory.getDataElementGroups().then(function(dataElementGroups){
+                MetaDataFactory.getAll('dataElements').then(function(dataElements){
 
-                    $scope.model.dataElementGroups = dataElementGroups;
+                    $scope.model.dataElementsById = dataElements.reduce( function(map, obj){
+                        map[obj.id] = obj;
+                        return map;
+                    }, {});
 
-                    MetaDataFactory.getAll('dataElementGroupSets').then(function(dataElementGroupSets){
 
-                        $scope.model.dataElementGroupSets = dataElementGroupSets;
+                    MetaDataFactory.getDataElementGroups().then(function(dataElementGroups){
 
-                        $scope.model.selectedMenu = SelectedMenuService.getSelectedMenu();
+                        $scope.model.dataElementGroups = dataElementGroups;
 
-                        $scope.model.periods = PeriodService.getPeriods($scope.model.selectedPeriodType, $scope.model.periodOffset, $scope.model.openFuturePeriods);
+                        MetaDataFactory.getAll('dataElementGroupSets').then(function(dataElementGroupSets){
 
-                        var selectedPeriodNames = ['2020/21', '2021/22', '2022/23', '2023/24', '2024/25'];
+                            $scope.model.dataElementGroupSets = dataElementGroupSets;
 
-                        angular.forEach($scope.model.periods, function(pe){
-                            if(selectedPeriodNames.indexOf(pe.displayName) > -1 ){
-                               $scope.model.selectedPeriods.push(pe);
-                            }
+                            $scope.model.selectedMenu = SelectedMenuService.getSelectedMenu();
+
+                            $scope.model.periods = PeriodService.getPeriods($scope.model.selectedPeriodType, $scope.model.periodOffset, $scope.model.openFuturePeriods);
+
+                            var selectedPeriodNames = ['2020/21', '2021/22', '2022/23', '2023/24', '2024/25'];
+
+                            angular.forEach($scope.model.periods, function(pe){
+                                if(selectedPeriodNames.indexOf(pe.displayName) > -1 ){
+                                   $scope.model.selectedPeriods.push(pe);
+                                }
+                            });
                         });
                     });
                 });
@@ -231,13 +249,34 @@ ndpFramework.controller('MDAController',
                 $scope.model.selectedDataElementGroupSets.push( $filter('filter')($scope.model.dataElementGroupSets, {id: groupSetId})[0] );
             });
 
-            $scope.model.selectedDataElementGroupSets = $filter('filter')($scope.model.selectedDataElementGroupSets, {indicatorGroupSetType: 'intervention'}, true);
+            if( $scope.model.selectedNDP && $scope.model.selectedNDP.code ){
+                $scope.model.selectedDataElementGroupSets = $filter('filter')($scope.model.selectedDataElementGroupSets, {indicatorGroupSetType: 'intervention', ndp: $scope.model.selectedNDP.code}, true);
+            }
+            else{
+                $scope.model.selectedDataElementGroupSets = $filter('filter')($scope.model.selectedDataElementGroupSets, {indicatorGroupSetType: 'intervention'}, true);
+            }
 
-            $scope.getObjectives();
-
+            $scope.getOutputs();
+            //$scope.getObjectives();
             //var goals = $filter('filter')($scope.model.selectedDataElementGroupSets, {indicatorGroupSetType: 'goal'}, true);
             //var objectives = $filter('filter')($scope.model.selectedDataElementGroupSets, {indicatorGroupSetType: 'objective'}, true);
         }
+    };
+
+    $scope.getOutputs = function(){
+        $scope.model.selectedDataElementGroupSets = $scope.model.selectedDataElementGroupSets.filter(function(obj){
+            return obj.dataElementGroups && obj.dataElementGroups.length && obj.dataElementGroups.length > 0;
+        });
+
+        $scope.model.dataElementGroup = [];
+        angular.forEach($scope.model.selectedDataElementGroupSets, function(degs){
+            angular.forEach(degs.dataElementGroups, function(deg){
+                var _deg = $filter('filter')($scope.model.dataElementGroups, {indicatorGroupType: 'output', id: deg.id}, true);
+                if ( _deg.length > 0 ){
+                    $scope.model.dataElementGroup.push( _deg[0] );
+                }
+            });
+        });
     };
 
     $scope.resetView = function(horizontalMenu){
@@ -269,6 +308,26 @@ ndpFramework.controller('MDAController',
         }
     };
 
+    $scope.getBasePeriod = function(){
+        $scope.model.basePeriod = null;
+        var location = -1;
+
+        var getBase = function(){
+            $scope.model.selectedPeriods = orderByFilter( $scope.model.selectedPeriods, '-id').reverse();
+            var p = $scope.model.selectedPeriods[0];
+            var res = PeriodService.getPreviousPeriod( p.id, $scope.model.allPeriods );
+            $scope.model.basePeriod = res.period;
+            location = res.location;
+        };
+
+        getBase();
+
+        if( location === 0 ){
+            $scope.getPeriods('PREV');
+            getBase();
+        }
+    };
+
     $scope.getAnalyticsData = function(){
 
         $scope.model.data = null;
@@ -281,6 +340,13 @@ ndpFramework.controller('MDAController',
         if( $scope.model.dataElementGroup.length === 0 || !$scope.model.dataElementGroup ){
             NotificationService.showNotifcationDialog($translate.instant("error"), $translate.instant("missing_invervention"));
         }
+
+        $scope.getBasePeriod();
+
+        /*if ( !$scope.model.basePeriod || !$scope.model.basePeriod.id ){
+            NotificationService.showNotifcationDialog($translate.instant("error"), $translate.instant("invalid_base_period"));
+            return;
+        }*/
 
         if( $scope.model.dataElementGroup && $scope.model.dataElementGroup.length > 0 && $scope.model.selectedPeriods.length > 0){
             analyticsUrl += '&filter=ou:'+ $scope.selectedOrgUnit.id +'&displayProperty=NAME&includeMetadataDetails=true';
@@ -297,27 +363,37 @@ ndpFramework.controller('MDAController',
             analyticsUrl += '&dimension=dx:' + des.join(';');
 
             Analytics.getData( analyticsUrl ).then(function(data){
-                $scope.model.data = data.data;
-                $scope.model.metaData = data.metaData;
-                $scope.model.reportReady = true;
-                $scope.model.reportStarted = false;
+                if( data && data.data && data.metaData ){
+                    $scope.model.data = data.data;
+                    $scope.model.metaData = data.metaData;
+                    $scope.model.reportReady = true;
+                    $scope.model.reportStarted = false;
 
-                var dataParams = {
-                    data: data.data,
-                    metaData: data.metaData,
-                    reportPeriods: angular.copy( $scope.model.selectedPeriods ),
-                    bta: $scope.model.bta,
-                    selectedDataElementGroupSets: $scope.model.selectedDataElementGroupSets,
-                    selectedDataElementGroup: $scope.model.selectedKra,
-                    dataElementGroups: $scope.model.dataElementGroups
-                };
+                    var dataParams = {
+                        data: data.data,
+                        metaData: data.metaData,
+                        reportPeriods: angular.copy( $scope.model.selectedPeriods ),
+                        bta: $scope.model.bta,
+                        actualDimension: $scope.model.actualDimension,
+                        selectedDataElementGroupSets: $scope.model.selectedDataElementGroupSets,
+                        selectedDataElementGroup: $scope.model.selectedKra,
+                        dataElementGroups: $scope.model.dataElementGroups,
+                        basePeriod: $scope.model.basePeriod,
+                        maxPeriod: $scope.model.selectedPeriods.slice(-1)[0],
+                        allPeriods: $scope.model.allPeriods,
+                        dataElementsById: $scope.model.dataElementsById,
+                        cost: $scope.model.cost
+                    };
 
-                var result = Analytics.processData( dataParams );
+                    var processedData = Analytics.processData( dataParams );
 
-                $scope.model.dataHeaders = result.dataHeaders;
-                $scope.model.finalData = result.finalData;
-                $scope.model.reportPeriods = result.reportPeriods;
-                $scope.model.dataExists = result.dataExists;
+                    $scope.model.dataHeaders = processedData.dataHeaders;
+                    $scope.model.reportPeriods = processedData.reportPeriods;
+                    $scope.model.dataExists = processedData.dataExists;
+                    $scope.model.resultData = processedData.resultData || [];
+                    $scope.model.performanceData = processedData.performanceData || [];
+                    $scope.model.cumulativeData = processedData.cumulativeData || [];
+                }
             });
         }
     };

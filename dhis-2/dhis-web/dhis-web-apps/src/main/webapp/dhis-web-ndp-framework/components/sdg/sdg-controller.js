@@ -231,7 +231,7 @@ ndpFramework.controller('SDGController',
         }
 
         if( $scope.model.dataElementGroup.length === 0 || !$scope.model.dataElementGroup ){
-            NotificationService.showNotifcationDialog($translate.instant("error"), $translate.instant("missing_objective_or_kra"));
+            NotificationService.showNotifcationDialog($translate.instant("error"), $translate.instant("missing_target_or_proxy"));
             return;
         }
 

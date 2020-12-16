@@ -103,7 +103,20 @@ ndpFramework.controller('HomeController',
                                 order: 2,
                                 displayName: $translate.instant('programme_outcomes'),
                                 children: [],
-                                view: 'components/programme/programme-status.html'
+                                view: 'components/programme-outcome/programme-status.html'
+                            } );
+
+                            op.hasChildren = true;
+                            op.show = true;
+                            op.children.push( {
+                                id: op.code + '-SUB',
+                                domain: 'SUB',
+                                code: 'ndpObjective',
+                                ndp: op.code,
+                                order: 2,
+                                displayName: $translate.instant('sub_programme_outcomes'),
+                                children: [],
+                                view: 'components/sub-programme/sub-programme-status.html'
                             } );
 
                             op.children.push( {
@@ -165,16 +178,8 @@ ndpFramework.controller('HomeController',
                                     displayName: $translate.instant('programme_performance'),
                                     order: 5,
                                     children: [],
-                                    view: 'components/programme/programme-performance.html'
+                                    view: 'components/programme-performance/programme-performance.html'
                                 },
-                                /*{
-                                    id: 'SUBP',
-                                    domain: 'SUBP',
-                                    displayName: $translate.instant('sub_programme_performance'),
-                                    order: 4,
-                                    children: [],
-                                    view: 'components/piap/sub-programme-performance.html'
-                                },*/
                                 {
                                     id: 'PRJP',
                                     domain: 'PRJP',

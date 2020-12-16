@@ -2,7 +2,6 @@
 /* global dhis2, angular, selection, i18n_ajax_login_failed, _ */
 
 dhis2.util.namespace('dhis2.doclib');
-dhis2.util.namespace('dhis2.tc');
 
 // whether current user has any organisation units
 dhis2.doclib.emptyOrganisationUnits = false;
@@ -19,10 +18,9 @@ var attributesInPromise = [];
 var batchSize = 50;
 
 dhis2.doclib.store = null;
-dhis2.tc.metaDataCached = dhis2.tc.metaDataCached || false;
 dhis2.doclib.metaDataCached = dhis2.doclib.metaDataCached || false;
 dhis2.doclib.memoryOnly = $('html').hasClass('ie7') || $('html').hasClass('ie8');
-var adapters = [];    
+var adapters = [];
 if( dhis2.doclib.memoryOnly ) {
     adapters = [ dhis2.storage.InMemoryAdapter ];
 } else {
@@ -48,9 +46,9 @@ dhis2.doclib.store = new dhis2.storage.Store({
 /**
  * Page init. The order of events is:
  *
- * 1. Load ouwt 
- * 2. Load meta-data (and notify ouwt) 
- * 
+ * 1. Load ouwt
+ * 2. Load meta-data (and notify ouwt)
+ *
  */
 $(document).ready(function()
 {
@@ -141,40 +139,39 @@ function downloadMetaData()
     promise = promise.then( getUserAccessiblePrograms );
     promise = promise.then( getOrgUnitLevels );
     promise = promise.then( getSystemSetting );
-        
+
     //fetch programs
     promise = promise.then( getMetaPrograms );
     promise = promise.then( filterMissingPrograms );
     promise = promise.then( getPrograms );
-    
+
     //fetch option sets
     promise = promise.then( getMetaOptionSets );
     promise = promise.then( filterMissingOptionSets );
     promise = promise.then( getOptionSets );
-        
+
     //fetch indicator groups
     promise = promise.then( getMetaCategoryCombos );
     promise = promise.then( filterMissingCategoryCombos );
     promise = promise.then( getCategoryCombos );
-    
-    promise.done(function() {        
+
+    promise.done(function() {
         //Enable ou selection after meta-data has downloaded
         $( "#orgUnitTree" ).removeClass( "disable-clicks" );
-        dhis2.tc.metaDataCached = true;
+        dhis2.doclib.metaDataCached = true;
         dhis2.availability.startAvailabilityCheck();
-        console.log( 'Finished loading meta-data' );        
-        selection.responseReceived(); 
+        console.log( 'Finished loading meta-data' );
+        selection.responseReceived();
     });
 
-    def.resolve();    
+    def.resolve();
 }
 
 function getUserProfile(){
-    return dhis2.metadata.simpleGet('USER_PROFILE', dhis2.doclib.apiUrl + '/me.json', 'fields=id,displayName,userCredentials[username]', 'sessionStorage');
+    return dhis2.metadata.getMetaObject(null, 'USER_PROFILE', dhis2.doclib.apiUrl + '/me.json', 'fields=id,displayName,userCredentials[username]', 'sessionStorage', dhis2.doclib.store);
 }
 
-function getUserAccessiblePrograms()
-{
+function getUserAccessiblePrograms(){
     return dhis2.metadata.getMetaObject(null, 'ACCESSIBLE_PROGRAMS', dhis2.doclib.apiUrl + '/programs.json', 'fields=id,access[data[write]]&paging=false', 'sessionStorage', dhis2.doclib.store);
 }
 
@@ -182,13 +179,13 @@ function getOrgUnitLevels(){
     dhis2.doclib.store.getKeys( 'ouLevels').done(function(res){
         if(res.length > 0){
             return;
-        }        
+        }
         return dhis2.metadata.getMetaObjects('ouLevels', 'organisationUnitLevels', dhis2.doclib.apiUrl + '/organisationUnitLevels.json', 'fields=id,displayName,level&paging=false', 'idb', dhis2.doclib.store);
     });
 }
 
 function getSystemSetting(){
-    return dhis2.metadata.simpleGet('SYSTEM_SETTING', dhis2.doclib.apiUrl + '/systemSettings?key=keyUiLocale&key=keyCalendar&key=keyDateFormat&key=multiOrganisationUnitForms','', 'sessionStorage');
+    return dhis2.metadata.getMetaObject(null, 'SYSTEM_SETTING', dhis2.doclib.apiUrl + '/systemSettings?key=keyUiLocale&key=keyCalendar&key=keyDateFormat&key=multiOrganisationUnitForms', 'sessionStorage', dhis2.doclib.store);
 }
 
 function getMetaCategoryCombos(){
@@ -199,7 +196,7 @@ function filterMissingCategoryCombos( objs ){
     return dhis2.metadata.filterMissingObjIds('categoryCombos', dhis2.doclib.store, objs);
 }
 
-function getCategoryCombos( ids ){    
+function getCategoryCombos( ids ){
     return dhis2.metadata.getBatches( ids, batchSize, 'categoryCombos', 'categoryCombos', dhis2.doclib.apiUrl + '/categoryCombos.json', 'paging=false&fields=id,displayName,code,skipTotal,isDefault,categoryOptionCombos[id,displayName,categoryOptions[displayName]],categories[id,displayName,code,dimension,dataDimensionType,attributeValues[value,attribute[id,name,valueType,code]],categoryOptions[id,displayName,code]]', 'idb', dhis2.doclib.store);
 }
 
@@ -223,7 +220,7 @@ function filterMissingOptionSets( objs ){
     return dhis2.metadata.filterMissingObjIds('optionSets', dhis2.doclib.store, objs);
 }
 
-function getOptionSets( ids ){    
+function getOptionSets( ids ){
     return dhis2.metadata.getBatches( ids, batchSize, 'optionSets', 'optionSets', dhis2.doclib.apiUrl + '/optionSets.json', 'paging=false&fields=id,displayName,code,version,valueType,attributeValues[value,attribute[id,name,valueType,code]],options[id,displayName,code]', 'idb', dhis2.doclib.store, dhis2.metadata.processObject);
 }
 
@@ -235,7 +232,7 @@ function filterMissingIndicatorGroups( objs ){
     return dhis2.metadata.filterMissingObjIds('indicatorGroups', dhis2.doclib.store, objs);
 }
 
-function getIndicatorGroups( ids ){    
+function getIndicatorGroups( ids ){
     return dhis2.metadata.getBatches( ids, batchSize, 'indicatorGroups', 'indicatorGroups', dhis2.doclib.apiUrl + '/indicatorGroups.json', 'paging=false&fields=id,displayName,attributeValues[value,attribute[id,name,valueType,code]],indicators[id,displayName,denominatorDescription,numeratorDescription,dimensionItem,numerator,denominator,annualized,dimensionType,indicatorType[id,displayName,factor,number]]', 'idb', dhis2.doclib.store, dhis2.metadata.processObject);
 }
 
@@ -247,6 +244,6 @@ function filterMissingAttributes( objs ){
     return dhis2.metadata.filterMissingObjIds('attributes', dhis2.doclib.store, objs);
 }
 
-function getAttributes( ids ){    
+function getAttributes( ids ){
     return dhis2.metadata.getBatches( ids, batchSize, 'attributes', 'attributes', dhis2.doclib.apiUrl + '/attributes.json', 'paging=false&fields=:all,!access,!lastUpdatedBy,!lastUpdated,!created,!href,!user,!translations,!favorites,optionSet[id,displayName,code,options[id,displayName,code,sortOrder]]', 'idb', dhis2.doclib.store, dhis2.metadata.processObject);
 }

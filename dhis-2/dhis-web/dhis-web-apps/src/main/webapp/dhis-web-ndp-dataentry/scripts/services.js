@@ -187,7 +187,7 @@ var ndpDataEntryServices = angular.module('ndpDataEntryServices', ['ngResource']
                 NdpStorageService.currentStore.getAll('dataSets').done(function(dss){
                     var dataSets = [];
                     angular.forEach(dss, function(ds){
-                        if(ds.id && ds.organisationUnits.indexOf( ou.id ) !== -1 && CommonUtils.userHasWriteAccess(ds.id)){
+                        if(ds.id && ds.organisationUnits.indexOf( ou.id ) !== -1 && CommonUtils.userHasWriteAccess('ACCESSIBLE_DATASETS', 'dataSets', ds.id)){
                             dataSets.push(ds);
                         }
                     });
@@ -233,7 +233,7 @@ var ndpDataEntryServices = angular.module('ndpDataEntryServices', ['ngResource']
                 NdpStorageService.currentStore.getAll('dataSets').done(function(dss){
                     var dataSets = [];
                     angular.forEach(dss, function(ds){
-                        if(ds.id && ds.organisationUnits.indexOf( ou.id ) !== -1 && CommonUtils.userHasWriteAccess(ds.id) ){
+                        if(ds.id && ds.organisationUnits.indexOf( ou.id ) !== -1 && CommonUtils.userHasWriteAccess('ACCESSIBLE_DATASETS', 'dataSets', ds.id) ){
                             //ds = CommonUtils.processDataSet( ds );
                             dataSets.push(ds);
                         }

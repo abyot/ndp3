@@ -73,7 +73,7 @@
                 <div class="col-sm-12">
                     <button type="button"
                             class="btn btn-primary"
-                            ng-disabled="!model.selectedObjective"
+                            ng-disabled="model.dataElementGroup.length === 0"
                             ng-click="getAnalyticsData()">
                         {{'display_report'| translate}}
                     </button>
@@ -110,8 +110,8 @@
                         </th>
                     </tr>
                     <tr>
-                        <th>{{'interventions'| translate}}</th>
-                        <th>{{'outputs'| translate}}</th>
+                        <th>{{'intervention'| translate}}</th>
+                        <th>{{'output'| translate}}</th>
                         <th>{{'indicator'| translate}}</th>
                         <th class="center" ng-repeat="header in model.dataHeaders">
                             {{model.metaData.items[header.dimensionId].name}}
@@ -119,11 +119,11 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <tr ng-repeat="row in model.finalData">
-                        <td class="vertical-center" ng-repeat="col in row" rowspan="{{col.span}}">
+                    <tr ng-repeat="row in model.resultData">
+                        <td class="vertical-center" ng-repeat="col in row" rowspan="{{col.span}}" ng-class="col.trafficLight">
                             {{col.val}}
                             <span ng-if="col.info" ng-click="getIndicatorDictionary(col.info)">
-                                <i class="fa fa-info-circle info-icon cursor-pointer" aria-hidden="true" title="{{'indicator_dictionary' | translate}}"></i>
+                                <i class="fa fa-info-circle info-icon cursor-pointer" aria-hidden="true" title="{{'indicator_dictionary'| translate}}"></i>
                             </span>
                         </td>
                     </tr>
@@ -139,6 +139,6 @@
     </div>
 </div>
 
-<div class="alert alert-warning" ng-if="selectedOrgUnit && model.objectives.length === 0">
+<div class="alert alert-warning" ng-if="selectedOrgUnit && model.dataElementGroup.length === 0">
     {{'mda_has_no_interventions'| translate}}
 </div>

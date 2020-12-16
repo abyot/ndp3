@@ -122,13 +122,13 @@ ndpFramework.controller('DataValueExplanationController',
                             angular.forEach($scope.dataValues, function(dv){
                                 if ( dv.comment ){
                                     dv.comment = JSON.parse( dv.comment );
-                                }
 
-                                if ( dv.comment.attachment ){
-                                    angular.forEach(dv.comment.attachment, function(att){
-                                        eventIds.push( att );
-                                    });
-                                };
+                                    if ( dv.comment.attachment ){
+                                        angular.forEach(dv.comment.attachment, function(att){
+                                            eventIds.push( att );
+                                        });
+                                    };
+                                }
 
                                 var ou = $scope.votesById[dv.orgUnit];
                                 $scope.dataVotes.push( ou );
@@ -137,9 +137,12 @@ ndpFramework.controller('DataValueExplanationController',
                                 }
                             });
 
-                            EventService.getMultiple( eventIds ).then(function(docs){
-                                $scope.documents = docs;
-                            });
+                            $scope.documents = {};
+                            if ( eventIds.length > 0 ){
+                                EventService.getMultiple( eventIds ).then(function(docs){
+                                    $scope.documents = docs;
+                                });
+                            }
                         }
                     });
                 });
