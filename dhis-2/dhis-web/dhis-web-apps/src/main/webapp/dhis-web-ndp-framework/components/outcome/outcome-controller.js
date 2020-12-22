@@ -359,7 +359,8 @@ ndpFramework.controller('OutcomeController',
             type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=utf-8"
         });
 
-        var reportName = $scope.model.selectedObjective.ndp + " objective" + " .xls";
+        var reportName =$scope.model.selectedMenu.displayName + ".xls";
+
         if( name ){
             reportName = name + ' performance.xls';
         }

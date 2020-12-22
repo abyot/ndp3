@@ -43,9 +43,6 @@ ndpFramework.controller('MDAController',
     };
 
     $scope.model.horizontalMenus = [
-        /*{id: 'performance', title: 'results', order: 3, view: 'components/mda/performance.html', active: true},
-        {id: 'dashboard', title: 'dashboards', order: 4, view: 'components/mda/dashboard.html'},
-        {id: 'library', title: 'library', order: 1, view: 'components/mda/library.html'}*/
         {id: 'trafficLight', title: 'traffic_light', order: 1, view: 'components/mda/traffic-light.html', active: true, class: 'main-horizontal-menu'},
         {id: 'budgetPerformance', title: 'budget_performance', order: 2, view: 'components/mda/budget-performance.html', class: 'main-horizontal-menu'},
         {id: 'budgetCompliance', title: 'budget_compliance', order: 3, view: 'components/mda/budget-compliance.html', class: 'main-horizontal-menu'},
@@ -196,7 +193,9 @@ ndpFramework.controller('MDAController',
 
                             $scope.model.selectedMenu = SelectedMenuService.getSelectedMenu();
 
-                            $scope.model.periods = PeriodService.getPeriods($scope.model.selectedPeriodType, $scope.model.periodOffset, $scope.model.openFuturePeriods);
+                            var periods = PeriodService.getPeriods($scope.model.selectedPeriodType, $scope.model.periodOffset, $scope.model.openFuturePeriods);
+                            $scope.model.allPeriods = angular.copy( periods );
+                            $scope.model.periods = periods;
 
                             var selectedPeriodNames = ['2020/21', '2021/22', '2022/23', '2023/24', '2024/25'];
 
@@ -257,9 +256,6 @@ ndpFramework.controller('MDAController',
             }
 
             $scope.getOutputs();
-            //$scope.getObjectives();
-            //var goals = $filter('filter')($scope.model.selectedDataElementGroupSets, {indicatorGroupSetType: 'goal'}, true);
-            //var objectives = $filter('filter')($scope.model.selectedDataElementGroupSets, {indicatorGroupSetType: 'objective'}, true);
         }
     };
 
@@ -281,13 +277,6 @@ ndpFramework.controller('MDAController',
 
     $scope.resetView = function(horizontalMenu){
         $scope.model.activeHorizontalMenu = horizontalMenu;
-        $scope.model.dataElementGroup = [];
-        $scope.model.selectedDataElementGroupSets = [];
-        $scope.model.objectives = [];
-        $scope.model.interventions = [];
-        $scope.model.selectedIntervention = null;
-        $scope.model.selectedObjective = null;
-        $scope.resetDataView();
     };
 
     $scope.resetDataView = function(){
@@ -314,6 +303,7 @@ ndpFramework.controller('MDAController',
 
         var getBase = function(){
             $scope.model.selectedPeriods = orderByFilter( $scope.model.selectedPeriods, '-id').reverse();
+            console.log('$scope.model.selectedPeriods:  ', $scope.model.selectedPeriods);
             var p = $scope.model.selectedPeriods[0];
             var res = PeriodService.getPreviousPeriod( p.id, $scope.model.allPeriods );
             $scope.model.basePeriod = res.period;
@@ -343,10 +333,10 @@ ndpFramework.controller('MDAController',
 
         $scope.getBasePeriod();
 
-        /*if ( !$scope.model.basePeriod || !$scope.model.basePeriod.id ){
+        if ( !$scope.model.basePeriod || !$scope.model.basePeriod.id ){
             NotificationService.showNotifcationDialog($translate.instant("error"), $translate.instant("invalid_base_period"));
             return;
-        }*/
+        }
 
         if( $scope.model.dataElementGroup && $scope.model.dataElementGroup.length > 0 && $scope.model.selectedPeriods.length > 0){
             analyticsUrl += '&filter=ou:'+ $scope.selectedOrgUnit.id +'&displayProperty=NAME&includeMetadataDetails=true';
