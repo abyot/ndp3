@@ -3,7 +3,7 @@
 
 /* Services */
 
-var ndpDataEntryServices = angular.module('ndpDataEntryServices', ['ngResource'])
+var ndpTargetServices = angular.module('ndpTargetServices', ['ngResource'])
 
 .factory('NdpStorageService', function(){
     var store = new dhis2.storage.Store({

@@ -1,9 +1,9 @@
-/* global angular, dhis2, ndpDataEntry */
+/* global angular, dhis2, ndpTarget */
 
 'use strict';
 
 //Controller for settings page
-ndpDataEntry.controller('DataEntryController',
+ndpTarget.controller('DataEntryController',
         function($scope,
                 $modal,
                 MetaDataFactory,
@@ -37,7 +37,8 @@ ndpDataEntry.controller('DataEntryController',
         attributes: [],
         selectedPeriod: null,
         periods: [],
-        periodOffset: 0
+        periodOffset: 0,
+        periodType: 'FinancialJuly'
     };
 
     $scope.$watch('selectedOrgUnit', function() {
@@ -55,7 +56,6 @@ ndpDataEntry.controller('DataEntryController',
                             $scope.model.categoryCombosById[cc.id] = cc;
                         });
                         $scope.loadDataSets($scope.selectedOrgUnit);
-
                     });
                 });
             }
@@ -109,7 +109,7 @@ ndpDataEntry.controller('DataEntryController',
     $scope.loadDataSetDetails = function(){
         if( $scope.model.selectedDataSet && $scope.model.selectedDataSet.id && $scope.model.selectedDataSet.periodType){
 
-            $scope.model.periods = PeriodService.getPeriods( $scope.model.selectedDataSet.periodType, $scope.model.periodOffset,  $scope.model.selectedDataSet.openFuturePeriods );
+            $scope.model.periods = PeriodService.getPeriods( $scope.model.periodType, $scope.model.periodOffset,  $scope.model.selectedDataSet.openFuturePeriods );
 
             if(!$scope.model.selectedDataSet.dataElements || $scope.model.selectedDataSet.dataElements.length < 1){
                 CommonUtils.notify('error', 'missing_data_elements_indicators');
@@ -240,7 +240,7 @@ ndpDataEntry.controller('DataEntryController',
 
         $scope.model.periodOffset = mode === 'NXT' ? ++$scope.model.periodOffset : --$scope.model.periodOffset;
 
-        $scope.model.periods = PeriodService.getPeriods( $scope.model.selectedDataSet.periodType, $scope.model.periodOffset,  $scope.model.selectedDataSet.openFuturePeriods );
+        $scope.model.periods = PeriodService.getPeriods( $scope.model.periodType, $scope.model.periodOffset,  $scope.model.selectedDataSet.openFuturePeriods );
     };
 
     $scope.saveDataValue = function( deId, ocId, aoc ){
