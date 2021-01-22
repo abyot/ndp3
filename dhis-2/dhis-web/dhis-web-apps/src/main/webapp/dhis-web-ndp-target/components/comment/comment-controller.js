@@ -12,11 +12,13 @@ ndpTarget.controller('CommentController',
                 DHIS2URL,
                 dataValues,
                 selectedOrgUnit,
+                actualPeriods,
                 selectedPeriod,
                 dataElement,
                 selectedCategoryCombo,
                 selectedCategoryOptionCombo,
                 selectedAttributeCategoryCombo,
+                optionSetsById,
                 CommonUtils,
                 DateUtils,
                 MetaDataFactory,
@@ -30,10 +32,12 @@ ndpTarget.controller('CommentController',
     $scope.dataValues = dataValues;
     $scope.selectedOrgUnit = selectedOrgUnit;
     $scope.selectedPeriod = selectedPeriod;
+    $scope.actualPeriods = actualPeriods;
     $scope.selectedDataElement = dataElement;
     $scope.selectedCategoryCombo = selectedCategoryCombo;
     $scope.selectedCategoryOptionCombo = selectedCategoryOptionCombo;
     $scope.selectedAttributeCategoryCombo = selectedAttributeCategoryCombo;
+    $scope.optionSetsById = optionSetsById;
     $scope.model = {
         fileInput: {},
         fileDataElement: null,
@@ -116,18 +120,26 @@ ndpTarget.controller('CommentController',
             clearComment = true;
         }
 
-        var dataValue = {ou: $scope.selectedOrgUnit.id,
-                    pe: $scope.selectedPeriod.id,
-                    de: $scope.selectedDataElement.id,
-                    co: $scope.selectedCategoryOptionCombo.id,
-                    comment: clearComment ? "" : JSON.stringify( $scope.model.comment[aoc.id] )
-                };
-        if( $scope.selectedAttributeCategoryCombo && !$scope.selectedAttributeCategoryCombo.isDefault ){
-            dataValue.cc = $scope.selectedAttributeCategoryCombo.id;
-            dataValue.cp = CommonUtils.getOptionIds(aoc.categoryOptions);
-        }
+        var comment = clearComment ? "" : JSON.stringify( $scope.model.comment[aoc.id] );
+        var value = CommonUtils.formatDataValue( $scope.selectedDataElement, $scope.dataValues[$scope.selectedDataElement.id][$scope.selectedCategoryOptionCombo.id ][aoc.id].aggregateValue, $scope.optionSetsById, 'API' );
+        value = $scope.selectedDataElement.aggregationType === 'SUM' ? value / 4 : value;
 
-        DataValueService.saveComment( dataValue ).then(function(response){
+        var dataValueSet = {
+            dataValues: []
+        };
+        angular.forEach($scope.actualPeriods, function(p){
+            dataValueSet.dataValues.push( {
+                orgUnit: $scope.selectedOrgUnit.id,
+                dataElement: $scope.selectedDataElement.id,
+                categoryOptionCombo: $scope.selectedCategoryOptionCombo.id,
+                attributeOptionCombo: aoc.id,
+                comment: comment,
+                value: value,
+                period: p.id
+            });
+        });
+
+        DataValueService.saveDataValueSet( dataValueSet ).then(function(){
             $scope.saveStatus[$scope.selectedDataElement.id + '-' + $scope.selectedCategoryOptionCombo.id + '-' + aoc.id].saved = true;
             $scope.saveStatus[$scope.selectedDataElement.id + '-' + $scope.selectedCategoryOptionCombo.id + '-' + aoc.id].pending = false;
             $scope.saveStatus[$scope.selectedDataElement.id + '-' + $scope.selectedCategoryOptionCombo.id + '-' + aoc.id].error = false;
@@ -136,6 +148,7 @@ ndpTarget.controller('CommentController',
             $scope.saveStatus[$scope.selectedDataElement.id + '-' + $scope.selectedCategoryOptionCombo.id + '-' + aoc.id].pending = false;
             $scope.saveStatus[$scope.selectedDataElement.id + '-' + $scope.selectedCategoryOptionCombo.id + '-' + aoc.id].error = true;
         });
+
     };
 
     $scope.getInputNotifcationClass = function(deId, ocId, aocId){
@@ -266,7 +279,7 @@ ndpTarget.controller('CommentController',
 
         ModalService.showModal({}, modalOptions).then(function(result){
             if( document ){
-                EventService.deleteEvent(document).then(function(data){
+                EventService.deleteEvent(document.event).then(function(data){
                     delete $scope.model.documents[document.event];
                     if( $scope.model.comment[aoc.id] && $scope.model.comment[aoc.id].attachment ){
                         for( var i=0; i< $scope.model.comment[aoc.id].attachment.length; i++ ){
@@ -280,7 +293,6 @@ ndpTarget.controller('CommentController',
                             }
                         }
                     }
-
                 });
             }
             if(e){

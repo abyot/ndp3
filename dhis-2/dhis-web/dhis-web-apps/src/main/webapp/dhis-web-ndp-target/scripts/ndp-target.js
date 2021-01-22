@@ -218,7 +218,7 @@ function filterMissingDataSets( objs ){
 }
 
 function getDataSets( ids ){
-    return dhis2.metadata.getBatches( ids, batchSize, 'dataSets', 'dataSets', dhis2.ndpde.apiUrl + '/dataSets.json', 'paging=false&fields=id,periodType,openFuturePeriods,displayName,version,categoryCombo[id],attributeValues[value,attribute[id,name,valueType,code]],organisationUnits[id],sections[id,displayName,description,sortOrder,code,dataElements,greyedFields[dimensionItem],indicators[id,displayName,indicatorType,numerator,denominator,attributeValues[value,attribute[id,name,valueType,code]]]],dataSetElements[id,dataElement[id,code,displayFormName,description,optionSetValue,optionSet[id],attributeValues[value,attribute[id,name,valueType,code]],description,formName,valueType,optionSetValue,optionSet[id],categoryCombo[id]]]', 'idb', dhis2.ndpde.store, '');
+    return dhis2.metadata.getBatches( ids, batchSize, 'dataSets', 'dataSets', dhis2.ndpde.apiUrl + '/dataSets.json', 'paging=false&fields=id,periodType,openFuturePeriods,displayName,version,categoryCombo[id],sections[id],attributeValues[value,attribute[id,name,valueType,code]],organisationUnits[id],dataSetElements[id,dataElement[:all,optionSet[id],attributeValues[value,attribute[id,name,valueType,code]],categoryCombo[id]]]', 'idb', dhis2.ndpde.store, '');
 }
 
 function getMetaOptionSets(){

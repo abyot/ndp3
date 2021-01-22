@@ -37,7 +37,7 @@ var ndpTargetServices = angular.module('ndpTargetServices', ['ngResource'])
         }
 
         var extractDate = function( obj ){
-            return obj._year + '-' + obj._month + '-' + obj._day;
+            return obj._year + '-' + String("0" + obj._month).slice(-2) + '-' + String("0" + obj._day).slice(-2);
         };
 
         var calendarSetting = CalendarService.getSetting();
@@ -62,6 +62,24 @@ var ndpTargetServices = angular.module('ndpTargetServices', ['ngResource'])
         });
 
         return d2Periods;
+    };
+
+    this.getQuartersForYear = function( period, periodType ){
+        var periods = [];
+        if( period && period.startDate && period.endDate && periodType && periodType === 'Quarterly' ){
+            var periods = [{
+                id: period._startDate._year + 'Q3'
+            },{
+                id: period._startDate._year + 'Q4'
+            },{
+                id: period._endDate._year + 'Q1'
+            },{
+                id: period._endDate._year + 'Q2'
+            }];
+        }
+
+        return periods;
+
     };
 })
 
@@ -516,6 +534,14 @@ var ndpTargetServices = angular.module('ndpTargetServices', ['ngResource'])
             });
             return promise;
         },
+        saveDataValueSet: function( dvs ){
+            var promise = $http.post('../api/dataValueSets.json', dvs ).then(function(response){
+                return response.data;
+            }, function(response){
+                CommonUtils.errorNotifier(response);
+            });
+            return promise;
+        },
         saveComment: function( dv ){
             if( dv.comment ){
                 dv.comment = encodeURI(dv.comment);
@@ -525,6 +551,9 @@ var ndpTargetServices = angular.module('ndpTargetServices', ['ngResource'])
                 return response.data;
             });
             return promise;
+        },
+        deleteDataValue: function(){
+
         }
     };
 })
@@ -636,7 +665,7 @@ var ndpTargetServices = angular.module('ndpTargetServices', ['ngResource'])
     };
 
     var deleteEvent = function(dhis2Event){
-        var promise = $http.delete(DHIS2URL + '/events/' + dhis2Event.event).then(function(response){
+        var promise = $http.delete(DHIS2URL + '/events/' + dhis2Event).then(function(response){
             return response.data;
         });
         return promise;
