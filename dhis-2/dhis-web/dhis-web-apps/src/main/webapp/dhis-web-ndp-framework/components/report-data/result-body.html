@@ -10,5 +10,8 @@
             {{col.val}}
             <i class="fa fa-info-circle info-icon cursor-pointer" aria-hidden="true" title="{{'indicator_dictionary'| translate}}"></i>
         </span>
+        <span ng-if="model.sdgView && col.info" ng-click="getRFInformation(col.info)">
+            <i class="fa fa-database info-icon cursor-pointer" aria-hidden="true" title="{{'ndp_source'| translate}}"></i>
+        </span>
     </td>
 </tr>

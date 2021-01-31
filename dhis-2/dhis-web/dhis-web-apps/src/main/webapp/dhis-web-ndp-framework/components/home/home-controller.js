@@ -58,7 +58,7 @@ ndpFramework.controller('HomeController',
                         var objectives = $filter('filter')($scope.model.dataElementGroupSets, {ndp: op.code, indicatorGroupSetType: 'resultsFrameworkObjective'}, true);
                         var goals = $filter('filter')($scope.model.dataElementGroupSets, {ndp: op.code, indicatorGroupSetType: 'goal'}, true);
                         var programs = $filter('filter')($scope.model.optionSets, {ndp: op.code, code: 'program'}, true);
-                        var sdgs = $filter('filter')($scope.model.dataElementGroupSets, {indicatorGroupSetType: 'sdg'}, true);
+                        //var sdgs = $filter('filter')($scope.model.dataElementGroupSets, {indicatorGroupSetType: 'sdgGoals'}, true);
 
                         op.children = [];
 
@@ -161,6 +161,7 @@ ndpFramework.controller('HomeController',
                                 {
                                     id: 'SDG',
                                     domain: 'SDG',
+                                    code: 'sdgGoals',
                                     displayName: $translate.instant('sdg_outcomes'),
                                     order: 3,
                                     children: [],

@@ -832,12 +832,13 @@ var ndpFrameworkServices = angular.module('ndpFrameworkServices', ['ngResource']
 
                 angular.forEach(dataParams.selectedDataElementGroupSets, function(degs){
                     var groupSet = {val: degs.displayName, span: 0};
-                    resultRow.push(groupSet);
-                    performanceRow.push(groupSet);
-                    cumulativeRow.push(groupSet);
-                    costRow.push(groupSet);
-                    costEffRow.push(groupSet);
-
+                    var addLeadingRow = function(){
+                        resultRow.push(groupSet);
+                        performanceRow.push(groupSet);
+                        cumulativeRow.push(groupSet);
+                        costRow.push(groupSet);
+                        costEffRow.push(groupSet);
+                    };
                     var generateRow = function(group, deg){
                         if( deg && deg.dataElements ){
                             angular.forEach(deg.dataElements, function(de){
@@ -858,7 +859,7 @@ var ndpFrameworkServices = angular.module('ndpFrameworkServices', ['ngResource']
                                             startDate: dh.periodStart,
                                             endDate: dh.periodEnd
                                         };
-                                        var val = filterResultData(dh, de.id, oc.id, data, dataParams)
+                                        var val = filterResultData(dh, de.id, oc.id, data, dataParams);
                                         var trafficLight = getTrafficLight(val, de.id, dh.dimensionId);
                                         resultRow.push({val: val, span: 1, trafficLight: trafficLight, details: de.id, period: period, coc: oc, aoc: dh.dimensionId});
                                     });
@@ -888,11 +889,49 @@ var ndpFrameworkServices = angular.module('ndpFrameworkServices', ['ngResource']
                                 });
                             });
                         }
+                        else{
+                            generateEmptyRow( group );
+                        }
+                    };
+                    var generateEmptyRow = function( group ){
+                        groupSet.span++;
+                        if ( group ){
+                            group.span++;
+                        }
+
+                        //Result data
+                        resultRow.push({val: "" , span: 1, info: ""});
+                        angular.forEach(dataHeaders, function(dh){
+                            var period = {
+                                id: dh.periodId,
+                                startDate: dh.periodStart,
+                                endDate: dh.periodEnd
+                            };
+                            var val = "";
+                            var trafficLight = "";
+                            resultRow.push({val: val, span: 1, trafficLight: trafficLight, details: "", period: period, coc: "", aoc: dh.dimensionId});
+                        });
+                        parsedResultRow.push(resultRow);
+                        resultRow = [];
                     };
 
-                    angular.forEach(degs.dataElementGroups, function(deg){
-                        if( dataParams.selectedDataElementGroup && dataParams.selectedDataElementGroup.id ){
-                            if ( deg.id === dataParams.selectedDataElementGroup.id ){
+                    if ( degs.dataElementGroups && degs.dataElementGroups.length > 0 ){
+                        addLeadingRow();
+                        angular.forEach(degs.dataElementGroups, function(deg){
+                            if( dataParams.selectedDataElementGroup && dataParams.selectedDataElementGroup.id ){
+                                if ( deg.id === dataParams.selectedDataElementGroup.id ){
+                                    var group = {val: deg.displayName, span: 0};
+                                    resultRow.push(group);
+                                    performanceRow.push(group);
+                                    cumulativeRow.push(group);
+                                    costRow.push(group);
+                                    costEffRow.push(group);
+                                    var _deg = $filter('filter')(dataParams.dataElementGroups, {id: deg.id})[0];
+                                    generateRow(group, _deg);
+                                    totalRows++;
+                                }
+                            }
+                            else{
                                 var group = {val: deg.displayName, span: 0};
                                 resultRow.push(group);
                                 performanceRow.push(group);
@@ -903,19 +942,11 @@ var ndpFrameworkServices = angular.module('ndpFrameworkServices', ['ngResource']
                                 generateRow(group, _deg);
                                 totalRows++;
                             }
-                        }
-                        else{
-                            var group = {val: deg.displayName, span: 0};
-                            resultRow.push(group);
-                            performanceRow.push(group);
-                            cumulativeRow.push(group);
-                            costRow.push(group);
-                            costEffRow.push(group);
-                            var _deg = $filter('filter')(dataParams.dataElementGroups, {id: deg.id})[0];
-                            generateRow(group, _deg);
-                            totalRows++;
-                        }
-                    });
+                        });
+                    }
+                    else{
+                        //generateEmptyRow();
+                    }
                 });
                 resultData = parsedResultRow;
                 performanceData = parsedPerformanceRow;

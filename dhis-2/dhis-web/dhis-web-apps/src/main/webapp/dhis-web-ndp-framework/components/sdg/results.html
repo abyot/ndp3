@@ -9,9 +9,9 @@
                     <ui-select ng-model="model.selectedNDP"
                                theme="select2"
                                style="width:100%;">
-                        <ui-select-match allow-clear="true" class="form-control-ui-select" placeholder="{{model.ndp && model.ndp.options && model.ndp.options.length > 0 ? 'select_or_search' : 'empty'| translate}}">{{$select.selected.displayName|| $select.selected}}</ui-select-match>
-                        <ui-select-choices repeat="option in model.ndp.options | filter: $select.search | limitTo:maxOptionSize | orderBy: ['displayName']">
-                            <span ng-bind-html="option.displayName | highlight: $select.search"></span>
+                        <ui-select-match allow-clear="true" class="form-control-ui-select" placeholder="{{model.ndp && model.ndp.length > 0 ? 'select_or_search' : 'empty'| translate}}">{{$select.selected.displayName|| $select.selected}}</ui-select-match>
+                        <ui-select-choices repeat="ndp in model.ndp | filter: $select.search | limitTo:maxOptionSize | orderBy: ['displayName']">
+                            <span ng-bind-html="ndp.displayName | highlight: $select.search"></span>
                         </ui-select-choices>
                     </ui-select>
                 </div>
@@ -21,12 +21,28 @@
                     {{'goal'| translate}}
                 </div>
                 <div class="col-sm-10">
-                    <ui-select ng-model="model.selectedSdg"
+                    <ui-select ng-model="model.selectedGoal"
+                               ng-disabled="!model.selectedNDP"
                                theme="select2"
                                style="width:100%;">
-                        <ui-select-match allow-clear="true" class="form-control-ui-select" placeholder="{{model.sdgs && model.sdgs.length > 0 ? 'all' : 'empty'| translate}}">{{$select.selected.displayName|| $select.selected}}</ui-select-match>
-                        <ui-select-choices repeat="degs in model.sdgs | filter: $select.search | limitTo:maxOptionSize">
-                            <span ng-bind-html="degs.displayName | highlight: $select.search"></span>
+                        <ui-select-match allow-clear="true" class="form-control-ui-select" placeholder="{{model.goals && model.goals.length > 0 ? 'select_or_search' : 'empty'| translate}}">{{$select.selected.displayName|| $select.selected}}</ui-select-match>
+                        <ui-select-choices repeat="goal in model.goals | filter: $select.search | limitTo:maxOptionSize">
+                            <span ng-bind-html="goal.displayName | highlight: $select.search"></span>
+                        </ui-select-choices>
+                    </ui-select>
+                </div>
+            </div>
+            <div class="row small-vertical-spacing" ng-if="model.selectedGoal">
+                <div class="col-sm-2">
+                    {{'target'| translate}}
+                </div>
+                <div class="col-sm-10">
+                    <ui-select ng-model="model.selectedTarget"
+                               theme="select2"
+                               style="width:100%;">
+                        <ui-select-match allow-clear="true" class="form-control-ui-select" placeholder="{{model.targets && model.targets.length > 0 ? 'all' : 'empty'| translate}}">{{$select.selected.displayName|| $select.selected}}</ui-select-match>
+                        <ui-select-choices repeat="target in model.targets | filter: $select.search | limitTo:maxOptionSize">
+                            <span ng-bind-html="target.displayName | highlight: $select.search"></span>
                         </ui-select-choices>
                     </ui-select>
                 </div>
@@ -34,6 +50,7 @@
             <div class="row vertical-spacing pull-right">
                 <div class="col-sm-12">
                     <button type="button"
+                            ng-disabled="!model.selectedGoal"
                             class="btn btn-primary"
                             ng-click="getAnalyticsData()">
                         {{'display_report'| translate}}
@@ -71,24 +88,15 @@
                         </th>
                     </tr>
                     <tr>
-                        <th>{{model.selectedMenu.ndp}} {{'objectives'| translate}}</th>
-                        <th>{{'kras'| translate}}</th>
-                        <th>{{'indicators'| translate}}</th>
+                        <th>{{'sdg_target'| translate}}</th>
+                        <th>{{'sdg_indicator'| translate}}</th>
+                        <th>{{'rf_indicator'| translate}}</th>
                         <th class="center" ng-repeat="header in model.dataHeaders">
                             {{model.metaData.items[header.dimensionId].name}}
                         </th>
                     </tr>
                 </thead>
-                <tbody>
-                    <tr ng-repeat="row in model.finalData">
-                        <td class="vertical-center" ng-repeat="col in row" rowspan="{{col.span}}">
-                            {{col.val}}
-                            <span ng-if="col.info" ng-click="getIndicatorDictionary(col.info)">
-                                <i class="fa fa-info-circle info-icon cursor-pointer" aria-hidden="true" title="{{'indicator_dictionary'| translate}}"></i>
-                            </span>
-                        </td>
-                    </tr>
-                </tbody>
+                <tbody ng-include="'components/report-data/result-body.html'"></tbody>
             </table>
         </div>
     </div>
