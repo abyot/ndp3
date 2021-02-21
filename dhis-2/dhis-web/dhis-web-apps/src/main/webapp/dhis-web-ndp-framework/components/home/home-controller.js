@@ -7,6 +7,7 @@ ndpFramework.controller('HomeController',
         function($scope,
                 $translate,
                 $filter,
+                SessionStorageService,
                 SelectedMenuService,
                 MetaDataFactory) {
 
@@ -27,6 +28,8 @@ ndpFramework.controller('HomeController',
     };
 
     dhis2.ndp.downloadMetaData().then(function(){
+        SessionStorageService.set('METADATA_CACHED', true);
+        console.log('Finished loading metadata');
 
         MetaDataFactory.getAll('optionSets').then(function(optionSets){
 

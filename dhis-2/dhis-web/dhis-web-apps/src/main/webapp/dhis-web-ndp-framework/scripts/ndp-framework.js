@@ -130,6 +130,12 @@ function ajax_login()
 
 dhis2.ndp.downloadMetaData = function()
 {
+    var metadataCached = JSON.parse(sessionStorage.getItem('METADATA_CACHED'));
+
+    if ( metadataCached ){
+        return Promise.resolve();
+    }
+
     console.log('Loading required meta-data');
 
     return dhis2.ndp.store.open()
