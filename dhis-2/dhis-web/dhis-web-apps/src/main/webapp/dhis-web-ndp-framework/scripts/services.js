@@ -863,6 +863,9 @@ var ndpFrameworkServices = angular.module('ndpFrameworkServices', ['ngResource']
                                         var trafficLight = getTrafficLight(val, de.id, dh.dimensionId);
                                         resultRow.push({val: val, span: 1, trafficLight: trafficLight, details: de.id, period: period, coc: oc, aoc: dh.dimensionId});
                                     });
+                                    if ( dataParams.displayVision2040 && dataParams.dataElementsById[de.id] ){
+                                        resultRow.push({vision2040: dataParams.dataElementsById[de.id].vision2040});
+                                    }
                                     parsedResultRow.push(resultRow);
                                     resultRow = [];
 

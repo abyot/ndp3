@@ -6,16 +6,19 @@
     <div data-stop-propagation="true">
         <script type="text/ng-template" id="treeMenu.html">
             <span class="tree-menu-button"
+                    ng-if="!menuItem.root"
                     ng-click="menuItem.show = !menuItem.show"
                     ng-show="menuItem.id !== 'SPACE' && menuItem.show && menuItem.children.length > 0">
                 <i class="fa fa-minus-square-o"></i>
             </span>
             <span class="tree-menu-button"
+                    ng-if="!menuItem.root"
                     ng-click="menuItem.show = !menuItem.show"
                     ng-show="menuItem.id !== 'SPACE' && (!menuItem.show && menuItem.children.length > 0) || (!menuItem.show && menuItem.hasChildren)">
                 <i class="fa fa-plus-square-o"></i>
             </span>
             <span class="tree-menu-button"
+                    ng-if="!menuItem.root"
                     ng-click="setSelectedMenu(menuItem)"
                     ng-class="{'selected-menu' : menuItem.id === model.selectedMenu.id, 'bold': menuItem.bold}"
                     ng-show="menuItem.id !== 'SPACE'">
@@ -46,6 +49,9 @@
         </tr>
         <tr ng-class="{'selected-menu' : 'FAQ' === model.selectedMenu.domain, 'bold': menuItem.bold}">
             <td ng-click="setBottomMenu('FAQ')">{{'faqs' | translate}}</td>
+        </tr>
+        <tr ng-class="{'selected-menu' : 'NEWS' === model.selectedMenu.domain, 'bold': menuItem.bold}">
+            <td ng-click="setBottomMenu('NEWS')">{{'news' | translate}}</td>
         </tr>
     </table>
 </div>

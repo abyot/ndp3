@@ -13,5 +13,8 @@
         <span ng-if="model.sdgView && col.info" ng-click="getRFInformation(col.info)">
             <i class="fa fa-database info-icon cursor-pointer" aria-hidden="true" title="{{'ndp_source'| translate}}"></i>
         </span>
+        <span ng-if="col.vision2040">
+            {{col.vision2040}}
+        </span>
     </td>
 </tr>

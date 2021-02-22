@@ -101,7 +101,7 @@ dhis2.metadata.processMetaDataAttribute = function( obj )
                     }
             	}
             	else if( obj.attributeValues[i].attribute.valueType === 'NUMBER' && obj.attributeValues[i].value ){
-                    obj[obj.attributeValues[i].attribute.code] = parseInt( obj.attributeValues[i].value );
+                    obj[obj.attributeValues[i].attribute.code] = parseFloat( obj.attributeValues[i].value );
             	}
                 else{
                     obj[obj.attributeValues[i].attribute.code] = obj.attributeValues[i].value;

@@ -65,74 +65,148 @@ ndpFramework.controller('HomeController',
 
                         op.children = [];
 
-                        /*if( sdgs.length > 0 ){
+                        if( goals.length > 0 ){
                             op.hasChildren = true;
                             op.show = true;
                             op.children.push( {
-                                id: op.code + '-SDG',
-                                domain: 'SDG',
-                                code: 'sdg',
-                                ndp: op.code,
-                                order: 0,
-                                displayName: $translate.instant('sdg_outcomes'),
-                                children: [],
-                                view: 'components/sdg/sdg-status.html'
-                            } );
-                        }*/
-
-                        if( objectives.length > 0 || goals.length > 0 ){
-                            op.hasChildren = true;
-                            op.show = true;
-                            op.children.push( {
-                                id: op.code + '-OUT',
+                                id: op.code + '-GOL',
                                 domain: 'NOUT',
                                 code: 'resultsFrameworkObjective',
                                 ndp: op.code,
                                 order: 1,
-                                displayName: $translate.instant('ndp_outcomes'),
+                                displayName: $translate.instant('goal_level'),
                                 children: [],
-                                view: 'components/outcome/outcome-status.html'
+                                view: 'components/goal/goal-status.html'
+                            } );
+                        }
+
+                        if( objectives.length > 0 ){
+                            op.hasChildren = true;
+                            op.show = true;
+                            op.children.push( {
+                                id: op.code + '-OBJ',
+                                domain: 'NOUT',
+                                code: 'resultsFrameworkObjective',
+                                ndp: op.code,
+                                order: 2,
+                                displayName: $translate.instant('objective_level'),
+                                children: [],
+                                view: 'components/objective/objective-status.html'
                             } );
                         }
 
                         if( programs.length > 0 ){
-                            op.hasChildren = true;
-                            op.show = true;
-                            op.children.push( {
+
+                            var pl = {
+                                id: op.code + '-PROGREAMME',
+                                order: 3,
+                                displayName: $translate.instant('programme_level'),
+                                show: true,
+                                ndp: op.code,
+                                domain: 'PRG',
+                                hasChildren: true,
+                                children: []
+                            };
+
+                            pl.hasChildren = true;
+                            pl.show = true;
+                            pl.children.push( {
                                 id: op.code + '-PRG',
                                 domain: 'PRGO',
                                 code: 'ndpObjective',
                                 ndp: op.code,
-                                order: 2,
-                                displayName: $translate.instant('programme_outcomes'),
+                                order: 1,
+                                displayName: $translate.instant('objective_level'),
                                 children: [],
                                 view: 'components/programme-outcome/programme-status.html'
                             } );
 
-                            op.hasChildren = true;
-                            op.show = true;
-                            op.children.push( {
+                            pl.hasChildren = true;
+                            pl.show = true;
+                            pl.children.push( {
                                 id: op.code + '-SUB',
                                 domain: 'SUB',
                                 code: 'ndpObjective',
                                 ndp: op.code,
                                 order: 2,
-                                displayName: $translate.instant('sub_programme_outcomes'),
+                                displayName: $translate.instant('sub_programme_level'),
                                 children: [],
                                 view: 'components/sub-programme/sub-programme-status.html'
                             } );
 
-                            op.children.push( {
+                            pl.children.push( {
                                 id: op.code + '-PIA',
                                 domain: 'PIAP',
                                 code: 'sub-programme',
                                 ndp: op.code,
-                                order: 2,
-                                displayName: $translate.instant('piap_outputs'),
+                                order: 3,
+                                displayName: $translate.instant('output_level'),
                                 show: true,
                                 view: 'components/piap/piap-status.html',
                                 children: []
                             } );
+
+                            op.hasChildren = true;
+                            op.show = true;
+                            op.children.push(pl);
+
+                            var pr = {
+                                id: op.code + '-PJ',
+                                order: 4,
+                                displayName: $translate.instant('project_level'),
+                                show: true,
+                                ndp: op.code,
+                                domain: 'PJ',
+                                hasChildren: true,
+                                children: []
+                            };
+
+                            pr.hasChildren = true;
+                            pr.show = true;
+                            pr.children.push({
+                                id: 'PRJP',
+                                domain: 'PRJP',
+                                displayName: $translate.instant('project_performance'),
+                                order: 1,
+                                children: [],
+                                view: 'components/project/performance.html'
+                            });
+
+                            op.children.push(pr);
+
+                            var il = {
+                                id: op.code + '-IL',
+                                order: 5,
+                                displayName: $translate.instant('institutional_level'),
+                                show: true,
+                                ndp: op.code,
+                                domain: 'IL',
+                                hasChildren: true,
+                                children: []
+                            };
+
+                            il.hasChildren = true;
+                            il.show = true;
+                            il.children.push(
+                                    {
+                                        id: 'MDA',
+                                        domain: 'MDA',
+                                        displayName: $translate.instant('mda_level'),
+                                        order: 1,
+                                        children: [],
+                                        view: 'components/mda/mda-status.html'
+                                    },
+                                    {
+                                        id: 'LOG',
+                                        domain: 'LOG',
+                                        displayName: $translate.instant('lg_level'),
+                                        order: 2,
+                                        children: [],
+                                        view: 'components/log/log-status.html'
+                                    }
+                            );
+
+                            op.children.push(il);
                         }
 
                         ndpMenus.push( op );
@@ -143,13 +217,14 @@ ndpFramework.controller('HomeController',
                             id: 'navigation',
                             order: 0,
                             displayName: $translate.instant('navigation'),
-                            bold: true,
+                            root: true,
                             show: true,
+
                             children: [
                                 {
                                     id: 'NDP',
                                     domain: 'NDP',
-                                    displayName: $translate.instant('ndps'),
+                                    displayName: $translate.instant('ndp_results'),
                                     order: 1,
                                     children: ndpMenus,
                                     hasChildren: ndpMenus.length > 0 ? true : false,
@@ -183,7 +258,7 @@ ndpFramework.controller('HomeController',
                                     order: 5,
                                     children: [],
                                     view: 'components/programme-performance/programme-performance.html'
-                                },
+                                }/*,
                                 {
                                     id: 'PRJP',
                                     domain: 'PRJP',
@@ -207,7 +282,7 @@ ndpFramework.controller('HomeController',
                                     order: 8,
                                     children: [],
                                     view: 'components/log/log-status.html'
-                                }
+                                }*/
                             ]
                         }
                     ];
