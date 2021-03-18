@@ -75,18 +75,30 @@ var ndpFrameworkDirectives = angular.module('ndpFrameworkDirectives', [])
         restrict: 'A',
         scope: {
             dashboardItemId: "=",
-            dashboardItemName: "="
+            dashboardItemName: "=",
+            dashboardItemType: "="
         },
         link: function (scope, element, attrs) {
             element.click(function(){
-                var svg = $("#" + scope.dashboardItemId ).contents();
-                DashboardService.download({fileName: scope.dashboardItemName, svg: svg[0].innerHTML}).then(function( result ){
-                    var blob = new Blob([result], {type: "image/png"});
-                    saveAs(blob, scope.dashboardItemName + ".png");
+                if ( scope.dashboardItemType === 'CHART' || scope.dashboardItemType === 'MAP' ){
+                    var svg = $("#" + scope.dashboardItemId ).contents();
+                    DashboardService.download({fileName: scope.dashboardItemName, svg: svg[0].innerHTML}).then(function( result ){
+                        var blob = new Blob([result], {type: "image/png"});
+                        saveAs(blob, scope.dashboardItemName + ".png");
 
-                    //var url = $window.URL.createObjectURL( blob );
-                    //$window.open(url, '_blank', scope.dashboardItemName + ".png");
-                });
+                        //var url = $window.URL.createObjectURL( blob );
+                        //$window.open(url, '_blank', scope.dashboardItemName + ".png");
+                    });
+                }
+                else if( scope.dashboardItemType === 'REPORT_TABLE' ){
+                    var blob = new Blob([document.getElementById(scope.dashboardItemId).innerHTML], {
+                        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=utf-8"
+                    });
+
+                    var reportName = scope.dashboardItemName + ".xls";
+
+                    saveAs(blob, reportName);
+                }
             });
         }
     };
