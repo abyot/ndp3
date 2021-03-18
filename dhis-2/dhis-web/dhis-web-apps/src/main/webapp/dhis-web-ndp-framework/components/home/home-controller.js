@@ -97,17 +97,12 @@ ndpFramework.controller('HomeController',
                                     description: 'Slide 2 Description'
                                 },{
                                     id: '3',
-                                    type: 'TEXT',
-                                    heading: 'Slide 3',
-                                    description: 'Slide 3 Description'
-                                },{
-                                    id: '4',
                                     type: 'IMG',
                                     heading: 'UGANDA',
                                     description: 'More about Map of Uganda 1',
                                     path: 'images/1200px-Flag-map_of_Uganda.svg.png'
                                 },{
-                                    id: '5',
+                                    id: '4',
                                     type: 'IMG',
                                     heading: 'UGANDA',
                                     description: 'More about Map of Uganda 2',

@@ -94,24 +94,24 @@
                                 {{slide.description}}
                             </div>
                             <div class="col-sm-12 slide-body" ng-switch-when="TABLE">
-                                <table class="table table-bordered table-striped">
+                                <table class="table table-bordered table-striped table-scroll">
                                     <thead>
                                         <tr>
-                                            <th></th>
-                                            <th></th>
-                                            <th></th>
-                                            <th class="center" colspan="{{period.colSpan}}" ng-repeat="period in model.reportPeriods" ng-if="period.hasData">
+                                            <th class="sticky"></th>
+                                            <th class="sticky"></th>
+                                            <th class="sticky"></th>
+                                            <th class="center sticky" colspan="{{period.colSpan}}" ng-repeat="period in model.reportPeriods" ng-if="period.hasData">
                                                 {{period.displayName}}
                                             </th>
-                                            <th rowspan="2" class="vertical-center">
+                                            <th rowspan="2" class="vertical-center sticky">
                                                 {{'vision_2040' | translate}}
                                             </th>
                                         </tr>
                                         <tr>
-                                            <th>{{model.selectedMenu.ndp}} {{'objectives'| translate}}</th>
-                                            <th>{{'kras'| translate}}</th>
-                                            <th>{{'indicators'| translate}}</th>
-                                            <th class="center" ng-repeat="header in model.dataHeaders">
+                                            <th class="sticky">{{model.selectedMenu.ndp}} {{'objectives'| translate}}</th>
+                                            <th class="sticky">{{'kras'| translate}}</th>
+                                            <th class="sticky">{{'indicators'| translate}}</th>
+                                            <th class="center sticky" ng-repeat="header in model.dataHeaders">
                                                 {{model.metaData.items[header.dimensionId].name}}
                                             </th>
                                         </tr>

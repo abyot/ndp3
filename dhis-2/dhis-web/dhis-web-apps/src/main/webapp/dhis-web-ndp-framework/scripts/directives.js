@@ -47,7 +47,7 @@ var ndpFrameworkDirectives = angular.module('ndpFrameworkDirectives', [])
         },
         link: function (scope, element, attrs) {
 
-            var base = "../..";
+            var base = "..";
 
             var chartItems = [], tableItems = [], mapItems = [];
 
