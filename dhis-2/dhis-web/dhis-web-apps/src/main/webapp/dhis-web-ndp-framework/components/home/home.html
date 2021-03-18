@@ -83,6 +83,49 @@
                 </span>-->
 
             </div>
+            <div ng-if="!model.selectedMenu" class="slide-container">
+                <carousel carousel-controls interval="3000" no-wrap="false">
+                    <slide ng-repeat="slide in model.slides">
+                        <div class="col-sm-12 slide-header">
+                            {{slide.heading}}
+                        </div>
+                        <div ng-switch="slide.type">
+                            <div class="col-sm-12 slide-body" ng-switch-when="TEXT">
+                                {{slide.description}}
+                            </div>
+                            <div class="col-sm-12 slide-body" ng-switch-when="TABLE">
+                                <table class="table table-bordered table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th></th>
+                                            <th></th>
+                                            <th></th>
+                                            <th class="center" colspan="{{period.colSpan}}" ng-repeat="period in model.reportPeriods" ng-if="period.hasData">
+                                                {{period.displayName}}
+                                            </th>
+                                            <th rowspan="2" class="vertical-center">
+                                                {{'vision_2040' | translate}}
+                                            </th>
+                                        </tr>
+                                        <tr>
+                                            <th>{{model.selectedMenu.ndp}} {{'objectives'| translate}}</th>
+                                            <th>{{'kras'| translate}}</th>
+                                            <th>{{'indicators'| translate}}</th>
+                                            <th class="center" ng-repeat="header in model.dataHeaders">
+                                                {{model.metaData.items[header.dimensionId].name}}
+                                            </th>
+                                        </tr>
+                                    </thead>
+                                    <tbody ng-include="'components/report-data/result-body.html'"></tbody>
+                                </table>
+                            </div>
+                            <div class="slide-image" ng-switch-when="IMG">
+                                <img ng-src="{{slide.path}}" alt="{{slide.path}}">
+                            </div>
+                        </div>
+                    </slide>
+                </carousel>
+            </div>
         </form>
 
     </div>

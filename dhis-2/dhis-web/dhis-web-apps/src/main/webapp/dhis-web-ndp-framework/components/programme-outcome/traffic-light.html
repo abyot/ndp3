@@ -3,21 +3,6 @@
         <div class="col-sm-7 green-info-area">
             <div class="row small-vertical-spacing">
                 <div class="col-sm-2">
-                    {{'ndp'| translate}}
-                </div>
-                <div class="col-sm-10">
-                    <ui-select ng-model="model.selectedNDP"
-                               theme="select2"
-                               style="width:100%;">
-                        <ui-select-match allow-clear="true" class="form-control-ui-select" placeholder="{{model.ndp && model.ndp.options && model.ndp.options.length > 0 ? 'select_or_search' : 'empty'| translate}}">{{$select.selected.displayName|| $select.selected}}</ui-select-match>
-                        <ui-select-choices repeat="option in model.ndp.options | filter: $select.search | limitTo:maxOptionSize | orderBy: ['displayName']">
-                            <span ng-bind-html="option.displayName | highlight: $select.search"></span>
-                        </ui-select-choices>
-                    </ui-select>
-                </div>
-            </div>
-            <div class="row small-vertical-spacing">
-                <div class="col-sm-2">
                     {{'programme'| translate}}
                 </div>
                 <div class="col-sm-10">
@@ -31,25 +16,12 @@
                     </ui-select>
                 </div>
             </div>
-            <div class="row small-vertical-spacing" ng-if="model.selectedNdpProgram">
-                <div class="col-sm-2">
-                    {{'sub-programme'| translate}}
-                </div>
-                <div class="col-sm-10">
-                    <ui-select ng-model="model.selectedSubProgramme"
-                               theme="select2"
-                               style="width:100%;">
-                        <ui-select-match allow-clear="true" class="form-control-ui-select" placeholder="{{model.subPrograms && model.subPrograms.length > 0 ? 'all' : 'empty'| translate}}">{{$select.selected.displayName|| $select.selected}}</ui-select-match>
-                        <ui-select-choices repeat="degs in model.subPrograms | filter: $select.search | limitTo:maxOptionSize | orderBy: ['displayName']">
-                            <span ng-bind-html="degs.displayName | highlight: $select.search"></span>
-                        </ui-select-choices>
-                    </ui-select>
-                </div>
-            </div>
+
             <div class="row vertical-spacing pull-right">
                 <div class="col-sm-12">
                     <button type="button"
                             class="btn btn-primary"
+                            ng-disabled="!model.selectedNdpProgram"
                             ng-click="getAnalyticsData()">
                         {{'display_report'| translate}}
                     </button>
@@ -62,7 +34,7 @@
     </div>
 </div>
 <div class="row" ng-if="model.reportReady">
-    <div class="col-sm-12" ng-if="model.dataExists">
+    <div class="col-sm-12" ng-if="model.hasTrafficLight">
         <span class=" hideInPrint">
             <span class="dropdown">
                 <label class="btn btn-default dropdown-toggle" data-toggle="dropdown" ng-attr-title="{{'download_as'| translate}}"><i class="fa fa-download"></i></label>
@@ -74,29 +46,29 @@
                 </ul>
             </span>
         </span>
-        <div id="exportTable">
+        <div id="exportTable" class="table-scroll">
             <table class="table table-bordered table-striped">
                 <thead>
                     <tr>
-                        <th></th>
-                        <th></th>
-                        <th></th>
-                        <th class="center" colspan="{{period.colSpan}}" ng-repeat="period in model.reportPeriods" ng-if="period.hasData">
+                        <th class="sticky"></th>
+                        <th class="sticky"></th>
+                        <th class="sticky"></th>
+                        <th class="center sticky" colspan="{{period.colSpan}}" ng-repeat="period in model.reportPeriods" ng-if="period.hasData">
                             {{period.displayName}}
                         </th>
                     </tr>
                     <tr>
-                        <th>{{'sub-programme'| translate}}</th>
-                        <th>{{'output'| translate}}</th>
-                        <th>{{'indicator'| translate}}</th>
-                        <th class="center" ng-repeat="header in model.dataHeaders">
+                        <th class="sticky">{{'programme_objectives'| translate}}</th>
+                        <th class="sticky">{{'outcomes'| translate}}</th>
+                        <th class="sticky">{{'indicator'| translate}}</th>
+                        <th class="center sticky" ng-repeat="header in model.dataHeaders">
                             {{model.metaData.items[header.dimensionId].name}}
                         </th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr ng-repeat="row in model.resultData">
-                        <td class="vertical-center" ng-repeat="col in row" rowspan="{{col.span}}">
+                        <td class="vertical-center" ng-repeat="col in row" rowspan="{{col.span}}" ng-class="col.trafficLight">
                             {{col.val}}
                             <span ng-if="col.info" ng-click="getIndicatorDictionary(col.info)">
                                 <i class="fa fa-info-circle info-icon cursor-pointer" aria-hidden="true" title="{{'indicator_dictionary'| translate}}"></i>
@@ -107,7 +79,7 @@
             </table>
         </div>
     </div>
-    <div class="col-sm-12" ng-if="!model.dataExists">
+    <div class="col-sm-12" ng-if="!model.hasTrafficLight">
         <div class="alert alert-warning">
             {{'no_data_exists'| translate}}
         </div>

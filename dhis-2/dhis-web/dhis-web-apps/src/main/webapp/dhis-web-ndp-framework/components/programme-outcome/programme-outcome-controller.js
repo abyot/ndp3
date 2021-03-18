@@ -15,6 +15,7 @@ ndpFramework.controller('ProgrammeOutcomeController',
         OrgUnitFactory,
         OptionComboService,
         Analytics,
+        DashboardService,
         FinancialDataService) {
 
     $scope.model = {
@@ -45,12 +46,9 @@ ndpFramework.controller('ProgrammeOutcomeController',
 
     $scope.model.horizontalMenus = [
         {id: 'result', title: 'results', order: 1, view: 'components/programme-outcome/results.html', active: true, class: 'main-horizontal-menu'},
-        {id: 'performance', title: 'physical_performance', order: 2, view: 'components/programme-outcome/performance.html', class: 'main-horizontal-menu'},
-        {id: 'cumulative', title: 'cumulative_progress', order: 3, view: 'components/programme-outcome/progress.html', class: 'main-horizontal-menu'},
-        {id: 'cost', title: 'cost', order: 4, view: 'components/programme-outcome/cost.html', class: 'main-horizontal-menu'},
-        {id: 'efficiency', title: 'cost_effectiveness', order: 5, view: 'components/programme-outcome/efficiency.html', class: 'main-horizontal-menu'},
-        {id: 'dashboard', title: 'dashboard', order: 6, view: 'components/programme-outcome/dashboard.html', class: 'external-horizontal-menu'},
-        {id: 'library', title: 'library', order: 7, view: 'components/programme-outcome/library.html', class: 'external-horizontal-menu'}
+        {id: 'trafficLight', title: 'traffic_light', order: 2, view: 'components/programme-outcome/traffic-light.html', class: 'main-horizontal-menu'},
+        {id: 'budgetPerformance', title: 'budget_performance', order: 3, view: 'components/programme-outcome/budget-performance.html', class: 'main-horizontal-menu'},
+        {id: 'dashboard', title: 'dashboard', order: 6, view: 'views/dashboard.html', class: 'main-horizontal-menu'}
     ];
 
     //Get orgunits for the logged in user
@@ -81,19 +79,6 @@ ndpFramework.controller('ProgrammeOutcomeController',
             });
         });
     };
-
-    $scope.$watch('model.selectedNDP', function(){
-        $scope.resetDataView();
-        $scope.model.selectedDataElementGroupSets = [];
-        $scope.model.dataElementGroup = [];
-        $scope.model.selectedProgram = null;
-        $scope.model.objectives = [];
-        $scope.model.ndpProgram = null;
-        if( angular.isObject($scope.model.selectedNDP) && $scope.model.selectedNDP.id && $scope.model.selectedNDP.code){
-            $scope.model.selectedDataElementGroupSets = $filter('filter')($scope.model.dataElementGroupSets, {ndp: $scope.model.selectedNDP.code, indicatorGroupSetType: 'program'}, true);
-            $scope.model.ndpProgram = $filter('getFirst')($scope.model.optionSets, {ndp: $scope.model.selectedNDP.code, code: 'program'}, true);
-        }
-    });
 
     $scope.$watch('model.selectedNdpProgram', function(){
         $scope.resetDataView();
@@ -155,6 +140,12 @@ ndpFramework.controller('ProgrammeOutcomeController',
 
             $scope.model.bta = bta;
             $scope.model.baseLineTargetActualDimensions = $.map($scope.model.bta.options, function(d){return d.id;});
+            $scope.model.actualDimension = null;
+            angular.forEach(bta.options, function(op){
+                if ( op.btaDimensionType === 'actual' ){
+                    $scope.model.actualDimension = op;
+                }
+            });
 
             MetaDataFactory.getAll('dataElements').then(function(dataElements){
 
@@ -194,6 +185,15 @@ ndpFramework.controller('ProgrammeOutcomeController',
                                 return !obj.ndpProgramme;
                             });
                         }
+
+                        $scope.model.dashboardName = 'Programme Outcomes';
+                        DashboardService.getByName( $scope.model.dashboardName ).then(function( result ){
+                            $scope.model.dashboardItems = result.dashboardItems;
+                            $scope.model.charts = result.charts;
+                            $scope.model.tables = result.tables;
+                            $scope.model.maps = result.maps;
+                            $scope.model.dashboardFetched = true;
+                        });
                     });
                 });
             });
@@ -274,7 +274,6 @@ ndpFramework.controller('ProgrammeOutcomeController',
             FinancialDataService.getLocalData('data/cost.json').then(function(cost){
                 $scope.model.cost = cost;
 
-                console.log('cost:  ', cost);
 
                 Analytics.getData( analyticsUrl ).then(function(data){
                     if( data && data.data && data.metaData ){
@@ -288,6 +287,7 @@ ndpFramework.controller('ProgrammeOutcomeController',
                             metaData: data.metaData,
                             reportPeriods: angular.copy( $scope.model.selectedPeriods ),
                             bta: $scope.model.bta,
+                            actualDimension: $scope.model.actualDimension,
                             selectedDataElementGroupSets: $scope.model.selectedDataElementGroupSets,
                             selectedDataElementGroup: $scope.model.selectedKra,
                             dataElementGroups: $scope.model.dataElementGroups,
@@ -306,6 +306,7 @@ ndpFramework.controller('ProgrammeOutcomeController',
                         $scope.model.resultData = processedData.resultData || [];
                         $scope.model.performanceData = processedData.performanceData || [];
                         $scope.model.cumulativeData = processedData.cumulativeData || [];
+                        $scope.model.hasTrafficLight = processedData.hasTrafficLight;
                     }
                 });
             });

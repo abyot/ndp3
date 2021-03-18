@@ -28,16 +28,16 @@
                 &nbsp;
             </span>
             <ul class="tree" id="tree" ng-show="menuItem.show">
-                <li ng-class="{'active-menu-item': menuItem.id !== 'SPACE'}" ng-repeat="menuItem in menuItem.children | orderBy:'order'" ng-include="'treeMenu.html'"></li>
+                <li ng-class="getTreeMenuStyle(menuItem)" ng-repeat="menuItem in menuItem.children | orderBy:'order'" ng-include="'treeMenu.html'"></li>
             </ul>
         </script>
         <ul class="tree" id="tree">
-            <li ng-class="{'active-menu-item': menuItem.id !== 'SPACE'}" ng-repeat="menuItem in model.menuItems | orderBy:'order'" ng-include="'treeMenu.html'"></li>
+            <li ng-class="getTreeMenuStyle(menuItem)" ng-repeat="menuItem in model.menuItems | orderBy:'order'" ng-include="'treeMenu.html'"></li>
         </ul>
     </div>
 
     <br><br>
-    <table class="table dhis2-table-hover table-bordered">
+    <!--<table class="table dhis2-table-hover table-bordered">
         <tr ng-class="{'selected-menu' : 'CMP' === model.selectedMenu.domain, 'bold': menuItem.bold}">
             <td ng-click="setBottomMenu('CMP')">{{'data_completeness' | translate}}</td>
         </tr>
@@ -45,13 +45,13 @@
             <td ng-click="setBottomMenu('DCT')">{{'indicator_dictionary' | translate}}</td>
         </tr>
         <tr ng-class="{'selected-menu' : 'DOCUMENT' === model.selectedMenu.domain, 'bold': menuItem.bold}">
-            <td ng-click="goToMenu('../dhis-web-document-library')">{{'document_library' | translate}}</td>
+            <td class="menu-padding" ng-click="goToMenu('../dhis-web-document-library')">{{'document_library' | translate}}</td>
         </tr>
         <tr ng-class="{'selected-menu' : 'FAQ' === model.selectedMenu.domain, 'bold': menuItem.bold}">
-            <td ng-click="setBottomMenu('FAQ')">{{'faqs' | translate}}</td>
+            <td class="menu-padding" ng-click="setBottomMenu('FAQ')">{{'faqs' | translate}}</td>
         </tr>
         <tr ng-class="{'selected-menu' : 'NEWS' === model.selectedMenu.domain, 'bold': menuItem.bold}">
-            <td ng-click="setBottomMenu('NEWS')">{{'news' | translate}}</td>
+            <td class="menu-padding" ng-click="setBottomMenu('NEWS')">{{'news' | translate}}</td>
         </tr>
-    </table>
+    </table>-->
 </div>

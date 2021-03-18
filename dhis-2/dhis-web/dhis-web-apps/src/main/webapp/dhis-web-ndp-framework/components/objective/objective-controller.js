@@ -16,6 +16,7 @@ ndpFramework.controller('ObjectiveController',
         OrgUnitFactory,
         OptionComboService,
         Analytics,
+        DashboardService,
         FinancialDataService) {
 
     $scope.showReportFilters = false;
@@ -51,12 +52,7 @@ ndpFramework.controller('ObjectiveController',
 
     $scope.model.horizontalMenus = [
         {id: 'result', title: 'results', order: 1, view: 'components/objective/results.html', active: true, class: 'main-horizontal-menu'},
-        {id: 'performance', title: 'physical_performance', order: 2, view: 'components/objective/performance.html', class: 'main-horizontal-menu'},
-        {id: 'cumulative', title: 'cumulative_progress', order: 3, view: 'components/objective/progress.html', class: 'main-horizontal-menu'},
-        {id: 'cost', title: 'cost', order: 4, view: 'components/objective/cost.html', class: 'main-horizontal-menu'},
-        {id: 'efficiency', title: 'cost_effectiveness', order: 5, view: 'components/objective/efficiency.html', class: 'main-horizontal-menu'},
-        {id: 'dashboard', title: 'dashboard', order: 6, view: 'components/objective/dashboard.html', class: 'external-horizontal-menu'},
-        {id: 'library', title: 'library', order: 7, view: 'components/objective/library.html', class: 'external-horizontal-menu'}
+        {id: 'dashboard', title: 'dashboard', order: 6, view: 'views/dashboard.html', class: 'main-horizontal-menu'}
     ];
 
     $scope.$watch('model.selectedObjective', function(){
@@ -188,7 +184,16 @@ ndpFramework.controller('ObjectiveController',
                         });
                         $scope.selectedOrgUnit = $scope.orgUnits[0] ? $scope.orgUnits[0] : null;
 
-                        $scope.populateMenu();
+                        $scope.model.dashboardName = 'Objectives';
+                        DashboardService.getByName( $scope.model.dashboardName ).then(function( result ){
+                            $scope.model.dashboardItems = result.dashboardItems;
+                            $scope.model.charts = result.charts;
+                            $scope.model.tables = result.tables;
+                            $scope.model.maps = result.maps;
+                            $scope.model.dashboardFetched = true;
+
+                            $scope.populateMenu();
+                        });
                     });
                 });
             });

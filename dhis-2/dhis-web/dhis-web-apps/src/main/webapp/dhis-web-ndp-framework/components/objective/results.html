@@ -59,22 +59,22 @@
                 </ul>
             </span>
         </span>
-        <div id="exportTable">
+        <div id="exportTable" class="table-scroll">
             <table class="table table-bordered table-striped">
                 <thead>
                     <tr>
-                        <th></th>
-                        <th></th>
-                        <th></th>
-                        <th class="center" colspan="{{period.colSpan}}" ng-repeat="period in model.reportPeriods" ng-if="period.hasData">
+                        <th class="sticky"></th>
+                        <th class="sticky"></th>
+                        <th class="sticky"></th>
+                        <th class="center sticky" colspan="{{period.colSpan}}" ng-repeat="period in model.reportPeriods" ng-if="period.hasData">
                             {{period.displayName}}
                         </th>
-                        <th rowspan="2" class="vertical-center">
+                        <th rowspan="2" class="vertical-center sticky">
                             {{'vision_2040' | translate}}
                         </th>
                     </tr>
                     <tr>
-                        <th>{{model.selectedMenu.ndp}} {{'objectives'| translate}}</th>
+                        <th class="sticky">{{model.selectedMenu.ndp}} {{'objectives'| translate}}</th>
                         <th>{{'kras'| translate}}</th>
                         <th>{{'indicators'| translate}}</th>
                         <th class="center" ng-repeat="header in model.dataHeaders">

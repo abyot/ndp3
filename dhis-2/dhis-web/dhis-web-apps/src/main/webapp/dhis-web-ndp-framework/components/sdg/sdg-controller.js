@@ -16,6 +16,7 @@ ndpFramework.controller('SDGController',
         OrgUnitFactory,
         OptionComboService,
         Analytics,
+        DashboardService,
         FinancialDataService) {
 
     $scope.showReportFilters = false;
@@ -49,13 +50,9 @@ ndpFramework.controller('SDGController',
     };
 
     $scope.model.horizontalMenus = [
-        {id: 'result', title: 'results', order: 1, view: 'components/sdg/results.html', active: true, class: 'main-horizontal-menu'},
-        {id: 'performance', title: 'physical_performance', order: 2, view: 'components/sdg/performance.html', class: 'main-horizontal-menu'},
-        {id: 'cumulative', title: 'cumulative_progress', order: 3, view: 'components/sdg/progress.html', class: 'main-horizontal-menu'},
-        {id: 'cost', title: 'cost', order: 4, view: 'components/sdg/cost.html', class: 'main-horizontal-menu'},
-        {id: 'efficiency', title: 'cost_effectiveness', order: 5, view: 'components/sdg/efficiency.html', class: 'main-horizontal-menu'},
-        {id: 'dashboard', title: 'dashboard', order: 6, view: 'components/sdg/dashboard.html', class: 'external-horizontal-menu'},
-        {id: 'library', title: 'library', order: 7, view: 'components/sdg/library.html', class: 'external-horizontal-menu'}
+        {id: 'trafficLight', title: 'traffic_light', order: 1, view: 'components/sdg/traffic-light.html', active: true, class: 'main-horizontal-menu'},
+        {id: 'budgetPerformance', title: 'budget_performance', order: 2, view: 'components/sdg/budget-performance.html', class: 'main-horizontal-menu'},
+        {id: 'dashboard', title: 'dashboard', order: 6, view: 'views/dashboard.html', class: 'main-horizontal-menu'}
     ];
 
     $scope.$watch('model.selectedNDP', function(){
@@ -177,8 +174,15 @@ ndpFramework.controller('SDGController',
                                 });
                             });
                             $scope.selectedOrgUnit = $scope.orgUnits[0] ? $scope.orgUnits[0] : null;
+                        });
 
-                            //$scope.populateMenu();
+                        $scope.model.dashboardName = 'SDGs';
+                        DashboardService.getByName( $scope.model.dashboardName ).then(function( result ){
+                            $scope.model.dashboardItems = result.dashboardItems;
+                            $scope.model.charts = result.charts;
+                            $scope.model.tables = result.tables;
+                            $scope.model.maps = result.maps;
+                            $scope.model.dashboardFetched = true;
                         });
                     });
                 });

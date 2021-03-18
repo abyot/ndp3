@@ -45,8 +45,7 @@ ndpFramework.controller('LOGController',
     $scope.model.horizontalMenus = [
         {id: 'trafficLight', title: 'traffic_light', order: 1, view: 'components/log/traffic-light.html', active: true, class: 'main-horizontal-menu'},
         {id: 'budgetPerformance', title: 'budget_performance', order: 2, view: 'components/log/budget-performance.html', class: 'main-horizontal-menu'},
-        {id: 'budgetCompliance', title: 'budget_compliance', order: 3, view: 'components/log/budget-compliance.html', class: 'main-horizontal-menu'},
-        {id: 'completeness', title: 'completeness', order: 4, view: 'components/log/completeness.html', class: 'main-horizontal-menu'}
+        {id: 'dashboard', title: 'dashboard', order: 3, view: 'components/log/dashboard.html', class: 'main-horizontal-menu'}
     ];
 
     //Get orgunits for the logged in user

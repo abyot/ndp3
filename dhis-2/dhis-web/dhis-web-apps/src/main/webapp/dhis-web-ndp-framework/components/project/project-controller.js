@@ -260,7 +260,7 @@ ndpFramework.controller('ProjectController',
                     }
 
                     var tpBsv = 56.4, cpBsv = 84.6;
-                    var tpEvWeight = 2, tpPvWeight = 8, cpEvWeight = 1;
+                    var tpEvWeight = 2, tpPvWeight = 9, cpEvWeight = 1;
 
                     //Get AC
                     var en = $scope.model.selectedProject.enrollments[0];

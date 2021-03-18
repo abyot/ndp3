@@ -59,22 +59,22 @@
                 </ul>
             </span>
         </span>
-        <div id="exportTable">
+        <div id="exportTable" class="table-scroll">
             <table class="table table-bordered table-striped">
                 <thead>
                     <tr>
-                        <th></th>
-                        <th></th>
-                        <th></th>
-                        <th colspan="100%" class="center">
+                        <th class="sticky"></th>
+                        <th class="sticky"></th>
+                        <th class="sticky"></th>
+                        <th colspan="100%" class="center sticky">
                             {{'cumulative_progress' | translate}}
                         </th>
                     </tr>
                     <tr>
-                        <th>{{model.selectedMenu.ndp}} {{'objectives'| translate}}</th>
-                        <th>{{'kras'| translate}}</th>
-                        <th>{{'indicators'| translate}}</th>
-                        <th class="center" ng-repeat="period in model.reportPeriods">
+                        <th class="sticky">{{model.selectedMenu.ndp}} {{'objectives'| translate}}</th>
+                        <th class="sticky">{{'kras'| translate}}</th>
+                        <th class="sticky">{{'indicators'| translate}}</th>
+                        <th class="center sticky" ng-repeat="period in model.reportPeriods">
                             {{period.displayName}}
                         </th>
                     </tr>

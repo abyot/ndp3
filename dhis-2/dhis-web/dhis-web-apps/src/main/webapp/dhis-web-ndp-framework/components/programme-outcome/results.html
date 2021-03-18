@@ -16,42 +16,11 @@
                     </ui-select>
                 </div>
             </div>
-            <div class="row small-vertical-spacing" ng-if="model.selectedNdpProgram">
-                <div class="col-sm-2">
-                    {{'sub-programme'| translate}}
-                </div>
-                <div class="col-sm-10">
-                    <ui-select ng-model="model.selectedSubProgramme"
-                               theme="select2"
-                               style="width:100%;">
-                        <ui-select-match allow-clear="true" class="form-control-ui-select" placeholder="{{model.subPrograms && model.subPrograms.length > 0 ? 'all' : 'empty'| translate}}">{{$select.selected.displayName|| $select.selected}}</ui-select-match>
-                        <ui-select-choices repeat="degs in model.subPrograms | filter: $select.search | limitTo:maxOptionSize | orderBy: ['displayName']">
-                            <span ng-bind-html="degs.displayName | highlight: $select.search"></span>
-                        </ui-select-choices>
-                    </ui-select>
-                </div>
-            </div>
-            <div class="row small-vertical-spacing" ng-if="model.selectedSubProgramme">
-                <div class="col-sm-2">
-                    {{'outputs_to_display'| translate}}
-                </div>
-                <div class="col-sm-10">
-                    <form>
-                        <label class="checkbox-inline">
-                            <input type="checkbox" ng-model="model.displayProjectOutputs">
-                            <span>{{'projects'| translate}}</span>
-                        </label>
-                        <label class="checkbox-inline">
-                            <input type="checkbox" ng-model="model.displayDepartmentOutPuts">
-                            <span>{{'departments'| translate}}</span>
-                        </label>
-                    </form>
-                </div>
-            </div>
             <div class="row vertical-spacing pull-right">
                 <div class="col-sm-12">
                     <button type="button"
                             class="btn btn-primary"
+                            ng-disabled="!model.selectedNdpProgram"
                             ng-click="getAnalyticsData()">
                         {{'display_report'| translate}}
                     </button>
@@ -76,37 +45,27 @@
                 </ul>
             </span>
         </span>
-        <div id="exportTable">
+        <div id="exportTable" class="table-scroll">
             <table class="table table-bordered table-striped">
                 <thead>
                     <tr>
-                        <th></th>
-                        <th></th>
-                        <th></th>
-                        <th class="center" colspan="{{period.colSpan}}" ng-repeat="period in model.reportPeriods" ng-if="period.hasData">
+                        <th class="sticky"></th>
+                        <th class="sticky"></th>
+                        <th class="sticky"></th>
+                        <th class="center sticky" colspan="{{period.colSpan}}" ng-repeat="period in model.reportPeriods" ng-if="period.hasData">
                             {{period.displayName}}
                         </th>
                     </tr>
                     <tr>
-                        <th>{{'programme_objectives'| translate}}</th>
-                        <th>{{'outcomes'| translate}}</th>
-                        <th>{{'indicator'| translate}}</th>
-                        <th class="center" ng-repeat="header in model.dataHeaders">
+                        <th class="sticky">{{'programme_objectives'| translate}}</th>
+                        <th class="sticky">{{'outcomes'| translate}}</th>
+                        <th class="sticky">{{'indicator'| translate}}</th>
+                        <th class="center sticky" ng-repeat="header in model.dataHeaders">
                             {{model.metaData.items[header.dimensionId].name}}
                         </th>
                     </tr>
                 </thead>
                 <tbody ng-include="'components/report-data/result-body.html'"></tbody>
-                <!--<tbody>
-                    <tr ng-repeat="row in model.resultData">
-                        <td class="vertical-center" ng-repeat="col in row" rowspan="{{col.span}}">
-                            {{col.val}}
-                            <span ng-if="col.info" ng-click="getIndicatorDictionary(col.info)">
-                                <i class="fa fa-info-circle info-icon cursor-pointer" aria-hidden="true" title="{{'indicator_dictionary'| translate}}"></i>
-                            </span>
-                        </td>
-                    </tr>
-                </tbody>-->
             </table>
         </div>
     </div>
@@ -117,7 +76,7 @@
     </div>
 </div>
 
-<div class="small-vertical-spacing" ng-if="!model.selectedNdpProgram && model.ndpObjectives.length > 0 && model.ndpProgrammes.length > 0">
+<!--<div class="small-vertical-spacing" ng-if="!model.selectedNdpProgram && model.ndpObjectives.length > 0 && model.ndpProgrammes.length > 0">
     <table class="table table-bordered table-responsive">
         <thead>
             <tr>
@@ -145,4 +104,4 @@
             </tr>
         </tbody>
     </table>
-</div>
+</div>-->

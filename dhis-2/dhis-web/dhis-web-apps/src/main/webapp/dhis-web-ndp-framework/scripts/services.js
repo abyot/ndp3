@@ -102,8 +102,6 @@ var ndpFrameworkServices = angular.module('ndpFrameworkServices', ['ngResource']
         });
 
         return d2Periods;
-
-        console.log('the period:  ', d2Periods);
     };
 })
 
@@ -638,6 +636,7 @@ var ndpFrameworkServices = angular.module('ndpFrameworkServices', ['ngResource']
             var costData = [];
             var costEffData = [];
             var redCells = 0, yellowCells = 0, greenCells = 0, totalRows = 0;
+            var hasTrafficLight = false;
 
             var mergeBtaData = function( _data ){
                 var data = angular.copy( _data );
@@ -717,14 +716,17 @@ var ndpFrameworkServices = angular.module('ndpFrameworkServices', ['ngResource']
                     if ( val <= r ){
                         color = 'red';
                         redCells++;
+                        hasTrafficLight = true;
                     }
                     else if( val >= y1 && val <= y2 ){
                         color = 'yellow';
                         yellowCells++;
+                        hasTrafficLight = true;
                     }
                     else if( val >= g){
                         color = 'green';
                         greenCells++;
+                        hasTrafficLight = true;
                     }
                     else {
                         color = "";
@@ -970,7 +972,8 @@ var ndpFrameworkServices = angular.module('ndpFrameworkServices', ['ngResource']
                 redCells: redCells,
                 yellowCells: yellowCells,
                 greenCells: greenCells,
-                totalRows: totalRows
+                totalRows: totalRows,
+                hasTrafficLight: hasTrafficLight
             };
         }
     };
@@ -1277,6 +1280,52 @@ var ndpFrameworkServices = angular.module('ndpFrameworkServices', ['ngResource']
                 return response.data;
             }, function( response ){
                 CommonUtils.errorNotifier(response);
+                return response.data;
+            });
+            return promise;
+        }
+    };
+})
+
+.service('DashboardService', function($http, CommonUtils) {
+
+    return {
+        getByName: function( dashboardName ){
+            var promise = $http.get('../api/dashboards.json?filter=name:eq:' + dashboardName + '&filter=publicAccess:eq:r-------&paging=false&fields=id,name,dashboardItems[id,type,visualization[id,displayName]]' ).then(function(response){
+                //return response.data;
+                var result = {charts: [], tables: [], maps: [], dashboardItems: []};
+                if( response.data && response.data.dashboards[0]){
+                    angular.forEach(response.data.dashboards[0].dashboardItems, function(item){
+                        result.dashboardItems.push( item );
+                        var _item = {url: '../..', el: item.id, id: item.visualization.id};
+                        if ( item.type === 'CHART' ){
+                            result.charts.push( _item );
+                        }
+                        else if ( item.type === 'REPORT_TABLE' ){
+                            result.tables.push( _item );
+                        }
+                        else if ( item.type === 'MAP' ){
+                            result.maps.push( _item );
+                        }
+                    });
+                }
+                return result;
+            }, function( response ){
+                CommonUtils.errorNotifier(response);
+                return response.data;
+            });
+            return promise;
+        },
+        download: function( metadata ){
+            var url = dhis2.ndp.apiUrl + '/svg.png';
+            var serializedData = $.param({filename: metadata.fileName, svg: metadata.svg});
+            var promise = $http({
+                method: 'POST',
+                url: url,
+                data: serializedData,
+                responseType: 'arraybuffer',
+                headers: {'Content-Type': 'application/x-www-form-urlencoded'}
+            }).then(function( response ){
                 return response.data;
             });
             return promise;

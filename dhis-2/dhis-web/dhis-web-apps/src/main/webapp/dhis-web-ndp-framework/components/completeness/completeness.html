@@ -77,23 +77,23 @@
                     </ul>
                 </span>
             </span>
-            <div id="exportTable">
+            <div id="exportTable" class="table-scroll">
                 <table class="table table-bordered table-striped">
                     <thead>
                         <tr>
-                            <th class="center" colspan="100%">
+                            <th class="center sticky" colspan="100%">
                                 {{'data_completeness' | translate}} = {{getCoverage(model.numerator, model.denominator)}}
                             </th>
                         </tr>
                         <tr>
-                            <th></th>
-                            <th class="center" colspan="{{period.colSpan}}" ng-repeat="period in model.selectedPeriods" ng-if="period.hasData">
+                            <th class="sticky"></th>
+                            <th class="center sticky" colspan="{{period.colSpan}}" ng-repeat="period in model.selectedPeriods" ng-if="period.hasData">
                                 {{period.displayName}}
                             </th>
                         </tr>
                         <tr>
-                            <th>{{'objective'| translate}}</th>
-                            <th class="center" ng-repeat="header in model.dataHeaders">
+                            <th class="sticky">{{'objective'| translate}}</th>
+                            <th class="center sticky" ng-repeat="header in model.dataHeaders">
                                 {{model.metaData.items[header.dimensionId].name}}
                             </th>
                         </tr>

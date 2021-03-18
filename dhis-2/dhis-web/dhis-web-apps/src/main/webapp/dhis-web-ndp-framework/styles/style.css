@@ -73,12 +73,15 @@ html, body {
     margin: 8px;
 }
 
+.menu-padding {
+    padding: 13px !important;
+}
 .menu-spacing {
     margin-top: 30px;
 }
 
 .vertical-spacing {
-    margin-top: 20px;
+    margin-top: 20px !important;
 }
 
 .long-vertical-spacing {
@@ -210,6 +213,12 @@ html, body {
     border: 1px solid #729fcf;
     background-color: #BBD1EE !important;
     border-radius: 3px;
+}
+
+.dashboard-item-container {
+    border: 1px solid #cad5e5;
+    padding: 20px;
+    border-radius: 10px;
 }
 
 .report-filter {
@@ -494,4 +503,128 @@ ul.tree ul li:last-child:before {
 .list-group-item-borderless {
     display: block;
     padding: 0 10px;
+}
+
+.slide-container {
+    padding: 20px;
+    border: 1px solid #d5d5d5;
+    border-radius: 10px;
+}
+
+.slide-header {
+    font-size: 20px;
+    font-weight: bold;
+    color: #000;
+}
+
+.slide-body {
+    height: 85vh;
+    overflow: auto;
+    font-size: 14px;
+    text-align: left;
+}
+
+.small-pading {
+    padding: 5px !important;
+}
+
+.sticky-table {
+    height: 60vh;
+}
+
+.slide-image {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    width: 50%;
+}
+
+img {
+    max-width: 100%;
+    max-height: 100%;
+    display: block; /* remove extra space below image */
+}
+
+.carousel-control.left, .carousel-control.right {
+    background-image: none
+}
+
+.table-scroll {
+    position: relative;
+    width: 100%;
+    z-index: 1;
+    margin: auto;
+    overflow: scroll;
+    height: 80vh;
+}
+
+.table-scroll table {
+    width: 100%;
+    min-width: 100px;
+    margin: auto;
+    border-collapse: separate;
+    border-spacing: 0;
+}
+
+.table-scroll table,
+.table-scroll th,
+.table-scroll td {
+    /*border: 1px solid #729fcf !important;*/
+}
+
+.table-wrap {
+    position: relative;
+}
+
+.table-scroll th,
+.table-scroll td {
+    vertical-align: top;
+}
+
+.table-scroll thead th {
+    background: #bbd1ee;
+    color: #333;
+    position: -webkit-sticky;
+    position: sticky;
+    top: 0;
+}
+
+th.sticky {
+    position: -webkit-sticky;
+    position: sticky;
+    left: 0;
+    z-index: 2;
+    background: #ccc;
+}
+
+thead th.sticky {
+    z-index: 5;
+}
+
+.table-scroll thead tr:nth-child(2) th {
+    top: 30px;
+}
+
+.ndp-menu {
+    color: #0000FF;
+}
+
+.il-menu {
+    color: #0CAFFF;
+}
+
+.prj-menu {
+    color: #2c7b13;
+}
+
+.sdg-menu {
+    color: #008080;
+}
+
+.dg-menu {
+    color: #5D8AA8;
+}
+
+.lib-menu {
+    color: #923a62;
 }

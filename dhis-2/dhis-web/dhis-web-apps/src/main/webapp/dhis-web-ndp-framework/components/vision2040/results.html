@@ -1,0 +1,29 @@
+<div class="row" ng-if="model.metaDataCached">
+    <div class="col-sm-12 vertical-spacing" ng-if="model.vision2040.length > 0">
+        <div id="exportTable" class="table-scroll">
+            <table class="table table-bordered table-striped">
+                <thead>
+                    <tr>
+                        <th class="sticky">{{'count' | translate}}</th>
+                        <th class="sticky">{{'development_indicator' | translate}}</th>
+                        <th class="sticky">{{'baseline_2010' | translate}}</th>
+                        <th class="sticky">{{'target_2040' | translate}}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr ng-repeat="de in model.vision2040">
+                        <td>{{$index + 1}}</td>
+                        <td>{{de.displayName}}</td>
+                        <td>{{de.baseline2010}}</td>
+                        <td>{{de.vision2040}}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div class="col-sm-12 vertical-spacing" ng-if="model.vision2040.length === 0">
+        <div class="alert alert-warning">
+            {{'missing_vision2040_data'| translate}}
+        </div>
+    </div>
+</div>

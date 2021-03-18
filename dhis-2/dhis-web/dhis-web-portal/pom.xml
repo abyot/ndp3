@@ -59,7 +59,7 @@
 
     <!-- Web maintenance modules -->
 
-    <dependency>
+    <!--<dependency>
       <groupId>org.hisp.dhis</groupId>
       <artifactId>dhis-web-dataentry</artifactId>
       <version>${project.version}</version>
@@ -81,7 +81,7 @@
       <groupId>org.hisp.dhis</groupId>
       <artifactId>dhis-web-api-mobile</artifactId>
       <type>jar</type>
-    </dependency>
+    </dependency>-->
     <dependency>
       <groupId>org.hisp.dhis</groupId>
       <artifactId>dhis-web-apps</artifactId>

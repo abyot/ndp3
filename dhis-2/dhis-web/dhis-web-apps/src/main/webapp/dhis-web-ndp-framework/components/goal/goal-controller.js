@@ -16,6 +16,7 @@ ndpFramework.controller('GoalController',
         OrgUnitFactory,
         OptionComboService,
         Analytics,
+        DashboardService,
         FinancialDataService) {
 
     $scope.showReportFilters = false;
@@ -51,12 +52,7 @@ ndpFramework.controller('GoalController',
 
     $scope.model.horizontalMenus = [
         {id: 'result', title: 'results', order: 1, view: 'components/goal/results.html', active: true, class: 'main-horizontal-menu'},
-        {id: 'performance', title: 'physical_performance', order: 2, view: 'components/goal/performance.html', class: 'main-horizontal-menu'},
-        {id: 'cumulative', title: 'cumulative_progress', order: 3, view: 'components/goal/progress.html', class: 'main-horizontal-menu'},
-        {id: 'cost', title: 'cost', order: 4, view: 'components/goal/cost.html', class: 'main-horizontal-menu'},
-        {id: 'efficiency', title: 'cost_effectiveness', order: 5, view: 'components/goal/efficiency.html', class: 'main-horizontal-menu'},
-        {id: 'dashboard', title: 'dashboard', order: 6, view: 'components/goal/dashboard.html', class: 'external-horizontal-menu'},
-        {id: 'library', title: 'library', order: 7, view: 'components/goal/library.html', class: 'external-horizontal-menu'}
+        {id: 'dashboard', title: 'dashboard', order: 6, view: 'views/dashboard.html', class: 'main-horizontal-menu'}
     ];
 
     $scope.$watch('model.selectedGoal', function(){
@@ -80,7 +76,6 @@ ndpFramework.controller('GoalController',
             angular.forEach($scope.model.goals, function(degs){
                 angular.forEach(degs.dataElementGroups, function(deg){
                     var _deg = $filter('filter')($scope.model.dataElementGroups, {id: deg.id});
-                    console.log('_deg:  ', _deg);
                     if ( _deg.length > 0 ){
                         $scope.model.dataElementGroup.push( _deg[0] );
                     }
@@ -188,7 +183,16 @@ ndpFramework.controller('GoalController',
                         });
                         $scope.selectedOrgUnit = $scope.orgUnits[0] ? $scope.orgUnits[0] : null;
 
-                        $scope.populateMenu();
+                        $scope.model.dashboardName = 'Goals';
+                        DashboardService.getByName( $scope.model.dashboardName ).then(function( result ){
+                            $scope.model.dashboardItems = result.dashboardItems;
+                            $scope.model.charts = result.charts;
+                            $scope.model.tables = result.tables;
+                            $scope.model.maps = result.maps;
+                            $scope.model.dashboardFetched = true;
+
+                            $scope.populateMenu();
+                        });
                     });
                 });
             });
@@ -286,6 +290,7 @@ ndpFramework.controller('GoalController',
                 $scope.model.cost = cost;
 
                 Analytics.getData( analyticsUrl ).then(function(data){
+                    console.log('1:  ', data);
                     if( data && data.data && data.metaData ){
                         $scope.model.data = data.data;
                         $scope.model.metaData = data.metaData;
