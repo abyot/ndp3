@@ -290,7 +290,6 @@ ndpFramework.controller('GoalController',
                 $scope.model.cost = cost;
 
                 Analytics.getData( analyticsUrl ).then(function(data){
-                    console.log('1:  ', data);
                     if( data && data.data && data.metaData ){
                         $scope.model.data = data.data;
                         $scope.model.metaData = data.metaData;
