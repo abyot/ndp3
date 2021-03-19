@@ -470,6 +470,13 @@ public class DefaultOrganisationUnitService
     {
         return isInUserHierarchy( currentUserService.getCurrentUser(), organisationUnit );
     }
+    
+    @Override
+    @Transactional(readOnly = true)
+    public boolean isInUserDataViewHierarchy( OrganisationUnit organisationUnit )
+    {
+        return isInUserDataViewHierarchy( currentUserService.getCurrentUser(), organisationUnit );
+    }
 
     @Override
     @Transactional(readOnly = true)
@@ -497,6 +504,18 @@ public class DefaultOrganisationUnitService
         }
 
         return organisationUnit.isDescendant( user.getOrganisationUnits() );
+    }
+    
+    @Override
+    @Transactional(readOnly = true)
+    public boolean isInUserDataViewHierarchy( User user, OrganisationUnit organisationUnit )
+    {
+        if ( user == null || user.getOrganisationUnits() == null || user.getOrganisationUnits().isEmpty() )
+        {
+            return false;
+        }
+
+        return organisationUnit.isDescendant( user.getDataViewOrganisationUnits() );
     }
     
     @Override

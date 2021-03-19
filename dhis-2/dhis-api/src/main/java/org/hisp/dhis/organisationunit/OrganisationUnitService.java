@@ -365,6 +365,16 @@ public interface OrganisationUnitService
      * @return true if the given organisation unit is part of the hierarchy.
      */
     boolean isInUserHierarchy( OrganisationUnit organisationUnit );
+    
+    
+    /**
+     * Indicates whether the given organisation unit is part of the hierarchy
+     * of the organisation units of the current user.
+     *
+     * @param organisationUnit the organisation unit.
+     * @return true if the given organisation unit is part of the hierarchy.
+     */
+    boolean isInUserDataViewHierarchy( OrganisationUnit organisationUnit );
 
     /**
      * Equal to {@link OrganisationUnitService#isInUserHierarchy(OrganisationUnit)}
@@ -388,6 +398,8 @@ public interface OrganisationUnitService
     boolean isInUserHierarchyCached( User user, OrganisationUnit organisationUnit );
 
     boolean isInUserHierarchy( User user, OrganisationUnit organisationUnit );
+    
+    boolean isInUserDataViewHierarchy( User user, OrganisationUnit organisationUnit );
 
     /**
      * Indicates whether the given organisation unit is part of the hierarchy
