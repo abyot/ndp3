@@ -30,6 +30,18 @@ var ndpFrameworkServices = angular.module('ndpFrameworkServices', ['ngResource']
     };
 })
 
+.service('DashboardItemService', function () {
+    this.dashboardItems = null;
+
+    this.setDashboardItems = function (dashboardItems) {
+        this.dashboardItems = dashboardItems;
+    };
+
+    this.getDashboardItems= function () {
+        return this.dashboardItems;
+    };
+})
+
 .service('PeriodService', function(CalendarService, DateUtils, orderByFilter){
 
     this.getPeriods = function(periodType, periodOffset, futurePeriods){
@@ -1287,17 +1299,18 @@ var ndpFrameworkServices = angular.module('ndpFrameworkServices', ['ngResource']
     };
 })
 
-.service('DashboardService', function($http, CommonUtils) {
+.service('DashboardService', function($http, CommonUtils, DashboardItemService) {
 
     return {
         getByName: function( dashboardName ){
             var promise = $http.get('../api/dashboards.json?filter=name:eq:' + dashboardName + '&filter=publicAccess:eq:r-------&paging=false&fields=id,name,dashboardItems[id,type,visualization[id,displayName]]' ).then(function(response){
-                //return response.data;
                 var result = {charts: [], tables: [], maps: [], dashboardItems: []};
+                var itemsById = [];
                 if( response.data && response.data.dashboards[0]){
                     angular.forEach(response.data.dashboards[0].dashboardItems, function(item){
                         result.dashboardItems.push( item );
-                        var _item = {url: '../..', el: item.id, id: item.visualization.id};
+                        itemsById[item.id] = {id: item.id, name: item.visualization.displayName, type: item.type};
+                        var _item = {url: '..', el: item.id, id: item.visualization.id};
                         if ( item.type === 'CHART' ){
                             result.charts.push( _item );
                         }
@@ -1308,6 +1321,9 @@ var ndpFrameworkServices = angular.module('ndpFrameworkServices', ['ngResource']
                             result.maps.push( _item );
                         }
                     });
+
+                    DashboardItemService.setDashboardItems( itemsById );
+
                 }
                 return result;
             }, function( response ){

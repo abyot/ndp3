@@ -37,7 +37,69 @@ var ndpFrameworkDirectives = angular.module('ndpFrameworkDirectives', [])
     };
 })
 
-.directive('dhis2Dashboard', function () {
+
+.directive('dhis2Dashboard', function ($translate, $timeout, $compile) {
+    return {
+        restrict: 'EA',
+        scope: {
+            dashboard: "=",
+            downloadlabel: "=",
+            charts: "=",
+            tables: "=",
+            maps: "="
+        },
+        template: '<div id="dashboardItemContainer"></div>',
+        link: function (scope, element, attrs) {
+
+            var base = "..";
+
+            var $div = $("#dashboardItemContainer");
+
+            $div.empty();
+
+            var chartItems = [], tableItems = [], mapItems = [];
+
+            $.each(scope.dashboard, function (i, item) {
+
+                //$div.append('<div class="dashboard-item-container vertical-spacing"><div class="row col-sm-12"><span class="btn btn-default" title="' + $translate.instant('download_visualization') + '" dashboard-item-id="' + item.id + '" dashboard-item-name="' + item.visualization.displayName + '" dashboard-item-type="' + item.type + '" dhis2-dashboard-download><i class="fa fa-download"></i></span></div><div class="col-sm-12" id=' + item.id + ' "></div></div>');
+                $div.append('<div class="dashboard-item-container vertical-spacing"><div class="row col-sm-12"><span class="btn btn-default" title="{{\'download_visualization\' | translate}}" dashboard-item-id="' + item.id + '" dashboard-item-name="item.visualization.displayName" dashboard-item-type="' + item.type + '" dhis2-dashboard-download><i class="fa fa-download"></i></span></div><div class="col-sm-12" id=' + item.id + ' "></div></div>');
+
+                switch( item.type ){
+                    case 'CHART':
+                            chartItems.push( {url: base, el: item.id, id: item.visualization.id} );
+                            break;
+                    case 'REPORT_TABLE':
+                            tableItems.push( {url: base, el: item.id, id: item.visualization.id} );
+                            break;
+                    case 'MAP':
+                            mapItems.push( {url: base, el: item.id, id: item.visualization.id} );
+                            break;
+                            default:
+                            break;
+                }
+
+            });
+
+            if( chartItems.length > 0 ){
+                chartPlugin.url = base;
+                chartPlugin.showTitles = true;
+                chartPlugin.load( chartItems );
+            }
+
+            if( tableItems.length > 0 ){
+                reportTablePlugin.url = base;
+                reportTablePlugin.showTitles = true;
+                reportTablePlugin.load( tableItems );
+            }
+
+            var com = $compile($div)(scope);
+            element.append(com);
+        }
+    };
+})
+
+
+/*.directive('dhis2Dashboard', function($timeout){
     return {
         restrict: 'EA',
         scope: {
@@ -54,23 +116,46 @@ var ndpFrameworkDirectives = angular.module('ndpFrameworkDirectives', [])
             chartItems = scope.charts;
             tableItems = scope.tables;
 
+            console.log('chartItems:  ', chartItems);
+            console.log('tableItems:  ', tableItems);
+
+            $.each(scope.charts, function (i, item) {
+                console.log('item - ', item);
+                var $div = $("#" + item.el );
+                $div.empty();
+            });
+
+            $.each(scope.tables, function (i, item) {
+                console.log('item - ', item);
+                var $div = $("#" + item.el );
+                $div.empty();
+            });
+
             if( chartItems.length > 0 ){
                 chartPlugin.url = base;
                 chartPlugin.showTitles = true;
                 chartPlugin.load( chartItems );
+
+                console.log('charts loaded ...');
             }
 
             if( tableItems.length > 0 ){
                 reportTablePlugin.url = base;
                 reportTablePlugin.showTitles = true;
                 reportTablePlugin.load( tableItems );
+
+                console.log('tables loaded ...');
             }
+
+            $timeout(function () {
+                scope.$apply();
+            });
         }
     };
-})
+})*/
 
-
-.directive('dhis2DashboardDownload', function($window, DashboardService ){
+//dhis2-dashboard-download
+.directive('dhis2DashboardDownload', function($window, DashboardService, DashboardItemService ){
     return {
         restrict: 'A',
         scope: {
@@ -80,24 +165,28 @@ var ndpFrameworkDirectives = angular.module('ndpFrameworkDirectives', [])
         },
         link: function (scope, element, attrs) {
             element.click(function(){
-                if ( scope.dashboardItemType === 'CHART' || scope.dashboardItemType === 'MAP' ){
-                    var svg = $("#" + scope.dashboardItemId ).contents();
-                    DashboardService.download({fileName: scope.dashboardItemName, svg: svg[0].innerHTML}).then(function( result ){
-                        var blob = new Blob([result], {type: "image/png"});
-                        saveAs(blob, scope.dashboardItemName + ".png");
+                var items = DashboardItemService.getDashboardItems();
+                if ( items && items[attrs.dashboardItemId] ){
+                    var dashboardItem = items[attrs.dashboardItemId];
+                    if ( dashboardItem.type === 'CHART' || dashboardItem.type === 'MAP' ){
+                        var svg = $("#" + dashboardItem.id ).contents();
+                        DashboardService.download({fileName: dashboardItem.name, svg: svg[0].innerHTML}).then(function( result ){
+                            var blob = new Blob([result], {type: "image/png"});
+                            saveAs(blob, dashboardItem.name + ".png");
 
-                        //var url = $window.URL.createObjectURL( blob );
-                        //$window.open(url, '_blank', scope.dashboardItemName + ".png");
-                    });
-                }
-                else if( scope.dashboardItemType === 'REPORT_TABLE' ){
-                    var blob = new Blob([document.getElementById(scope.dashboardItemId).innerHTML], {
-                        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=utf-8"
-                    });
+                            //var url = $window.URL.createObjectURL( blob );
+                            //$window.open(url, '_blank', scope.dashboardItemName + ".png");
+                        });
+                    }
+                    else if( dashboardItem.type === 'REPORT_TABLE' ){
+                        var blob = new Blob([$("#" + dashboardItem.id ).html()], {
+                            type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=utf-8"
+                        });
 
-                    var reportName = scope.dashboardItemName + ".xls";
+                        var reportName = dashboardItem.name + ".xls";
 
-                    saveAs(blob, reportName);
+                        saveAs(blob, reportName);
+                    }
                 }
             });
         }

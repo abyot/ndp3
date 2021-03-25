@@ -5,6 +5,7 @@
 //Controller for settings page
 ndpFramework.controller('HomeController',
         function($scope,
+                $modal,
                 $translate,
                 $filter,
                 orderByFilter,
@@ -636,9 +637,6 @@ ndpFramework.controller('HomeController',
             if ( menuItem.id !== 'SPACE' ){
                 style += 'active-menu-item';
             }
-            if( menuItem.displayName && menuItem.color ){
-                style += ' ' + menuItem.color;
-            }
         }
 
         return style;
@@ -740,6 +738,18 @@ ndpFramework.controller('HomeController',
                 });
             });
         }
+    };
+
+    $scope.settings = function(){
+
+        var modalInstance = $modal.open({
+            templateUrl: 'components/settings/settings-modal.html',
+            controller: 'SettingsController'
+        });
+
+        modalInstance.result.then(function () {
+
+        });
     };
 
 });

@@ -17,12 +17,18 @@
                     ng-show="menuItem.id !== 'SPACE' && (!menuItem.show && menuItem.children.length > 0) || (!menuItem.show && menuItem.hasChildren)">
                 <i class="fa fa-plus-square-o"></i>
             </span>
-            <span class="tree-menu-button"
-                    ng-if="!menuItem.root"
-                    ng-click="setSelectedMenu(menuItem)"
-                    ng-class="{'selected-menu' : menuItem.id === model.selectedMenu.id, 'bold': menuItem.bold}"
+            <span href class="tree-menu-button"
+                    ng-if="!menuItem.root && menuItem.children.length > 0"
+                    ng-class="{'selected-menu' : menuItem.id === model.selectedMenu.id}"
                     ng-show="menuItem.id !== 'SPACE'">
                 {{menuItem.displayName}}
+            </span>
+            <span href class="tree-menu-button"
+                    ng-if="!menuItem.root && (menuItem.children.length === 0 || !menuItem.children)"
+                    ng-click="setSelectedMenu(menuItem)"
+                    ng-class="{'selected-menu' : menuItem.id === model.selectedMenu.id}"
+                    ng-show="menuItem.id !== 'SPACE'">
+                <a href ng-class="{'selected-menu' : menuItem.id === model.selectedMenu.id}">{{menuItem.displayName}}</a>
             </span>
             <span ng-show="menuItem.id === 'SPACE'" class="vertical-center">
                 &nbsp;

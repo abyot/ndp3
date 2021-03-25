@@ -411,7 +411,10 @@ ul.tree ul li:last-child:before {
 
 .selected-org-unit, .selected-menu {
     font-weight: bold;
-    color: #FF8000;
+    padding: 5px;
+    background: #2b6998;
+    color: #fff !important;
+    text-decoration: none;
 }
 
 .menu-spacer {
@@ -419,6 +422,19 @@ ul.tree ul li:last-child:before {
     width: 100%;
 }
 /* ou tree end */
+
+
+.tree li a {
+    color: #3162C5;
+    text-decoration: none;
+}
+
+.tree li a:hover {
+    padding: 5px;
+    background: #2b6998;
+    color: #fff ;
+    text-decoration: none;
+}
 
 .nav-tabs.nav-justified > li {
     padding-bottom: 0 !important;
@@ -606,25 +622,25 @@ thead th.sticky {
 }
 
 .ndp-menu {
-    color: #0000FF;
+    color: #0000FF !important;
 }
 
 .il-menu {
-    color: #0CAFFF;
+    color: #0CAFFF !important;
 }
 
 .prj-menu {
-    color: #2c7b13;
+    color: #2c7b13 !important;
 }
 
 .sdg-menu {
-    color: #008080;
+    color: #008080 !important;
 }
 
 .dg-menu {
-    color: #5D8AA8;
+    color: #5D8AA8 !important;
 }
 
 .lib-menu {
-    color: #923a62;
+    color: #923a62 !important;
 }
