@@ -505,7 +505,7 @@ ndpFramework.controller('HomeController',
                                                     domain: 'DICT',
                                                     code: 'DICT',
                                                     displayName: $translate.instant('indicator_dictionary'),
-                                                    view: 'components/dictionary/dictionary.html',
+                                                    view: 'components/dictionary/dictionary-status.html',
                                                     color: 'dg-menu'
                                                 },
                                                 {
@@ -546,42 +546,9 @@ ndpFramework.controller('HomeController',
                                             displayName: $translate.instant('document_library'),
                                             order: 11,
                                             children: [],
-                                            //view: 'components/sdg/sdg-status.html',
                                             address: '../dhis-web-document-library',
                                             color: 'lib-menu'
                                         }
-                                        /*{
-                                            id: 'PRGP',
-                                            domain: 'PRGP',
-                                            displayName: $translate.instant('programme_performance'),
-                                            order: 5,
-                                            children: [],
-                                            view: 'components/programme-performance/programme-performance.html'
-                                        },
-                                        {
-                                            id: 'PRJP',
-                                            domain: 'PRJP',
-                                            displayName: $translate.instant('project_performance'),
-                                            order: 6,
-                                            children: [],
-                                            view: 'components/project/performance.html'
-                                        },
-                                        {
-                                            id: 'MDA',
-                                            domain: 'MDA',
-                                            displayName: $translate.instant('mda_performance'),
-                                            order: 7,
-                                            children: [],
-                                            view: 'components/mda/mda-status.html'
-                                        },
-                                        {
-                                            id: 'LOG',
-                                            domain: 'LOG',
-                                            displayName: $translate.instant('log_performance'),
-                                            order: 8,
-                                            children: [],
-                                            view: 'components/log/log-status.html'
-                                        }*/
                                     ]
                                 }
                             ];

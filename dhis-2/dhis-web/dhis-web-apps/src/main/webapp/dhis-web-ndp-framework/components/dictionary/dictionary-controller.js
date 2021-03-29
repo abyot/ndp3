@@ -5,13 +5,12 @@
 //Controller for settings page
 ndpFramework.controller('DictionaryController',
         function($scope,
-                $translate,
                 $modal,
                 $filter,
                 MetaDataFactory) {
 
     $scope.model = {
-        metaDataCached: false,
+        indicatorsFetched: false,
         data: null,
         dataElements: [],
         dataElementsById: [],
@@ -19,6 +18,9 @@ ndpFramework.controller('DictionaryController',
         dataElementGroupSets: [],
         selectedDataElementGroups: [],
         selectedDataElementGroupSets: [],
+        classificationGroupSets: [],
+        classificationGroups: [],
+        classificationDataElements: [],
         baseLineTargetActualDimensions: [],
         dataSetsById: {},
         categoryCombosById: {},
@@ -26,10 +28,6 @@ ndpFramework.controller('DictionaryController',
         optionSetsById: [],
         dictionaryItems: [],
         attributes: [],
-        selectedPeriods: [],
-        periods: [],
-        periodOffset: 0,
-        openFuturePeriods: 10,
         selectedPeriodType: 'FinancialJuly',
         selectedDataElementGroup: null,
         selectedDictionary: null,
@@ -37,18 +35,22 @@ ndpFramework.controller('DictionaryController',
         ndp: null,
         ndpProgram: null,
         selectedNDP: null,
-        programs: [],
         selectedProgram: null,
         groupSetSize: {},
-        physicalPerformance: true,
         financialPerformance: true,
         showProjectDetails: false,
+        classificationGroup: null,
         completeness: {
             green: ['displayName', 'code', 'periodType', 'computationMethod', 'indicatorType', 'preferredDataSource', 'rationale', 'responsibilityForIndicator', 'unit'],
             yellow: ['displayName', 'code', 'accountabilityForIndicator', 'computationMethod', 'preferredDataSource', 'unit'],
             invalid: ['isProgrammeDocument', 'isDocumentFolder']
         }
     };
+
+    $scope.model.horizontalMenus = [
+        {id: 'default', title: 'ndp_indicator', order: 1, view: 'components/dictionary/default.html', active: true, class: 'main-horizontal-menu'},
+        {id: 'classification', title: 'indicator_classification', order: 2, view: 'components/dictionary/classification.html', class: 'main-horizontal-menu'}
+    ];
 
     $scope.getDataElementGroupSetsForNdp = function(){
         $scope.model.selectedDataElementGroupSets = angular.copy( $scope.model.dataElementGroupSets );
@@ -66,7 +68,8 @@ ndpFramework.controller('DictionaryController',
         });
     };
 
-    $scope.getDataElementGroupsForNdp = function(){
+    $scope.getSelectedDataElementGroups = function(){
+        $scope.model.indicatorsFetched = false;
         $scope.model.dataElements = [];
         var available = [];
         angular.forEach($scope.model.selectedDataElementGroups, function(deg){
@@ -78,14 +81,32 @@ ndpFramework.controller('DictionaryController',
                 }
             });
         });
+        $scope.model.indicatorsFetched = true;
+    };
+
+    $scope.getClassificationGroups = function(){
+        $scope.model.classificationIndicatorsFetched = false;
+        $scope.model.classificationDataElements = [];
+        var available = [];
+        $scope.model.classificationDataElements = [];
+        angular.forEach($scope.model.classificationGroups, function(deg){
+            angular.forEach(deg.dataElements, function(de){
+                var _de = $scope.model.dataElementsById[de.id];
+                if( _de && available.indexOf(de.id) === -1 ){
+                    $scope.model.classificationDataElements.push( _de );
+                    available.push( de.id );
+                }
+            });
+        });
+        $scope.model.classificationIndicatorsFetched = true;
     };
 
     $scope.$watch('model.selectedNDP', function(){
         $scope.model.selectedProgram = null;
+        $scope.model.selectedDataElementGroupSets = angular.copy( $scope.model.dataElementGroupSets );
         $scope.model.selectedDataElementGroups = angular.copy( $scope.model.dataElementGroups );
         $scope.getDataElementGroupSetsForNdp();
-
-        $scope.getDataElementGroupsForNdp();
+        $scope.getSelectedDataElementGroups();
     });
 
     $scope.$watch('model.selectedProgram', function(){
@@ -101,15 +122,39 @@ ndpFramework.controller('DictionaryController',
                 });
             });
         }
-        else{
-            $scope.getDataElementGroupSetsForNdp();
-        }
 
-        $scope.getDataElementGroupsForNdp();
+        $scope.getSelectedDataElementGroups();
+    });
+
+    $scope.$watch('model.selectedClassification', function(){
+
+        $scope.model.classificationGroups = angular.copy( $scope.model.dataElementGroups );
+
+        if ( angular.isObject( $scope.model.selectedClassification ) && $scope.model.selectedClassification.id ){
+            $scope.model.classificationGroups = [];
+            var _deg = $filter('filter')($scope.model.dataElementGroups, {id: $scope.model.selectedClassification.id});
+            if (_deg && _deg.length > 0){
+                $scope.model.classificationGroups.push( _deg[0] );
+            }
+        }
+        else{
+            $scope.model.classificationGroups = [];
+            $scope.model.classificationGroupSets = angular.copy( [$scope.model.classificationGroup] );
+            if ( $scope.model.classificationGroup && $scope.model.classificationGroup.dataElementGroups ){
+                angular.forEach($scope.model.classificationGroup.dataElementGroups, function(deg){
+                    var _deg = $filter('filter')($scope.model.dataElementGroups, {id: deg.id});
+                    if (_deg && _deg.length > 0){
+                        $scope.model.classificationGroups.push( _deg[0] );
+                    }
+                });
+            }
+        }
+        $scope.getClassificationGroups();
     });
 
     MetaDataFactory.getAll('attributes').then(function(attributes){
 
+        $scope.model.indicatorsFetched = false;
         $scope.model.attributes = attributes;
 
         MetaDataFactory.getAll('categoryCombos').then(function(categoryCombos){
@@ -118,37 +163,36 @@ ndpFramework.controller('DictionaryController',
             });
 
             MetaDataFactory.getAll('optionSets').then(function(optionSets){
-
                 $scope.model.optionSets = optionSets;
-
                 angular.forEach(optionSets, function(optionSet){
                     $scope.model.optionSetsById[optionSet.id] = optionSet;
                 });
 
                 $scope.model.ndp = $filter('filter')($scope.model.optionSets, {code: 'ndp'})[0];
-
                 $scope.model.ndp = $filter('filter')(optionSets, {code: 'ndp'})[0];
                 $scope.model.ndpProgram = $filter('filter')(optionSets, {code: 'ndpIIIProgram'})[0];
 
                 MetaDataFactory.getAll('dataSets').then(function(dataSets){
-
                     angular.forEach(dataSets, function(ds){
                         ds.dataElements = ds.dataElements.map(function(de){ return de.id; });
                         $scope.model.dataSetsById[ds.id] = ds;
                     });
-
                     $scope.model.dataSets = dataSets;
 
                     MetaDataFactory.getAll('dataElementGroupSets').then(function( dataElementGroupSets ){
                         $scope.model.dataElementGroupSets = dataElementGroupSets;
+
+                        angular.forEach($scope.model.dataElementGroupSets, function(degs){
+                            if( degs.indicatorGroupSetType === 'classification' ){
+                                $scope.model.classificationGroup = degs;
+                            }
+                        });
+
                         MetaDataFactory.getAll('dataElementGroups').then(function(dataElementGroups){
                             $scope.model.dataElementGroups = dataElementGroups;
                             $scope.model.selectedDataElementGroups = angular.copy( $scope.model.dataElementGroups );
 
-                            $scope.getDataElementGroupsForNdp();
-
                             MetaDataFactory.getAll('dataElements').then(function(dataElements){
-
                                 $scope.sortHeader = {id: 'displayName', name: 'name', colSize: "col-sm-1", show: true, fetch: false};
                                 $scope.model.dictionaryHeaders = [
                                     {id: 'displayName', name: 'name', colSize: "col-sm-1", show: true, fetch: false},
@@ -200,11 +244,10 @@ ndpFramework.controller('DictionaryController',
                                     }
 
                                     de = $scope.getAttributeCompleteness( de );
-
                                     $scope.model.dataElementsById[de.id] = de;
                                 });
 
-                                $scope.getDataElementGroupsForNdp();
+                                $scope.getSelectedDataElementGroups();
                             });
                         });
                     });
@@ -315,5 +358,16 @@ ndpFramework.controller('DictionaryController',
             reportName = name + '.xls';
         }
         saveAs(blob, reportName);
+    };
+
+    $scope.resetView = function( horizontalMenu ){
+        $scope.model.selectedNDP = null;
+        $scope.model.selectedProgram = null;
+        $scope.model.selectedClassification = null;
+        if ( horizontalMenu && horizontalMenu.id === 'default' ){
+            $scope.model.selectedDataElementGroupSets = angular.copy( $scope.model.dataElementGroupSets );
+            $scope.model.selectedDataElementGroups = angular.copy( $scope.model.dataElementGroups );
+            $scope.getSelectedDataElementGroups();
+        }
     };
 });
