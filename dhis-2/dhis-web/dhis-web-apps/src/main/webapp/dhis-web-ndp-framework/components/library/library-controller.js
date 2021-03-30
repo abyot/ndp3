@@ -9,7 +9,6 @@ ndpFramework.controller('LibraryController',
                 $filter,
                 $window,
                 $modal,
-                ModalService,
                 NotificationService,
                 EventService,
                 MetaDataFactory,
@@ -50,16 +49,13 @@ ndpFramework.controller('LibraryController',
     ];
 
     MetaDataFactory.getAll('optionSets').then(function(optionSets){
-
         $scope.model.optionSets = optionSets.reduce( function(map, obj){
             map[obj.id] = obj;
             return map;
         }, {});
 
         MetaDataFactory.getAllByProperty('programs', 'programType', 'without_registration').then(function(programs){
-
             $scope.model.programs = programs;
-
             angular.forEach(programs, function(pr){
                 if ( pr.documentFolderType === 'general' ){
                     $scope.model.ndpDocumentFolders.push( pr );
