@@ -34,12 +34,7 @@ ndpFramework.controller('HomeController',
         allPeriods: [],
         periodOffset: 0,
         openFuturePeriods: 10,
-        selectedPeriodType: 'FinancialJuly',
-        bottomMenu: {
-            FAQ: '',
-            CMP: 'components/completeness/completeness.html',
-            DCT: 'components/dictionary/dictionary.html'
-        }
+        selectedPeriodType: 'FinancialJuly'
     };
 
     var start = new Date();
@@ -546,7 +541,8 @@ ndpFramework.controller('HomeController',
                                             displayName: $translate.instant('document_library'),
                                             order: 11,
                                             children: [],
-                                            address: '../dhis-web-document-library',
+                                            //address: '../dhis-web-document-library',
+                                            view: 'components/library/library-status.html',
                                             color: 'lib-menu'
                                         }
                                     ]

@@ -422,6 +422,28 @@ var ndpFrameworkServices = angular.module('ndpFrameworkServices', ['ngResource']
             });
             return def.promise;
         },
+        getAllByProperty: function(store, prop, val){
+            var def = $q.defer();
+            DDStorageService.currentStore.open().done(function(){
+                DDStorageService.currentStore.getAll(store).done(function(objs){
+                    var selectedObjects = [];
+                    for(var i=0; i<objs.length; i++){
+                        if(objs[i][prop] ){
+                            objs[i][prop] = objs[i][prop].toLocaleLowerCase();
+                            if( objs[i][prop] === val )
+                            {
+                                selectedObjects.push( objs[i] );
+                            }
+                        }
+                    }
+
+                    $rootScope.$apply(function(){
+                        def.resolve(selectedObjects);
+                    });
+                });
+            });
+            return def.promise;
+        },
         getByProperty: function(store, prop, val){
             var def = $q.defer();
             DDStorageService.currentStore.open().done(function(){
@@ -1071,6 +1093,7 @@ var ndpFrameworkServices = angular.module('ndpFrameworkServices', ['ngResource']
                                     doc.size = bytesToSize( res.contentLength || 0 );
                                     doc.type = res.contentType || 'undefined';
                                     doc.path = '/events/files?dataElementUid=' + dv.dataElement + '&eventUid=' + ev.event;
+                                    doc.mda = ev.orgUnitName;
                                 });
                             }
                             else{
