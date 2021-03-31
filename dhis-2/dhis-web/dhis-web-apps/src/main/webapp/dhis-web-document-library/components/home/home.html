@@ -5,14 +5,14 @@
 <div id="leftBar">
 
     <d2-left-bar></d2-left-bar>
-    
+
     <div class="input-group large-vertical-spacing">
         <input type="text" id="searchField" name="key" class="form-control" placeholder="{{'search' | translate}}">
         <span class="input-group-btn">
             <button class="btn btn-primary" type="button" onclick="selection.findByName()">{{'go' | translate}}</button>
         </span>
     </div>
-    
+
 
     <div id="orgUnitTree">
         <ul>
@@ -27,14 +27,14 @@
 <div class="page" id="mainPage">
 
     <h3>{{'document_library' | translate}}</h3>
-    
+
     <div ng-if="!selectedOrgUnit" class="font-16">
         <img src="../images/ajax-loader-bar.gif" alt="{{'in_progress'| translate}}"/><br>
         {{'loading_metadata'| translate}}
     </div>
 
     <div ng-show="selectedOrgUnit">
-        
+
         <!-- selection begins-->
         <div class="small-vertical-spacing hideInPrint">
             <div class="selection-group">
@@ -53,8 +53,8 @@
                             {{'document_folder'| translate}}
                         </div>
                         <div class="col-sm-8">
-                            <ui-select ng-model="model.selectedProgram" 
-                                       theme="select2"                                 
+                            <ui-select ng-model="model.selectedProgram"
+                                       theme="select2"
                                        style="width:100%;">
                                 <ui-select-match allow-clear="true" class="form-control-ui-select" placeholder="{{model.programs && model.programs.length > 0 ? 'select_or_search' : 'empty'| translate}}">{{$select.selected.displayName|| $select.selected}}</ui-select-match>
                                 <ui-select-choices repeat="program in model.programs | filter: $select.search | limitTo:maxOptionSize | orderBy: 'displayName' ">
@@ -65,7 +65,7 @@
                     </div>
                     <div class="row small-vertical-spacing" ng-if="model.isProgrammeDocument">
                         <div class="col-sm-4">
-                            {{'ndp_programme'| translate}}
+                            {{'programme_sub'| translate}}
                         </div>
                         <div class="col-sm-8">
                             <ui-select ng-model="model.selectedNdpProgram"
@@ -73,7 +73,12 @@
                                        style="width:100%;">
                                 <ui-select-match allow-clear="true" class="form-control-ui-select" placeholder="{{model.optionSets[model.programmeDataElement.optionSet.id].options && model.optionSets[model.programmeDataElement.optionSet.id].options.length > 0 ? 'select_or_search' : 'empty'| translate}}">{{$select.selected.displayName|| $select.selected}}</ui-select-match>
                                 <ui-select-choices repeat="option in model.optionSets[model.programmeDataElement.optionSet.id].options | filter: $select.search | limitTo:maxOptionSize">
-                                    <span ng-bind-html="option.displayName | highlight: $select.search"></span>
+                                    <span ng-if="option.code.length === 2">
+                                        <span ng-bind-html="option.displayName | highlight: $select.search"></span>
+                                    </span>
+                                    <span ng-if="option.code.length > 2">
+                                        <span class="indentation" ng-bind-html="option.displayName | highlight: $select.search"></span>
+                                    </span>
                                 </ui-select-choices>
                             </ui-select>
                         </div>
@@ -84,11 +89,11 @@
 
                 </div>
             </div>
-        </div>       
+        </div>
         <!-- selection ends -->
-        
+
         <!-- form begins -->
-        <form name="outerForm" novalidate>        
+        <form name="outerForm" novalidate>
             <div ng-include="'components/home/document-list.html'"></div>
         </form>
         <!-- form ends -->
