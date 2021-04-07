@@ -106,6 +106,18 @@ ndpFramework.controller('HomeController',
                                 }
                             ];
 
+                            var periods = PeriodService.getPeriods($scope.model.selectedPeriodType, $scope.model.periodOffset, $scope.model.openFuturePeriods);
+                            $scope.model.allPeriods = angular.copy( periods );
+                            $scope.model.periods = periods;
+
+                            var selectedPeriodNames = ['2020/21', '2021/22', '2022/23', '2023/24', '2024/25'];
+
+                            angular.forEach($scope.model.periods, function(pe){
+                                if(selectedPeriodNames.indexOf(pe.displayName) > -1 ){
+                                   $scope.model.selectedPeriods.push(pe);
+                                }
+                            });
+
                             var ndpMenus = [], order = 0;
                             angular.forEach($scope.model.ndp.options, function(op){
                                 op.order = order;
@@ -172,18 +184,6 @@ ndpFramework.controller('HomeController',
                                                 $scope.model.dataElementGroup.push( _deg[0] );
                                             }
                                         });
-                                    });
-
-                                    var periods = PeriodService.getPeriods($scope.model.selectedPeriodType, $scope.model.periodOffset, $scope.model.openFuturePeriods);
-                                    $scope.model.allPeriods = angular.copy( periods );
-                                    $scope.model.periods = periods;
-
-                                    var selectedPeriodNames = ['2020/21', '2021/22', '2022/23', '2023/24', '2024/25'];
-
-                                    angular.forEach($scope.model.periods, function(pe){
-                                        if(selectedPeriodNames.indexOf(pe.displayName) > -1 ){
-                                           $scope.model.selectedPeriods.push(pe);
-                                        }
                                     });
 
                                     //Get orgunits for the logged in user
