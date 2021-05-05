@@ -172,6 +172,24 @@ dhis2.metadata.filterMissingObjIds  = function( store, db, objs )
     if( !objs || !objs.length || objs.length < 1){
         return;
     }
+    var def = $.Deferred();
+
+    var objIds = [];
+
+    _.each( _.values( objs ), function ( obj ) {
+        objIds.push( obj.id );
+    });
+
+    def.resolve( objIds );
+
+    return def.promise();
+};
+
+dhis2.metadata.filterMissingObjIdsWithCheck  = function( store, db, objs )
+{
+    if( !objs || !objs.length || objs.length < 1){
+        return;
+    }
 
     var mainDef = $.Deferred();
     var mainPromise = mainDef.promise();
@@ -189,12 +207,12 @@ dhis2.metadata.filterMissingObjIds  = function( store, db, objs )
             var p = d.promise();
             db.get(store, obj.id).done(function(o) {
                 if( !o ) {
-                	missingObjIds.push( obj.id );
+                    missingObjIds.push( obj.id );
                 }
                 else{
-                	if( obj.version && o.version != obj.version ){
-                		missingObjIds.push( obj.id );
-                	}
+                    if( obj.version && o.version != obj.version ){
+                    	missingObjIds.push( obj.id );
+                    }
                 }
                 d.resolve();
             });
@@ -207,7 +225,7 @@ dhis2.metadata.filterMissingObjIds  = function( store, db, objs )
         def.resolve();
         promise = promise.done( function () {
             mainDef.resolve( missingObjIds );
-        } );
+        });
     }).fail(function(){
         mainDef.resolve( null );
     });
