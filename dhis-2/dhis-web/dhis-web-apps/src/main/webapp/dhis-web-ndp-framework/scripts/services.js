@@ -1,4 +1,4 @@
-/* global angular, moment, dhis2, parseFloat */
+/* global angular, moment, dhis2, parseFloat, indexedDB */
 
 'use strict';
 
@@ -876,13 +876,13 @@ var ndpFrameworkServices = angular.module('ndpFrameworkServices', ['ngResource']
                         costEffRow.push(groupSet);
                     };
                     var generateRow = function(group, deg){
-                        if( deg && deg.dataElements ){
+                        if( deg && deg.dataElements && deg.dataElements.length > 0 ){
                             angular.forEach(deg.dataElements, function(de){
                                 angular.forEach(de.categoryOptionCombos, function(oc){
                                     groupSet.span++;
                                     group.span++;
 
-                                    var name = dataParams.metaData.items[de.id].name;
+                                    var name = dataParams.dataElementsById && dataParams.dataElementsById[de.id] ? dataParams.dataElementsById[de.id].displayName : 'not-found';
                                     if( de.categoryOptionCombos.length > 1 ){
                                         name = name + " - " + oc.displayName;
                                     }
@@ -984,7 +984,7 @@ var ndpFrameworkServices = angular.module('ndpFrameworkServices', ['ngResource']
                         });
                     }
                     else{
-                        //generateEmptyRow();
+                        generateEmptyRow();
                     }
                 });
                 resultData = parsedResultRow;
