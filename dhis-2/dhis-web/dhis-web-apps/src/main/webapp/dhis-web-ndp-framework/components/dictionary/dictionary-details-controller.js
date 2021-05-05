@@ -56,37 +56,39 @@ ndpFramework.controller('DictionaryDetailsController',
                         MetaDataFactory.getAll('dataElements').then(function(dataElements){
 
                             angular.forEach(dataElements, function(de){
-                                $scope.model.dataElementsById[de.id] = de;
                                 var cc = $scope.model.categoryCombosById[de.categoryCombo.id];
                                 de.disaggregation = !cc || cc.isDefault ? '-' : cc.displayName;
-                                de.vote = [];
-                                de.periodType = [];
+                                var vote = [];
+                                var periodType = [];
 
                                 for(var i=0; i<dataSets.length; i++){
                                     var ds = dataSets[i];
                                     if( ds && ds.dataElements.indexOf(de.id) !== -1 ){
-                                        var periodType = ds.periodType  === 'FinancialJuly' ? 'Fiscal year' : ds.periodType;
-                                        if( de.periodType.indexOf(periodType) === -1){
-                                            de.periodType.push(periodType);
+                                        var pt = ds.periodType  === 'FinancialJuly' ? 'Fiscal year' : ds.periodType;
+                                        if( periodType.indexOf(pt) === -1){
+                                            periodType.push(pt);
                                         }
-                                        var votes = ds.organisationUnits.map(function(ou){return ou.code;})
-                                        angular.forEach(votes, function(vote){
-                                            if(de.vote.indexOf(vote) === -1){
-                                                de.vote.push(vote);
+                                        var votes = ds.organisationUnits.map(function(ou){return ou.code;});
+                                        angular.forEach(votes, function(v){
+                                            if(vote.indexOf(v) === -1){
+                                                vote.push(v);
                                             }
                                         });
                                     }
                                 }
-                                if( de.vote && de.vote.length > 0 ){
-                                    de.vote = de.vote.sort();
-                                    de.vote = de.vote.join(', ');
+                                if( vote && vote.length > 0 ){
+                                    vote = vote.sort();
+                                    de.vote = vote.join(', ');
                                 }
 
-                                if( de.periodType && de.periodType.length > 0 ){
-                                    de.periodType = de.periodType.sort();
-                                    de.periodType = de.periodType.join(', ');
+                                if( periodType && periodType.length > 0 ){
+                                    periodType = periodType.sort();
+                                    de.periodType = periodType.join(', ');
                                 }
+                                $scope.model.dataElementsById[de.id] = de;
                             });
+
+                            //console.log('$scope.model.dataElementsById:  ', $scope.model.dataElementsById);
 
                             $scope.model.dictionaryHeaders = [
                                 {id: 'displayName', name: 'name', colSize: "col-sm-1", show: true, fetch: false},
