@@ -80,15 +80,15 @@ ndpFramework.controller('SubProgrammeOutputController',
 
     $scope.$watch('model.selectedNdpProgram', function(){
         $scope.resetDataView();
-        $scope.model.objectives = [];
+        $scope.model.interventions = [];
         $scope.model.selectedDataElementGroupSets = [];
         $scope.model.subPrograms = [];
         $scope.model.selectedSubProgramme = null;
         if( angular.isObject($scope.model.selectedNdpProgram) ){
             if( $scope.model.selectedNdpProgram && $scope.model.selectedNdpProgram.code ){
-                $scope.model.objectives = $filter('filter')($scope.model.dataElementGroupSets, {ndp: $scope.model.selectedMenu.ndp, indicatorGroupSetType: $scope.model.selectedMenu.code, ndpProgramme: $scope.model.selectedNdpProgram.code}, true);
+                $scope.model.interventions = $filter('filter')($scope.model.dataElementGroupSets, {ndp: $scope.model.selectedMenu.ndp, indicatorGroupSetType: $scope.model.selectedMenu.code, ndpProgramme: $scope.model.selectedNdpProgram.code}, true);
                 $scope.model.subPrograms = $filter('filter')($scope.model.dataElementGroupSets, {ndp: $scope.model.selectedMenu.ndp, indicatorGroupSetType: 'sub-programme', ndpProgramme: $scope.model.selectedNdpProgram.code}, true);
-                $scope.model.selectedDataElementGroupSets = $filter('filter')($scope.model.dataElementGroupSets, {ndp: $scope.model.selectedMenu.ndp, ndpProgramme: $scope.model.selectedNdpProgram.code}, true);
+                $scope.model.selectedDataElementGroupSets = $filter('filter')($scope.model.dataElementGroupSets, {ndp: $scope.model.selectedMenu.ndp, ndpProgramme: $scope.model.selectedNdpProgram.code, indicatorGroupSetType: $scope.model.selectedMenu.code}, true);
                 $scope.getOutputs();
             }
         }
@@ -292,8 +292,6 @@ ndpFramework.controller('SubProgrammeOutputController',
                     };
 
                     var processedData = Analytics.processData( dataParams );
-
-                    console.log('processedData:  ', processedData);
 
                     $scope.model.dataHeaders = processedData.dataHeaders;
                     $scope.model.reportPeriods = processedData.reportPeriods;
