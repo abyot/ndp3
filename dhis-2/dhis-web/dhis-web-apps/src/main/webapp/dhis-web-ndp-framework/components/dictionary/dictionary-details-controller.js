@@ -88,8 +88,6 @@ ndpFramework.controller('DictionaryDetailsController',
                                 $scope.model.dataElementsById[de.id] = de;
                             });
 
-                            //console.log('$scope.model.dataElementsById:  ', $scope.model.dataElementsById);
-
                             $scope.model.dictionaryHeaders = [
                                 {id: 'displayName', name: 'name', colSize: "col-sm-1", show: true, fetch: false},
                                 {id: 'code', name: 'code', colSize: "col-sm-1", show: true, fetch: false},
