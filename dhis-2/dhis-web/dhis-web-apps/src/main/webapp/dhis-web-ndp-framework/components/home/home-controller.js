@@ -237,7 +237,7 @@ ndpFramework.controller('HomeController',
                                     pl.children.push( {
                                         id: op.code + '-PRG',
                                         domain: 'PRGO',
-                                        code: 'ndpObjective',
+                                        code: 'objective',
                                         ndp: op.code,
                                         order: 1,
                                         displayName: $translate.instant('outcome_level'),
