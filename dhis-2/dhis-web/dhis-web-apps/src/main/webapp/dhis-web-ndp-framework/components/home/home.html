@@ -27,65 +27,16 @@
 
         <form name="outerForm" novalidate>
             <div ng-if="model.selectedMenu" ng-switch="model.selectedMenu.domain">
-
                 <div ng-include="model.selectedMenu.view"></div>
-
-                <!--<span ng-switch-when="SDG">
-                    <div ng-include="'components/sdg/sdg-status.html'"></div>
-                </span>
-
-                <span ng-switch-when="NOUT">
-                    <div ng-include="'components/outcome/outcome-status.html'"></div>
-                </span>
-
-                <span ng-switch-when="PRGO">
-                    <div ng-include="'components/programme/programme-status.html'"></div>
-                </span>
-
-                <span ng-switch-when="SUBO">
-                    <div ng-include="'components/piap/sub-programme-status.html'"></div>
-                </span>
-
-                <span ng-switch-when="PRJO">
-                    <div ng-include="'components/project/output-status.html'"></div>
-                </span>
-
-                <span ng-switch-when="DEPO">
-                    <div ng-include="'components/department/output-status.html'"></div>
-                </span>
-
-                <span ng-switch-when="PRGP">
-                    <div ng-include="'components/programme/programme-performance.html'"></div>
-                </span>
-
-                <span ng-switch-when="SUBP">
-                    <div ng-include="'components/piap/sub-programme-performance.html'"></div>
-                </span>
-
-                <span ng-switch-when="PRJP">
-                    <div ng-include="'components/project/project-performance.html'"></div>
-                </span>
-
-                <span ng-switch-when="MDA">
-                    <div ng-include="'components/mda/mda-status.html'"></div>
-                </span>
-
-                <span ng-switch-when="LOG">
-                    <div ng-include="'components/log/log-status.html'"></div>
-                </span>
-
-                <span ng-switch-when="DICTIONARY">
-                    <div ng-include="'components/dictionary/dictionary.html'"></div>
-                </span>
-
-                <span ng-switch-when="COMPLETENESS">
-                    <div ng-include="'components/completeness/completeness.html'"></div>
-                </span>-->
-
             </div>
             <div ng-if="!model.selectedMenu" class="slide-container">
                 <carousel carousel-controls interval="3000" no-wrap="false">
                     <slide ng-repeat="slide in model.slides">
+                        <div class="slide-image">
+                            <img ng-src="{{slide.path}}" alt="{{slide.path}}">
+                        </div>
+                    </slide>
+                    <!--<slide ng-repeat="slide in model.slides">
                         <div class="col-sm-12 slide-header">
                             {{slide.heading}}
                         </div>
@@ -123,7 +74,7 @@
                                 <img ng-src="{{slide.path}}" alt="{{slide.path}}">
                             </div>
                         </div>
-                    </slide>
+                    </slide>-->
                 </carousel>
             </div>
         </form>

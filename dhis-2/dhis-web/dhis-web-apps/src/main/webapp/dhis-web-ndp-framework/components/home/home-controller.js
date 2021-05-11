@@ -84,6 +84,62 @@ ndpFramework.controller('HomeController',
                             $scope.model.slides = [
                                 {
                                     id: '1',
+                                    type: 'IMG',
+                                    heading: 'Header',
+                                    description: 'Description',
+                                    path: 'images/1.jpg',
+                                    background: 'bg-slide-1'
+                                },
+                                {
+                                    id: '2',
+                                    type: 'IMG',
+                                    heading: 'Header',
+                                    description: 'Description',
+                                    path: 'images/2.jpg',
+                                    background: 'bg-slide-2'
+                                },
+                                {
+                                    id: '3',
+                                    type: 'IMG',
+                                    heading: 'Header',
+                                    description: 'Description',
+                                    path: 'images/3.jpg',
+                                    background: 'bg-slide-3'
+                                },
+                                {
+                                    id: '4',
+                                    type: 'IMG',
+                                    heading: 'Header',
+                                    description: 'Description',
+                                    path: 'images/4.jpg',
+                                    background: 'bg-slide-4'
+                                },
+                                {
+                                    id: '5',
+                                    type: 'IMG',
+                                    heading: 'Header',
+                                    description: 'Description',
+                                    path: 'images/5.jpg',
+                                    background: 'bg-slide-5'
+                                },
+                                {
+                                    id: '6',
+                                    type: 'IMG',
+                                    heading: 'Header',
+                                    description: 'Description',
+                                    path: 'images/6.jpg',
+                                    background: 'bg-slide-6'
+                                },
+                                {
+                                    id: '7',
+                                    type: 'IMG',
+                                    heading: 'Header',
+                                    description: 'Description',
+                                    path: 'images/7.jpg',
+                                    background: 'bg-slide-7'
+                                }
+                                /*{
+                                    id: '1',
                                     type: 'TABLE',
                                     heading: $translate.instant('goal_slider_title')
                                 },{
@@ -103,7 +159,7 @@ ndpFramework.controller('HomeController',
                                     heading: 'UGANDA',
                                     description: 'More about Map of Uganda 2',
                                     path: 'images/logo_front.png'
-                                }
+                                }*/
                             ];
 
                             var periods = PeriodService.getPeriods($scope.model.selectedPeriodType, $scope.model.periodOffset, $scope.model.openFuturePeriods);
@@ -290,7 +346,7 @@ ndpFramework.controller('HomeController',
                                     sp.children.push( {
                                         id: op.code + '-SUB-ACTION',
                                         domain: 'SUB',
-                                        code: 'SUB-ACTION',
+                                        code: 'intervention',
                                         ndp: op.code,
                                         order: 3,
                                         displayName: $translate.instant('action_level'),
@@ -300,7 +356,7 @@ ndpFramework.controller('HomeController',
                                         color: 'ndp-menu'
                                     } );
 
-                                    sp.children.push( {
+                                    /*sp.children.push( {
                                         id: op.code + '-SUB-ITEM',
                                         domain: 'SUB',
                                         code: 'SUB-ITEM',
@@ -311,7 +367,7 @@ ndpFramework.controller('HomeController',
                                         view: 'components/items/items-status.html',
                                         children: [],
                                         color: 'ndp-menu'
-                                    } );
+                                    } );*/
 
                                     op.hasChildren = true;
                                     op.show = true;
