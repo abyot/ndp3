@@ -1,5 +1,5 @@
 /* Pagination service */
-/* global angular, dhis2, moment */
+/* global angular, dhis2, moment, Intl */
 
 var d2Services = angular.module('d2Services', ['ngResource'])
 
@@ -365,6 +365,16 @@ var d2Services = angular.module('d2Services', ['ngResource'])
             var userProfile = SessionStorageService.get('USER_PROFILE');
             var username = userProfile && userProfile.userCredentials && userProfile.userCredentials.username ? userProfile.userCredentials.username : '';
             return username;
+        },
+        getProduct: function(op1, op2){
+            op1 = dhis2.validation.isNumber(op1) ? parseInt(op1) : 0;
+            op2 = dhis2.validation.isNumber(op2) ? parseInt(op2) : 0;
+            var res = op1 * op2;
+
+            if ( dhis2.validation.isNumber( res ) ){
+                return new Intl.NumberFormat().format(res);
+            }
+            return "";
         },
         getSum: function( op1, op2 ){
             op1 = dhis2.validation.isNumber(op1) ? parseInt(op1) : 0;
