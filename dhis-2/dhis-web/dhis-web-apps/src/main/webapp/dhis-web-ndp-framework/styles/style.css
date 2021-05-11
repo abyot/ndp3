@@ -178,6 +178,10 @@ html, body {
     margin-left: 20px;
 }
 
+.double-indentation {
+    margin-left: 40px;
+}
+
 .remove-horizontal-spacing {
     margin-left: -25px;
 }
@@ -553,10 +557,9 @@ ul.tree ul li:last-child:before {
 }
 
 .slide-image {
-    display: block;
-    margin-left: auto;
-    margin-right: auto;
-    width: 50%;
+    position: fixed;
+    top: 50px;
+    left: 350px;
 }
 
 img {
