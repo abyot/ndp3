@@ -42,10 +42,7 @@ ndpFramework.controller('ActionsController',
     };
 
     $scope.model.horizontalMenus = [
-        {id: 'result', title: 'results', order: 1, view: 'components/actions/results.html', active: true, class: 'main-horizontal-menu'},
-        {id: 'trafficLight', title: 'traffic_light', order: 2, view: 'components/actions/traffic-light.html', class: 'main-horizontal-menu'},
-        {id: 'budgetPerformance', title: 'budget_performance', order: 3, view: 'components/actions/budget-performance.html', class: 'main-horizontal-menu'},
-        {id: 'dashboard', title: 'dashboard', order: 6, view: 'components/actions/dashboard.html', class: 'external-horizontal-menu'}
+        {id: 'result', title: 'results', order: 1, view: 'components/actions/results.html', active: true, class: 'main-horizontal-menu'}
     ];
 
     //Get orgunits for the logged in user
@@ -79,15 +76,15 @@ ndpFramework.controller('ActionsController',
 
     $scope.$watch('model.selectedNdpProgram', function(){
         $scope.resetDataView();
-        $scope.model.objectives = [];
+        $scope.model.interventions = [];
         $scope.model.selectedDataElementGroupSets = [];
         $scope.model.subPrograms = [];
         $scope.model.selectedSubProgramme = null;
         if( angular.isObject($scope.model.selectedNdpProgram) ){
             if( $scope.model.selectedNdpProgram && $scope.model.selectedNdpProgram.code ){
-                $scope.model.objectives = $filter('filter')($scope.model.dataElementGroupSets, {ndp: $scope.model.selectedMenu.ndp, indicatorGroupSetType: $scope.model.selectedMenu.code, ndpProgramme: $scope.model.selectedNdpProgram.code}, true);
+                $scope.model.interventions = $filter('filter')($scope.model.dataElementGroupSets, {ndp: $scope.model.selectedMenu.ndp, indicatorGroupSetType: $scope.model.selectedMenu.code, ndpProgramme: $scope.model.selectedNdpProgram.code}, true);
                 $scope.model.subPrograms = $filter('filter')($scope.model.dataElementGroupSets, {ndp: $scope.model.selectedMenu.ndp, indicatorGroupSetType: 'sub-programme', ndpProgramme: $scope.model.selectedNdpProgram.code}, true);
-                $scope.model.selectedDataElementGroupSets = $filter('filter')($scope.model.dataElementGroupSets, {ndp: $scope.model.selectedMenu.ndp, ndpProgramme: $scope.model.selectedNdpProgram.code}, true);
+                $scope.model.selectedDataElementGroupSets = $filter('filter')($scope.model.dataElementGroupSets, {ndp: $scope.model.selectedMenu.ndp, ndpProgramme: $scope.model.selectedNdpProgram.code, indicatorGroupSetType: $scope.model.selectedMenu.code}, true);
                 $scope.getOutputs();
             }
         }
@@ -137,6 +134,12 @@ ndpFramework.controller('ActionsController',
 
             $scope.model.bta = bta;
             $scope.model.baseLineTargetActualDimensions = $.map($scope.model.bta.options, function(d){return d.id;});
+            $scope.model.actualDimension = null;
+            angular.forEach(bta.options, function(op){
+                if ( op.btaDimensionType === 'actual' ){
+                    $scope.model.actualDimension = op;
+                }
+            });
 
             MetaDataFactory.getAll('dataElements').then(function(dataElements){
 
@@ -148,6 +151,7 @@ ndpFramework.controller('ActionsController',
                 MetaDataFactory.getDataElementGroups().then(function(dataElementGroups){
 
                     $scope.model.dataElementGroups = dataElementGroups;
+                    $scope.model.allActions = $filter('filter')($scope.model.dataElementGroups, {indicatorGroupType: 'action'}, true);
 
                     MetaDataFactory.getAll('dataElementGroupSets').then(function(dataElementGroupSets){
 
@@ -217,6 +221,16 @@ ndpFramework.controller('ActionsController',
         $scope.model.allPeriods = angular.copy( $scope.model.periods );
     };
 
+    $scope.getActions = function( code ){
+        var actions = [];
+        angular.forEach($scope.model.allActions, function(ac){
+            if( ac.code && ac.code.startsWith(code) ){
+                actions.push( ac );
+            }
+        });
+        return actions;
+    };
+
     $scope.getAnalyticsData = function(){
 
         $scope.model.data = null;
@@ -245,44 +259,71 @@ ndpFramework.controller('ActionsController',
             analyticsUrl += '&dimension=pe:' + $.map($scope.model.selectedPeriods.concat( $scope.model.basePeriod ), function(pe){return pe.id;}).join(';');
 
             var des = [];
+            $scope.model.selectedActions = [];
+            $scope.model.actionsByDataElement = [];
             angular.forEach($scope.model.dataElementGroup, function(deg){
                 angular.forEach(deg.dataElements, function(de){
+                    if( de.code ){
+                        var ac = $scope.getActions( de.code );
+                        if ( ac.length > 0 ){
+                            $scope.model.actionsByDataElement[de.id] = ac;
+                            $scope.model.selectedActions = $scope.model.selectedActions.concat( ac );
+                        }
+                    }
                     des.push( de.id );
                 });
             });
 
             analyticsUrl += '&dimension=dx:' + des.join(';');
 
-            Analytics.getData( analyticsUrl ).then(function(data){
-                if( data && data.data && data.metaData ){
-                    $scope.model.data = data.data;
-                    $scope.model.metaData = data.metaData;
-                    $scope.model.reportReady = true;
-                    $scope.model.reportStarted = false;
+            var actionAnalyticsUrl = '&filter=ou:'+ $scope.selectedOrgUnit.id +'&displayProperty=NAME&includeMetadataDetails=true';
+            actionAnalyticsUrl += '&dimension=pe:' + $.map($scope.model.selectedPeriods, function(pe){return pe.id;}).join(';');
+            var acs = [];
+            angular.forEach($scope.model.selectedActions, function(deg){
+                angular.forEach(deg.dataElements, function(de){
+                    acs.push( de.id );
+                });
+            });
+            actionAnalyticsUrl += '&dimension=dx:' + acs.join(';');
 
-                    var dataParams = {
-                        data: data.data,
-                        metaData: data.metaData,
-                        reportPeriods: angular.copy( $scope.model.selectedPeriods ),
-                        bta: $scope.model.bta,
-                        selectedDataElementGroupSets: $scope.model.selectedDataElementGroupSets,
-                        selectedDataElementGroup: $scope.model.selectedKra,
-                        dataElementGroups: $scope.model.dataElementGroups,
-                        basePeriod: $scope.model.basePeriod,
-                        maxPeriod: $scope.model.selectedPeriods.slice(-1)[0],
-                        allPeriods: $scope.model.allPeriods,
-                        dataElementsById: $scope.model.dataElementsById
-                    };
+            Analytics.getData( actionAnalyticsUrl ).then(function(actionData){
+                Analytics.getData( analyticsUrl ).then(function(data){
+                    if( data && data.data && data.metaData ){
+                        $scope.model.data = data.data;
+                        $scope.model.metaData = data.metaData;
+                        $scope.model.reportReady = true;
+                        $scope.model.reportStarted = false;
 
-                    var processedData = Analytics.processData( dataParams );
+                        var dataParams = {
+                            data: data.data,
+                            metaData: data.metaData,
+                            reportPeriods: angular.copy( $scope.model.selectedPeriods ),
+                            bta: $scope.model.bta,
+                            actualDimension: $scope.model.actualDimension,
+                            selectedDataElementGroupSets: $scope.model.selectedDataElementGroupSets,
+                            selectedDataElementGroup: $scope.model.selectedKra,
+                            dataElementGroups: $scope.model.dataElementGroups,
+                            basePeriod: $scope.model.basePeriod,
+                            maxPeriod: $scope.model.selectedPeriods.slice(-1)[0],
+                            allPeriods: $scope.model.allPeriods,
+                            dataElementsById: $scope.model.dataElementsById,
+                            displayActionData: true,
+                            actionsByDataElement: $scope.model.actionsByDataElement,
+                            actionData: actionData.data,
+                            actionMetaData: actionData.metaData
+                        };
 
-                    $scope.model.dataHeaders = processedData.dataHeaders;
-                    $scope.model.reportPeriods = processedData.reportPeriods;
-                    $scope.model.dataExists = processedData.dataExists;
-                    $scope.model.resultData = processedData.resultData || [];
-                    $scope.model.performanceData = processedData.performanceData || [];
-                    $scope.model.cumulativeData = processedData.cumulativeData || [];
-                }
+                        var processedData = Analytics.processData( dataParams );
+
+                        $scope.model.dataHeaders = processedData.dataHeaders;
+                        $scope.model.reportPeriods = processedData.reportPeriods;
+                        $scope.model.dataExists = processedData.dataExists;
+                        $scope.model.resultData = processedData.resultData || [];
+                        $scope.model.performanceData = processedData.performanceData || [];
+                        $scope.model.cumulativeData = processedData.cumulativeData || [];
+                        $scope.model.hasTrafficLight = processedData.hasTrafficLight;
+                    }
+                });
             });
         }
     };
