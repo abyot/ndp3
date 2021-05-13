@@ -321,7 +321,7 @@ ndpFramework.controller('ActionsController',
                             displayActionData: true,
                             actionsByDataElement: $scope.model.actionsByDataElement,
                             actionData: actionData && actionData.data ? actionData.data : null,
-                            actionMetaData: actionData && actionData.metaData ? actionData.metaData : null,
+                            actionMetaData: actionData && actionData.metaData ? actionData.metaData : null
                         };
 
                         var processedData = Analytics.processData( dataParams );
