@@ -869,30 +869,38 @@ var ndpFrameworkServices = angular.module('ndpFrameworkServices', ['ngResource']
                         periodStart: pe.startDate,
                         periodEnd: pe.endDate,
                         dimensionId: 'unitCost',
+                        name: $translate.instant("target_unit_cost"),
                         dimension: 'unitCost'});
 
-                    dataParams.metaData.items['unitCost'] = {name: $translate.instant("cost"), id: 'unitCost'};
+                    colSpan++;
+                    dataHeaders.push({
+                        periodId: pe.id,
+                        periodStart: pe.startDate,
+                        periodEnd: pe.endDate,
+                        name: $translate.instant("target_cost"),
+                        dimensionId: dataParams.targetDimension.id,
+                        dimension: dataParams.bta.category});
                 }
-
-                angular.forEach(baseLineTargetActualDimensions, function(dm){
-                    var filterParams = {pe: pe.id};
-                    filterParams[dataParams.bta.category] = dm;
-                    var d = $filter('dataFilter')(data, filterParams);
-                    if( d && d.length > 0 ){
-                        if (dataParams.displayActionData && dataParams.targetDimension && dataParams.targetDimension.id !== dm )
-                        {
-                            return;
+                else{
+                    angular.forEach(baseLineTargetActualDimensions, function(dm){
+                        var filterParams = {pe: pe.id};
+                        filterParams[dataParams.bta.category] = dm;
+                        var d = $filter('dataFilter')(data, filterParams);
+                        if( d && d.length > 0 ){
+                            if (dataParams.displayActionData && dataParams.targetDimension && dataParams.targetDimension.id !== dm )
+                            {
+                                return;
+                            }
+                            colSpan++;
+                            dataHeaders.push({
+                                periodId: pe.id,
+                                periodStart: pe.startDate,
+                                periodEnd: pe.endDate,
+                                dimensionId: dm,
+                                dimension: dataParams.bta.category});
                         }
-                        colSpan++;
-                        dataHeaders.push({
-                            periodId: pe.id,
-                            periodStart: pe.startDate,
-                            periodEnd: pe.endDate,
-                            dimensionId: dm,
-                            dimension: dataParams.bta.category});
-                    }
-                });
-
+                    });
+                }
                 pe.colSpan = colSpan;
             });
 

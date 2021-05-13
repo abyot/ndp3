@@ -76,7 +76,7 @@
                         <th class="sticky">{{'outputs'| translate}}</th>
                         <th class="sticky">{{'indicator'| translate}}</th>
                         <th class="center sticky" ng-repeat="header in model.dataHeaders">
-                            {{model.metaData.items[header.dimensionId].name}}
+                            {{header.name}}
                         </th>
                     </tr>
                 </thead>
