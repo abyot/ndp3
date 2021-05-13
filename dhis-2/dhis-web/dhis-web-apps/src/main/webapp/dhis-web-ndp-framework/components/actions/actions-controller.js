@@ -135,9 +135,13 @@ ndpFramework.controller('ActionsController',
             $scope.model.bta = bta;
             $scope.model.baseLineTargetActualDimensions = $.map($scope.model.bta.options, function(d){return d.id;});
             $scope.model.actualDimension = null;
+            $scope.model.targetDimension = null;
             angular.forEach(bta.options, function(op){
                 if ( op.btaDimensionType === 'actual' ){
                     $scope.model.actualDimension = op;
+                }
+                if ( op.btaDimensionType === 'target' ){
+                    $scope.model.targetDimension = op;
                 }
             });
 
@@ -279,12 +283,18 @@ ndpFramework.controller('ActionsController',
             var actionAnalyticsUrl = '&filter=ou:'+ $scope.selectedOrgUnit.id +'&displayProperty=NAME&includeMetadataDetails=true';
             actionAnalyticsUrl += '&dimension=pe:' + $.map($scope.model.selectedPeriods, function(pe){return pe.id;}).join(';');
             var acs = [];
+            var actionDataExists = false;
             angular.forEach($scope.model.selectedActions, function(deg){
                 angular.forEach(deg.dataElements, function(de){
+                    actionDataExists = true;
                     acs.push( de.id );
                 });
             });
             actionAnalyticsUrl += '&dimension=dx:' + acs.join(';');
+
+            if ( !actionDataExists ){
+                actionAnalyticsUrl = null;
+            }
 
             Analytics.getData( actionAnalyticsUrl ).then(function(actionData){
                 Analytics.getData( analyticsUrl ).then(function(data){
@@ -300,6 +310,7 @@ ndpFramework.controller('ActionsController',
                             reportPeriods: angular.copy( $scope.model.selectedPeriods ),
                             bta: $scope.model.bta,
                             actualDimension: $scope.model.actualDimension,
+                            targetDimension: $scope.model.targetDimension,
                             selectedDataElementGroupSets: $scope.model.selectedDataElementGroupSets,
                             selectedDataElementGroup: $scope.model.selectedKra,
                             dataElementGroups: $scope.model.dataElementGroups,
@@ -309,8 +320,8 @@ ndpFramework.controller('ActionsController',
                             dataElementsById: $scope.model.dataElementsById,
                             displayActionData: true,
                             actionsByDataElement: $scope.model.actionsByDataElement,
-                            actionData: actionData.data,
-                            actionMetaData: actionData.metaData
+                            actionData: actionData && actionData.data ? actionData.data : null,
+                            actionMetaData: actionData && actionData.metaData ? actionData.metaData : null,
                         };
 
                         var processedData = Analytics.processData( dataParams );
@@ -322,6 +333,7 @@ ndpFramework.controller('ActionsController',
                         $scope.model.performanceData = processedData.performanceData || [];
                         $scope.model.cumulativeData = processedData.cumulativeData || [];
                         $scope.model.hasTrafficLight = processedData.hasTrafficLight;
+                        $scope.model.actionData = processedData.actionCost;
                     }
                 });
             });

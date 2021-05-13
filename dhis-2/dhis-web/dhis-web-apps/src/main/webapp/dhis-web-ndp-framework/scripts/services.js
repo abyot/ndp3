@@ -602,41 +602,48 @@ var ndpFrameworkServices = angular.module('ndpFrameworkServices', ['ngResource']
     };
 })
 
-.service('Analytics', function($http, $filter, $translate, PeriodService, orderByFilter, CommonUtils, NotificationService){
+.service('Analytics', function($q, $http, $filter, $translate, PeriodService, orderByFilter, CommonUtils, NotificationService){
     return {
         getData: function( url ){
-            url = dhis2.ndp.apiUrl + '/analytics?' + encodeURI( url );
-            var promise = $http.get( url ).then(function(response){
+            if ( url ){
+                url = dhis2.ndp.apiUrl + '/analytics?' + encodeURI( url );
+                var promise = $http.get( url ).then(function(response){
 
-                var data = response.data;
-                var reportData = [];
-                if ( data && data.headers && data.headers.length > 0 && data.rows && data.rows.length > 0 ){
-                    for(var i=0; i<data.rows.length; i++){
-                        var r = {}, d = data.rows[i];
-                        for(var j=0; j<data.headers.length; j++){
+                    var data = response.data;
+                    var reportData = [];
+                    if ( data && data.headers && data.headers.length > 0 && data.rows && data.rows.length > 0 ){
+                        for(var i=0; i<data.rows.length; i++){
+                            var r = {}, d = data.rows[i];
+                            for(var j=0; j<data.headers.length; j++){
 
-                            if ( data.headers[j].name === 'numerator' || data.headers[j].name === 'denominator' ){
-                                d[j] = parseInt( d[j] );
+                                if ( data.headers[j].name === 'numerator' || data.headers[j].name === 'denominator' ){
+                                    d[j] = parseInt( d[j] );
+                                }
+                                else if( data.headers[j].name === 'value' ){
+                                    d[j] = parseFloat( d[j] );
+                                }
+
+                                r[data.headers[j].name] = d[j];
                             }
-                            else if( data.headers[j].name === 'value' ){
-                                d[j] = parseFloat( d[j] );
-                            }
 
-                            r[data.headers[j].name] = d[j];
+                            delete r.multiplier;
+                            delete r.factor;
+                            delete r.divisor;
+                            reportData.push( r );
                         }
-
-                        delete r.multiplier;
-                        delete r.factor;
-                        delete r.divisor;
-                        reportData.push( r );
                     }
-                }
-                return {data: reportData, metaData: data.metaData};
-            }, function(response){
-                CommonUtils.errorNotifier(response);
-                return response.data;
-            });
-            return promise;
+                    return {data: reportData, metaData: data.metaData};
+                }, function(response){
+                    CommonUtils.errorNotifier(response);
+                    return response.data;
+                });
+                return promise;
+            }
+            else{
+                var def = $q.defer();
+                def.resolve();
+                return def.promise;
+            }
         },
         processData: function( dataParams ){
 
@@ -853,15 +860,39 @@ var ndpFrameworkServices = angular.module('ndpFrameworkServices', ['ngResource']
                 var colSpan = 0;
                 var d = $filter('filter')(data, {pe: pe.id});
                 pe.hasData = d && d.length > 0;
+
+                if (dataParams.displayActionData)
+                {
+                    colSpan++;
+                    dataHeaders.push({
+                        periodId: pe.id,
+                        periodStart: pe.startDate,
+                        periodEnd: pe.endDate,
+                        dimensionId: 'unitCost',
+                        dimension: 'unitCost'});
+
+                    dataParams.metaData.items['unitCost'] = {name: $translate.instant("cost"), id: 'unitCost'};
+                }
+
                 angular.forEach(baseLineTargetActualDimensions, function(dm){
                     var filterParams = {pe: pe.id};
                     filterParams[dataParams.bta.category] = dm;
                     var d = $filter('dataFilter')(data, filterParams);
                     if( d && d.length > 0 ){
+                        if (dataParams.displayActionData && dataParams.targetDimension && dataParams.targetDimension.id !== dm )
+                        {
+                            return;
+                        }
                         colSpan++;
-                        dataHeaders.push({periodId: pe.id, periodStart: pe.startDate, periodEnd: pe.endDate, dimensionId: dm, dimension: dataParams.bta.category});
+                        dataHeaders.push({
+                            periodId: pe.id,
+                            periodStart: pe.startDate,
+                            periodEnd: pe.endDate,
+                            dimensionId: dm,
+                            dimension: dataParams.bta.category});
                     }
                 });
+
                 pe.colSpan = colSpan;
             });
 
@@ -878,7 +909,8 @@ var ndpFrameworkServices = angular.module('ndpFrameworkServices', ['ngResource']
                     performanceRow = [], parsedPerformanceRow = [],
                     cumulativeRow = [], parsedCumulativeRow = [],
                     costRow = [], parsedCostRow = [],
-                    costEffRow = [], parsedCostEffRow = [];
+                    costEffRow = [], parsedCostEffRow = [],
+                    actionCost = {};
 
                 angular.forEach(dataParams.selectedDataElementGroupSets, function(degs){
                     var groupSet = {val: degs.displayName, span: 0};
@@ -909,8 +941,20 @@ var ndpFrameworkServices = angular.module('ndpFrameworkServices', ['ngResource']
                                             startDate: dh.periodStart,
                                             endDate: dh.periodEnd
                                         };
+
+                                        if ( dh.dimensionId === 'unitCost' )
+                                        {
+                                            resultRow.push({val: '', span: 1, period: period, coc: oc, aoc: dh.dimensionId});
+                                        }
+
+                                        if (dataParams.displayActionData && dataParams.targetDimension && dataParams.targetDimension.id !== dh.dimensionId )
+                                        {
+                                            return;
+                                        }
+
                                         var val = filterResultData(dh, de.id, oc.id, data, dataParams);
                                         var trafficLight = getTrafficLight(val, de.id, dh.dimensionId);
+
                                         resultRow.push({val: val, span: 1, trafficLight: trafficLight, details: de.id, period: period, coc: oc, aoc: dh.dimensionId});
                                     });
                                     if ( dataParams.displayVision2040 && dataParams.dataElementsById[de.id] ){
@@ -926,7 +970,9 @@ var ndpFrameworkServices = angular.module('ndpFrameworkServices', ['ngResource']
                                         angular.forEach(actions, function(action){
                                             groupSet.span++;
                                             group.span++;
-
+                                            if( !actionCost[action.id] ){
+                                                actionCost[action.id] = {};
+                                            }
                                             resultRow.push({action: action.displayName, span: 1, style: 'green-background'});
                                             angular.forEach(dataHeaders, function(dh){
                                                 var period = {
@@ -934,14 +980,22 @@ var ndpFrameworkServices = angular.module('ndpFrameworkServices', ['ngResource']
                                                     startDate: dh.periodStart,
                                                     endDate: dh.periodEnd
                                                 };
-                                                var val = filterResultData(dh, de.id, oc.id, data, dataParams);
-                                                resultRow.push({val: 'action_cost', span: 1, period: period, coc: oc, aoc: dh.dimensionId, style: 'green-background'});
+
+                                                if ( dh.dimensionId === 'unitCost' )
+                                                {
+                                                    resultRow.push({val: '', span: 1, period: period, coc: oc, aoc: dh.dimensionId, style: 'green-background'});
+                                                }
+
+                                                if (dataParams.displayActionData && dataParams.targetDimension && dataParams.targetDimension.id !== dh.dimensionId )
+                                                {
+                                                    return;
+                                                }
+                                                resultRow.push({actionId: action.id, span: 1, period: period, coc: oc, aoc: dh.dimensionId, style: 'green-background'});
                                             });
                                             parsedResultRow.push(resultRow);
                                             resultRow = [];
 
                                             if( action.dataElements && action.dataElements.length > 0 ){
-
                                                 angular.forEach(action.dataElements, function(cost){
                                                     groupSet.span++;
                                                     group.span++;
@@ -954,14 +1008,35 @@ var ndpFrameworkServices = angular.module('ndpFrameworkServices', ['ngResource']
                                                             endDate: dh.periodEnd
                                                         };
 
-                                                        var val = filterResultData(dh, de.id, oc.id, data, dataParams);
                                                         var unitCost = filterCostData(dh, cost.id, oc.id, dataParams.actionData, dataParams);
-                                                        resultRow.push({val: CommonUtils.getProduct(val, unitCost), span: 1, period: period, coc: oc, aoc: dh.dimensionId, style: 'yellow-background'});
+
+                                                        if ( dh.dimensionId === 'unitCost' )
+                                                        {
+                                                            resultRow.push({val: CommonUtils.formatNumber(unitCost), span: 1, period: period, coc: oc, aoc: dh.dimensionId, style: 'yellow-background'});
+                                                        }
+
+                                                        if (dataParams.displayActionData && dataParams.targetDimension && dataParams.targetDimension.id !== dh.dimensionId )
+                                                        {
+                                                            return;
+                                                        }
+
+                                                        var val = filterResultData(dh, de.id, oc.id, data, dataParams);
+                                                        val = CommonUtils.getProduct(val, unitCost)
+                                                        if( !actionCost[action.id][dh.periodId] ){
+                                                            actionCost[action.id][dh.periodId] = 0;
+                                                        }
+                                                        actionCost[action.id][dh.periodId] += val;
+                                                        resultRow.push({val: CommonUtils.formatNumber(val), span: 1, period: period, coc: oc, aoc: dh.dimensionId, style: 'yellow-background'});
                                                     });
                                                     parsedResultRow.push(resultRow);
                                                     resultRow = [];
                                                 });
-
+                                                for( var key in actionCost[action.id] ){
+                                                    if( actionCost[action.id].hasOwnProperty(key) ){
+                                                        var val = actionCost[action.id][key];
+                                                        actionCost[action.id][key] = CommonUtils.formatNumber(val);
+                                                    }
+                                                }
                                             }
 
                                         });
@@ -1069,7 +1144,8 @@ var ndpFrameworkServices = angular.module('ndpFrameworkServices', ['ngResource']
                 yellowCells: yellowCells,
                 greenCells: greenCells,
                 totalRows: totalRows,
-                hasTrafficLight: hasTrafficLight
+                hasTrafficLight: hasTrafficLight,
+                actionCost: actionCost
             };
         }
     };

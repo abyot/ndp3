@@ -370,9 +370,11 @@ var d2Services = angular.module('d2Services', ['ngResource'])
             op1 = dhis2.validation.isNumber(op1) ? parseInt(op1) : 0;
             op2 = dhis2.validation.isNumber(op2) ? parseInt(op2) : 0;
             var res = op1 * op2;
-
-            if ( dhis2.validation.isNumber( res ) ){
-                return new Intl.NumberFormat().format(res);
+            return res;
+        },
+        formatNumber: function( num ){
+            if ( dhis2.validation.isNumber( num ) ){
+                return new Intl.NumberFormat().format(num);
             }
             return "";
         },

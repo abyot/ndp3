@@ -3,7 +3,7 @@
         <span ng-if="col.details">
             <a href ng-click="getDataValueExplanation(col)" title="{{'click_here_for_details'| translate}}">{{col.val}}</a>
         </span>
-        <span ng-if="!col.details && !col.info && !col.action">
+        <span ng-if="!col.details && !col.info && !col.action && !col.actionCost">
             {{col.val}}
         </span>
         <span ng-if="col.info" ng-click="getIndicatorDictionary(col.info)">
@@ -18,6 +18,9 @@
         </span>
         <span ng-if="col.action" class="indentation">
             {{col.action}}
+        </span>
+        <span ng-if="col.actionId">
+            {{model.actionData[col.actionId][col.period.id]}}
         </span>
         <span ng-if="col.cost" class="double-indentation">
             {{col.cost}}
