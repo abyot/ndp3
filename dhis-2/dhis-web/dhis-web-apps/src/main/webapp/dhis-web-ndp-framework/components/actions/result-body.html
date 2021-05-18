@@ -1,9 +1,9 @@
 <tr ng-repeat="row in model.resultData">
     <td class="vertical-center" ng-repeat="col in row" rowspan="{{col.span}}" ng-class="col.style">
-        <span ng-if="col.details">
-            <a href ng-click="getDataValueExplanation(col)" title="{{'click_here_for_details'| translate}}">{{col.val}}</a>
+        <span ng-if="col.details" ng-click="getDataValueExplanation(col)" title="{{'click_here_for_details'| translate}}" class="link-text">
+            {{col.val}}
         </span>
-        <span ng-if="!col.details && !col.info && !col.action && !col.actionCost">
+        <span ng-if="!col.details && !col.info">
             {{col.val}}
         </span>
         <span ng-if="col.info" ng-click="getIndicatorDictionary(col.info)">
@@ -22,8 +22,11 @@
         <span ng-if="col.actionId">
             {{model.actionData[col.actionId][col.period.id]}}
         </span>
-        <span ng-if="col.cost" class="double-indentation">
-            {{col.cost}}
+        <span ng-if="col.item" class="double-indentation">
+            {{col.item}}
+        </span>
+        <span ng-if="col.totalOutputCost">
+            {{col.totalOutputCost}}
         </span>
     </td>
 </tr>

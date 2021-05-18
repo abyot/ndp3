@@ -1,7 +1,7 @@
 <tr ng-repeat="row in model.resultData">
     <td class="vertical-center" ng-repeat="col in row" rowspan="{{col.span}}">
-        <span ng-if="col.details">
-            <a href ng-click="getDataValueExplanation(col)" title="{{'click_here_for_details'| translate}}">{{col.val}}</a>
+        <span ng-if="col.details" ng-click="getDataValueExplanation(col)" title="{{'click_here_for_details'| translate}}" class="link-text">
+            {{col.val}}
         </span>
         <span ng-if="!col.details && !col.info">
             {{col.val}}

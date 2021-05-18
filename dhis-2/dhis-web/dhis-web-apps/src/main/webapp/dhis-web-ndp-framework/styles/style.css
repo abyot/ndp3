@@ -6,17 +6,23 @@ html, body {
     overflow: auto;
     font-size: 100% !important;
 }
+
+::-webkit-scrollbar
+{
+    width: 8px;
+    height: 8px;
+}
+
 #leftBar {
-    padding: 5px 0;
     margin-top: 4px;
     border-radius: 3px;
     height: 100%;
-    width: 350px;
+    width: 365px;
     overflow: scroll;
 }
 
 #mainPage {
-    margin: 60px 5px 5px 355px;
+    margin: 60px 5px 5px 370px;
 }
 
 .not-for-screen {
@@ -62,11 +68,29 @@ html, body {
     .select2-arrow, .ui-select-toggle {
         display: none !important;
     }
+
+    .table-scroll {
+        height: 100% !important;
+    }
+
+    .table-scroll table {
+        padding: 20px;
+        height: 100% !important;
+        width: 100% !important;
+        border-collapse: collapse !important;
+        border-spacing: 0 !important;
+    }
+
+    .result-table th {
+        border: 1px solid #000 !important;
+    }
 }
 
 .category-menu {
     background-color: #fff;
     height: auto;
+    font-family: Cambria,Georgia,serif;
+    font-size: 14pt;
 }
 
 .menu-title  {
@@ -263,12 +287,23 @@ html, body {
     border-radius: 3px;
 }
 
+.red-background {
+    background-color: #f4b183 !important;
+    color: #000;
+}
+
 .yellow-background {
-    background-color: #faebc4 !important;
+    background-color: #ffff00 !important;
+    color: #000;
 }
 
 .green-background {
-    background-color: #d0eBd0 !important;
+    background-color: #92d050 !important;
+    color: #000;
+}
+
+.blue-background {
+    background-color: #00b0f0 !important;
     color: #000;
 }
 
@@ -387,7 +422,7 @@ ul.tree ul:before {
 
 ul.tree li {
     margin:0;
-    padding:0 12px; /* indentation + 2 */
+    padding:0 10px; /* indentation + 2 */
     line-height:24px; /* default list item `line-height` */
     position:relative;
 }
@@ -419,7 +454,7 @@ ul.tree ul li:last-child:before {
 
 .selected-org-unit, .selected-menu {
     font-weight: bold;
-    padding: 5px;
+    padding: 2px;
     background: #2b6998;
     color: #fff !important;
     text-decoration: none;
@@ -438,7 +473,7 @@ ul.tree ul li:last-child:before {
 }
 
 .tree li a:hover {
-    padding: 5px;
+    padding: 2px;
     background: #2b6998;
     color: #fff ;
     text-decoration: none;
@@ -457,6 +492,16 @@ ul.tree ul li:last-child:before {
 }
 .nav-tabs.nav-justified > li > a:link {
     background: #eee;
+}
+
+.link-text {
+    cursor: pointer;
+    color: #3b73b8;
+    text-decoration: none;
+}
+
+.link-text:hover {
+    text-decoration: underline;
 }
 
 .cursor-pointer {

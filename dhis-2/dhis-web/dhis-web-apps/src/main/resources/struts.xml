@@ -42,5 +42,11 @@
         </action>
     </package>
 
+    <package name="dhis-web-results-tracker" extends="dhis-web-commons" namespace="/dhis-web-results-tracker">
+        <action name="index" class="org.hisp.dhis.commons.action.NoAction">
+            <result name="success" type="redirect">index.html</result>
+        </action>
+    </package>
+
   <!-- INJECT BUNDLED APPS HERE -->
 </struts>

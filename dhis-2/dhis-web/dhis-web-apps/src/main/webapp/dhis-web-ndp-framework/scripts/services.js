@@ -1004,11 +1004,11 @@ var ndpFrameworkServices = angular.module('ndpFrameworkServices', ['ngResource']
                                             resultRow = [];
 
                                             if( action.dataElements && action.dataElements.length > 0 ){
-                                                angular.forEach(action.dataElements, function(cost){
+                                                angular.forEach(action.dataElements, function(item){
                                                     groupSet.span++;
                                                     group.span++;
 
-                                                    resultRow.push({cost: cost.displayName, span: 1, style: 'yellow-background'});
+                                                    resultRow.push({item: item.displayName, span: 1, style: 'yellow-background'});
                                                     angular.forEach(dataHeaders, function(dh){
                                                         var period = {
                                                             id: dh.periodId,
@@ -1016,11 +1016,11 @@ var ndpFrameworkServices = angular.module('ndpFrameworkServices', ['ngResource']
                                                             endDate: dh.periodEnd
                                                         };
 
-                                                        var unitCost = filterCostData(dh, cost.id, oc.id, dataParams.actionData, dataParams);
+                                                        var unitCost = filterCostData(dh, item.id, oc.id, dataParams.actionData, dataParams);
 
                                                         if ( dh.dimensionId === 'unitCost' )
                                                         {
-                                                            resultRow.push({val: CommonUtils.formatNumber(unitCost), span: 1, period: period, coc: oc, aoc: dh.dimensionId, style: 'yellow-background'});
+                                                            resultRow.push({val: CommonUtils.formatNumber(unitCost), span: 1, period: period, coc: oc, aoc: dh.dimensionId, style: 'red-background'});
                                                         }
 
                                                         if (dataParams.displayActionData && dataParams.targetDimension && dataParams.targetDimension.id !== dh.dimensionId )
@@ -1029,7 +1029,7 @@ var ndpFrameworkServices = angular.module('ndpFrameworkServices', ['ngResource']
                                                         }
 
                                                         var val = filterResultData(dh, de.id, oc.id, data, dataParams);
-                                                        val = CommonUtils.getProduct(val, unitCost)
+                                                        val = CommonUtils.getProduct(val, unitCost);
                                                         if( !actionCost[action.id][dh.periodId] ){
                                                             actionCost[action.id][dh.periodId] = 0;
                                                         }
@@ -1039,15 +1039,45 @@ var ndpFrameworkServices = angular.module('ndpFrameworkServices', ['ngResource']
                                                     parsedResultRow.push(resultRow);
                                                     resultRow = [];
                                                 });
-                                                for( var key in actionCost[action.id] ){
-                                                    if( actionCost[action.id].hasOwnProperty(key) ){
-                                                        var val = actionCost[action.id][key];
-                                                        actionCost[action.id][key] = CommonUtils.formatNumber(val);
-                                                    }
-                                                }
                                             }
 
                                         });
+
+                                        //Cost per output
+                                        groupSet.span++;
+                                        group.span++;
+                                        resultRow.push({totalOutputCost: $translate.instant('total_cost_per_output') , span: 1, style: 'blue-background'});
+                                        angular.forEach(dataHeaders, function(dh){
+                                            var period = {
+                                                id: dh.periodId,
+                                                startDate: dh.periodStart,
+                                                endDate: dh.periodEnd
+                                            };
+
+                                            if ( dh.dimensionId === 'unitCost' )
+                                            {
+                                                resultRow.push({val: '', span: 1, period: period, coc: oc, aoc: dh.dimensionId, style: 'blue-background'});
+                                            }
+
+                                            if (dataParams.displayActionData && dataParams.targetDimension && dataParams.targetDimension.id !== dh.dimensionId )
+                                            {
+                                                return;
+                                            }
+
+                                            var totalCost = 0;
+                                            angular.forEach(actions, function(action){
+                                                var ac = actionCost[action.id][dh.periodId];
+                                                if ( dhis2.validation.isNumber( ac ) ){
+                                                    totalCost += ac;
+                                                    actionCost[action.id][dh.periodId] = CommonUtils.formatNumber( ac );
+                                                }
+                                            });
+
+                                            resultRow.push({val: CommonUtils.formatNumber( totalCost ), span: 1, style: 'blue-background'});
+                                        });
+
+                                        parsedResultRow.push(resultRow);
+                                        resultRow = [];
                                     }
 
                                     //Performance, Cumulative, Cost and CostEff data
