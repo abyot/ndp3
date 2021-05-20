@@ -211,11 +211,11 @@ ndpFramework.controller('HomeController',
                                     code: 'vision2040',
                                     ndp: op.code,
                                     order: 2,
-                                    displayName: $translate.instant('vision_2040_targets'),
+                                    displayName: $translate.instant('vision_2040'),
                                     children: [],
                                     view: 'components/vision2040/vision2040-status.html',
                                     color: 'ndp-menu'
-                                })
+                                });
 
                                 if( goals.length > 0 ){
 
@@ -226,7 +226,7 @@ ndpFramework.controller('HomeController',
                                         code: 'resultsFrameworkObjective',
                                         ndp: op.code,
                                         order: 3,
-                                        displayName: $translate.instant('goal_impact'),
+                                        displayName: $translate.instant('goal_level'),
                                         children: [],
                                         view: 'components/goal/goal-status.html',
                                         color: 'ndp-menu'
@@ -267,7 +267,7 @@ ndpFramework.controller('HomeController',
                                         code: 'resultsFrameworkObjective',
                                         ndp: op.code,
                                         order: 3,
-                                        displayName: $translate.instant('objective_outcomes'),
+                                        displayName: $translate.instant('objective_level'),
                                         children: [],
                                         view: 'components/objective/objective-status.html',
                                         color: 'ndp-menu'
@@ -324,7 +324,7 @@ ndpFramework.controller('HomeController',
                                         code: 'subProgrammeObjective',
                                         ndp: op.code,
                                         order: 2,
-                                        displayName: $translate.instant('intermediate_outcomes'),
+                                        displayName: $translate.instant('outcome_level'),
                                         children: [],
                                         view: 'components/sub-programme-outcome/sub-programme-outcome-status.html',
                                         color: 'ndp-menu'
