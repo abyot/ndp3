@@ -17,34 +17,39 @@ var actionMappingServices = angular.module('actionMappingServices', ['ngResource
     };
 })
 
-/* current selections */
-.service('PeriodService', function(DateUtils){
+.service('PeriodService', function(CalendarService){
 
     this.getPeriods = function(periodType, periodOffset, futurePeriods){
-        periodOffset = angular.isUndefined(periodOffset) ? 0 : periodOffset;
-        futurePeriods = angular.isUndefined(futurePeriods) ? 1 : futurePeriods;
-        var availablePeriods = [];
         if(!periodType){
-            return availablePeriods;
+            return [];
         }
 
-        var pt = new PeriodType();
-        var d2Periods = pt.get(periodType).generatePeriods({offset: periodOffset, filterFuturePeriods: false, reversePeriods: false});
+        var extractDate = function( obj ){
+            return obj._year + '-' + obj._month + '-' + obj._day;
+        };
 
-        d2Periods = d2Periods.slice( 0, d2Periods.length - 1 + futurePeriods );
+        var calendarSetting = CalendarService.getSetting();
 
-        d2Periods = d2Periods.slice( d2Periods.length - 2, d2Periods.length );
-        d2Periods.reverse();
+        dhis2.period.format = calendarSetting.keyDateFormat;
+
+        dhis2.period.calendar = $.calendars.instance( calendarSetting.keyCalendar );
+
+        dhis2.period.generator = new dhis2.period.PeriodGenerator( dhis2.period.calendar, dhis2.period.format );
+
+        dhis2.period.picker = new dhis2.period.DatePicker( dhis2.period.calendar, dhis2.period.format );
+
+        var d2Periods = dhis2.period.generator.generateReversedPeriods( periodType, periodOffset );
+
+        d2Periods = dhis2.period.generator.filterOpenPeriods( periodType, d2Periods, futurePeriods, null, null );
 
         angular.forEach(d2Periods, function(p){
-            p.endDate = DateUtils.formatFromApiToUser(p.endDate);
-            p.startDate = DateUtils.formatFromApiToUser(p.startDate);
-            availablePeriods.push( p );
-            /*if(moment(DateUtils.getToday()).isAfter(p.endDate)){
-                availablePeriods.push( p );
-            }*/
+            p.endDate = extractDate(p._endDate);
+            p.startDate = extractDate(p._startDate);
+            p.displayName = p.name;
+            p.id = p.iso;
         });
-        return availablePeriods;
+
+        return d2Periods;
     };
 })
 
@@ -298,11 +303,23 @@ var actionMappingServices = angular.module('actionMappingServices', ['ngResource
 
     return {
         saveDataValue: function( dv ){
-            var url = '?de='+dv.de + '&ou='+dv.ou + '&pe='+dv.pe + '&co='+dv.co + '&cc='+dv.cc + '&cp='+dv.cp + '&value='+dv.value;
+
+            var url = '?de='+dv.de + '&ou='+dv.ou + '&pe='+dv.pe + '&co='+dv.co + '&value='+dv.value;
+
+            if ( dv && dv.cc && dv.cp ){
+                url += '&cc='+dv.cc + '&cp='+dv.cp;
+            }
+
+            if( dv.comment ){
+                url += '&comment='+dv.comment;
+            }
+
             url = encodeURI( url );
+
             var promise = $http.post('../api/dataValues.json' + url).then(function(response){
                 return response.data;
             });
+
             return promise;
         },
         getDataValue: function( dv ){
@@ -310,6 +327,26 @@ var actionMappingServices = angular.module('actionMappingServices', ['ngResource
             var promise = $http.get('../api/dataValues.json' + url).then(function(response){
                 return response.data;
             });
+            return promise;
+        },
+        deleteDataValue: function( dv ){
+
+            var url = '?de='+dv.de + '&ou='+dv.ou + '&pe='+dv.pe + '&co='+dv.co + '&value='+dv.value;
+
+            if ( dv && dv.cc && dv.cp ){
+                url += '&cc='+dv.cc + '&cp='+dv.cp;
+            }
+
+            if( dv.comment ){
+                url += '&comment='+dv.comment;
+            }
+
+            url = encodeURI( url );
+
+            var promise = $http.delete('../api/dataValues.json' + url).then(function(response){
+                return response.data;
+            });
+
             return promise;
         },
         saveDataValueSet: function(dvs){
@@ -324,14 +361,6 @@ var actionMappingServices = angular.module('actionMappingServices', ['ngResource
                 return response.data;
             }, function(response){
                 CommonUtils.errorNotifier(response);
-            });
-            return promise;
-        },
-        saveComment: function( dv ){
-            var url = '?de='+dv.de + '&ou='+dv.ou + '&pe='+dv.pe + '&co='+dv.co + '&cc='+dv.cc + '&cp='+dv.cp + '&comment=' + dv.comment;
-            url = encodeURI( url );
-            var promise = $http.post('../api/dataValues.json' + url).then(function(response){
-                return response.data;
             });
             return promise;
         }

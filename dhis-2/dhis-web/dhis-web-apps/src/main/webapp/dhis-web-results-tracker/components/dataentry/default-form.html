@@ -29,8 +29,7 @@
                                             ng-model="dataValues[de.id][oco.id].value"
                                             name="foo"
                                             d2-tab-index
-                                            tabindex={{tabOrder[de.id][oco.id]}}
-                                            tabname="foo"
+                                            tabindex={{tabOrder[de.id][oco.id].index}}
                                             on-select="saveDataValue(de.id, oco.id)"
                                             on-remove="saveDataValue(de.id, oco.id)"
                                             style="width:100%;">
@@ -52,10 +51,9 @@
                                                       name="foo"
                                                       ng-model="dataValues[de.id][oco.id].value"
                                                       d2-tab-index
-                                                      tabindex={{tabOrder[de.id][oco.id]}}
-                                                      tabname="foo"
+                                                      tabindex={{tabOrder[de.id][oco.id].index}}
                                                       class="form-control"
-                                                      ng-class="getInputNotifcationClass(de.id, oco.id.id)"
+                                                      ng-class="getInputNotifcationClass(de.id, oco.id)"
                                                       d2-blur="saveDataValue(de.id, oco.id)">
                                             </textarea>
                                         </span>
@@ -64,10 +62,9 @@
                                                    name="foo"
                                                    ng-model="dataValues[de.id][oco.id].value"
                                                    d2-tab-index
-                                                   tabindex={{tabOrder[de.id][oco.id]}}
-                                                   tabname="foo"
+                                                   tabindex={{tabOrder[de.id][oco.id].index}}
                                                    class="form-control"
-                                                   ng-class="getInputNotifcationClass(de.id, oco.id.id)"
+                                                   ng-class="getInputNotifcationClass(de.id, oco.id)"
                                                    d2-blur="saveDataValue(de.id, oco.id)">
                                         </span>
                                         <span ng-switch-when="NUMBER">
@@ -77,10 +74,9 @@
                                                    number-type={{de.valueType}}
                                                    ng-model="dataValues[de.id][oco.id].value"
                                                    d2-tab-index
-                                                   tabindex={{tabOrder[de.id][oco.id]}}
-                                                   tabname="foo"
+                                                   tabindex={{tabOrder[de.id][oco.id].index}}
                                                    class="form-control"
-                                                   ng-class="getInputNotifcationClass(de.id, oco.id.id)"
+                                                   ng-class="getInputNotifcationClass(de.id, oco.id)"
                                                    ng-dblclick="getAuditInfo(de, oco, dataValues[de.id][oco.id].value, dataValues[de.id][oco.id].comment,dataValues[de.id][oco.id].followUp)"
                                                    d2-blur="saveDataValue(de.id, oco.id)">
                                         </span>
@@ -91,10 +87,9 @@
                                                    number-type={{de.valueType}}
                                                    ng-model="dataValues[de.id][oco.id].value"
                                                    d2-tab-index
-                                                   tabindex={{tabOrder[de.id][oco.id]}}
-                                                   tabname="foo"
+                                                   tabindex={{tabOrder[de.id][oco.id].index}}
                                                    class="form-control"
-                                                   ng-class="getInputNotifcationClass(de.id, oco.id.id)"
+                                                   ng-class="getInputNotifcationClass(de.id, oco.id)"
                                                    ng-dblclick="getAuditInfo(de, oco, dataValues[de.id][oco.id].value, dataValues[de.id][oco.id].comment,dataValues[de.id][oco.id].followUp)"
                                                    d2-blur="saveDataValue(de.id, oco.id)">
                                         </span>
@@ -105,10 +100,9 @@
                                                    number-type={{de.valueType}}
                                                    ng-model="dataValues[de.id][oco.id].value"
                                                    d2-tab-index
-                                                   tabindex={{tabOrder[de.id][oco.id]}}
-                                                   tabname="foo"
+                                                   tabindex={{tabOrder[de.id][oco.id].index}}
                                                    class="form-control"
-                                                   ng-class="getInputNotifcationClass(de.id, oco.id.id)"
+                                                   ng-class="getInputNotifcationClass(de.id, oco.id)"
                                                    ng-dblclick="getAuditInfo(de, oco, dataValues[de.id][oco.id].value, dataValues[de.id][oco.id].comment,dataValues[de.id][oco.id].followUp)"
                                                    d2-blur="saveDataValue(de.id, oco.id)">
                                         </span>
@@ -119,10 +113,9 @@
                                                    number-type={{de.valueType}}
                                                    ng-model="dataValues[de.id][oco.id].value"
                                                    d2-tab-index
-                                                   tabindex={{tabOrder[de.id][oco.id]}}
-                                                   tabname="foo"
+                                                   tabindex={{tabOrder[de.id][oco.id].index}}
                                                    class="form-control"
-                                                   ng-class="getInputNotifcationClass(de.id, oco.id.id)"
+                                                   ng-class="getInputNotifcationClass(de.id, oco.id)"
                                                    ng-dblclick="getAuditInfo(de, oco, dataValues[de.id][oco.id].value, dataValues[de.id][oco.id].comment,dataValues[de.id][oco.id].followUp)"
                                                    d2-blur="saveDataValue(de.id, oco.id)">
                                         </span>
@@ -133,10 +126,9 @@
                                                    number-type={{de.valueType}}
                                                    ng-model="dataValues[de.id][oco.id].value"
                                                    d2-tab-index
-                                                   tabindex={{tabOrder[de.id][oco.id]}}
-                                                   tabname="foo"
+                                                   tabindex={{tabOrder[de.id][oco.id].index}}
                                                    class="form-control"
-                                                   ng-class="getInputNotifcationClass(de.id, oco.id.id)"
+                                                   ng-class="getInputNotifcationClass(de.id, oco.id)"
                                                    ng-dblclick="getAuditInfo(de, oco, dataValues[de.id][oco.id].value, dataValues[de.id][oco.id].comment,dataValues[de.id][oco.id].followUp)"
                                                    d2-blur="saveDataValue(de.id, oco.id)">
                                         </span>
@@ -145,10 +137,9 @@
                                                    name="foo"
                                                    ng-model="dataValues[de.id][oco.id].value"
                                                    d2-tab-index
-                                                   tabindex={{tabOrder[de.id][oco.id]}}
-                                                   tabname="foo"
+                                                   tabindex={{tabOrder[de.id][oco.id].index}}
                                                    class="form-control"
-                                                   ng-class="getInputNotifcationClass(de.id, oco.id.id)"
+                                                   ng-class="getInputNotifcationClass(de.id, oco.id)"
                                                    d2-blur="saveDataValue(de.id, oco.id)">
                                         </span>
                                         <span ng-switch-when="PERCENTAGE">
@@ -158,10 +149,9 @@
                                                    number-type={{de.valueType}}
                                                    ng-model="dataValues[de.id][oco.id].value"
                                                    d2-tab-index
-                                                   tabindex={{tabOrder[de.id][oco.id]}}
-                                                   tabname="foo"
+                                                   tabindex={{tabOrder[de.id][oco.id].index}}
                                                    class="form-control"
-                                                   ng-class="getInputNotifcationClass(de.id, oco.id.id)"
+                                                   ng-class="getInputNotifcationClass(de.id, oco.id)"
                                                    ng-dblclick="getAuditInfo(de, oco, dataValues[de.id][oco.id].value, dataValues[de.id][oco.id].comment,dataValues[de.id][oco.id].followUp)"
                                                    d2-blur="saveDataValue(de.id, oco.id)">
                                         </span>
@@ -170,14 +160,13 @@
                                                        ng-model="dataValues[de.id][oco.id].value"
                                                        name="foo"
                                                        d2-tab-index
-                                                       tabindex={{tabOrder[de.id][oco.id]}}
-                                                       tabname="foo"
+                                                       tabindex={{tabOrder[de.id][oco.id].index}}
                                                        on-select="saveDataValue(de.id, oco.id)"
                                                        on-remove="saveDataValue(de.id, oco.id)"
                                                        style="width:100%;">
                                                 <ui-select-match allow-clear="true"
                                                                  class="form-control-ui-select"
-                                                                 ng-class="getInputNotifcationClass(de.id, oco.id.id)"
+                                                                 ng-class="getInputNotifcationClass(de.id, oco.id)"
                                                                  placeholder="{{'select_or_search' | translate}}">
                                                     {{$select.selected.displayName  || $select.selected}}
                                                 </ui-select-match>
@@ -198,16 +187,14 @@
                             </ng-form>
                         </td>
                         <td>
-                            <div class="cursor-pointer" ng-click="displayCommentBox(de.id, oco)">
+                            <div class="cursor-pointer">
                                 <textarea rows="2"
                                         name="foo"
                                         ng-model="dataValues[de.id][oco.id].comment"
-                                        d2-tab-index
-                                        tabindex={{tabOrder[de.id][oco.id]}}
-                                        tabname="foo"
                                         class="form-control"
-                                        ng-class="getInputNotifcationClass(de.id, oco.id.id)"
-                                        d2-blur="saveComment(de.id, oco.id)">
+                                        ng-disabled="!dataValues[de.id][oco.id].value"
+                                        ng-class="getInputNotifcationClass(de.id, oco.id, true)"
+                                        d2-blur="saveDataValue(de.id, oco.id, true)">
                                 </textarea>
                             </div>
                         </td>

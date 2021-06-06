@@ -22,26 +22,18 @@ rt.controller('DataEntryController',
         dataValues: {},
         dataElements: [],
         dataElementsById: [],
-        dataElementGroups: [],
-        dataElementGroupSets: [],
-        selectedDataElementGroups: [],
-        selectedDataElementGroupSets: [],
-        baseLineTargetActualDimensions: [],
         selectedAttributeCategoryCombo: null,
-        selectedAttributeOptionCombos: null,
-        dataSetsById: {},
+        selectedAttributeOptionCombo: null,
         categoryCombosById: {},
         optionSets: [],
         optionSetsById: null,
-        dictionaryItems: [],
-        attributes: [],
         selectedPeriod: null,
         periods: [],
         periodOffset: 0
     };
 
     $scope.$watch('selectedOrgUnit', function() {
-        $scope.resetDataView();
+        $scope.resetParams();
         if( angular.isObject($scope.selectedOrgUnit)){
             if(!$scope.model.optionSetsById){
                 $scope.model.optionSetsById = {};
@@ -55,7 +47,6 @@ rt.controller('DataEntryController',
                             $scope.model.categoryCombosById[cc.id] = cc;
                         });
                         $scope.loadDataSets($scope.selectedOrgUnit);
-
                     });
                 });
             }
@@ -65,39 +56,26 @@ rt.controller('DataEntryController',
         }
     });
 
-    var resetParams = function(){
-        $scope.model.dataValues = {};
-        $scope.model.roleValues = {};
-        $scope.model.orgUnitsWithValues = [];
-        $scope.model.selectedEvent = {};
-        $scope.model.valueExists = false;
-        $scope.model.stakeholderRoles = {};
-        $scope.model.basicAuditInfo = {};
-        $scope.model.basicAuditInfo.exists = false;
-        $scope.model.rolesAreDifferent = false;
-        $scope.saveStatus = {};
-        $scope.commonOrgUnit = null;
-        $scope.commonOptionCombo = null;
-    };
-
-    $scope.resetDataView = function(){
+    $scope.resetParams = function(){
         $scope.model.dataSets = [];
         $scope.model.periods = [];
         $scope.model.selectedAttributeCategoryCombo = null;
-        $scope.model.selectedAttributeOptionCombos = null;
+        $scope.model.selectedAttributeOptionCombo = null;
         $scope.model.selectedPeriod = null;
         $scope.dataValues = {};
-        $scope.dataValuesCopy = {};
-        $scope.saveStatus = {};
         $scope.model.categoryOptionsReady = false;
+    };
+
+    $scope.resetDataView = function(){
+        $scope.saveStatus = {};
+        $scope.dataValues = {};
     };
 
     //load datasets associated with the selected org unit.
     $scope.loadDataSets = function() {
-        $scope.resetDataView();
+        $scope.resetParams();
         if (angular.isObject($scope.selectedOrgUnit)) {
             DataSetFactory.getResultsDataSets( $scope.selectedOrgUnit).then(function(dataSets){
-                console.log('data sets:  ', dataSets);
                 $scope.model.dataSets = dataSets || [];
             });
         }
@@ -108,17 +86,12 @@ rt.controller('DataEntryController',
         $scope.model.periods = [];
         $scope.model.selectedPeriod = null;
         $scope.model.categoryOptionsReady = false;
-        $scope.dataValues = {};
-        $scope.dataValuesCopy = {};
         if( angular.isObject($scope.model.selectedDataSet) && $scope.model.selectedDataSet.id){
             $scope.loadDataSetDetails();
         }
     });
 
     $scope.$watch('model.selectedPeriod', function(){
-        $scope.dataValues = {};
-        $scope.dataValuesCopy = {};
-        $scope.saveStatus = {};
         $scope.loadDataEntryForm();
     });
 
@@ -134,12 +107,17 @@ rt.controller('DataEntryController',
 
             $scope.model.selectedAttributeCategoryCombo = null;
             if( $scope.model.selectedDataSet && $scope.model.selectedDataSet.categoryCombo && $scope.model.selectedDataSet.categoryCombo.id ){
-                $scope.model.selectedAttributeCategoryCombo = $scope.model.categoryCombosById[$scope.model.selectedDataSet.categoryCombo.id];
+                $scope.model.selectedAttributeCategoryCombo = angular.copy($scope.model.categoryCombosById[$scope.model.selectedDataSet.categoryCombo.id]);
             }
 
             if(!$scope.model.selectedAttributeCategoryCombo || $scope.model.selectedAttributeCategoryCombo.categoryOptionCombos.legth < 1 ){
                 CommonUtils.notify('error', 'missing_dataset_category_combo');
                 return;
+            }
+
+            if( $scope.model.selectedAttributeCategoryCombo && $scope.model.selectedAttributeCategoryCombo.isDefault ){
+                $scope.model.categoryOptionsReady = true;
+                $scope.model.selectedOptions = $scope.model.selectedAttributeCategoryCombo.categories[0].categoryOptions;
             }
 
             $scope.model.dataElements = [];
@@ -149,71 +127,61 @@ rt.controller('DataEntryController',
                 $scope.model.dataElements[de.id] = de;
                 $scope.tabOrder[de.id] = {};
                 angular.forEach($scope.model.categoryCombosById[de.categoryCombo.id].categoryOptionCombos, function(oco){
-                    $scope.tabOrder[de.id][oco.id] = idx++;
+                    $scope.tabOrder[de.id][oco.id] = {
+                        index: idx++,
+                        name: de.id + '-' + oco.id
+                    };
                 });
             });
         }
     };
 
-    var copyDataValues = function(){
-        $scope.dataValuesCopy = angular.copy( $scope.dataValues );
-    };
-
     $scope.loadDataEntryForm = function(){
-        $scope.saveStatus = {};
+        $scope.resetDataView();
+
         if( $scope.selectedOrgUnit && $scope.selectedOrgUnit.id &&
                 $scope.model.selectedDataSet && $scope.model.selectedDataSet.id &&
-                $scope.model.selectedPeriod && $scope.model.selectedPeriod.id ){
+                $scope.model.selectedPeriod && $scope.model.selectedPeriod.id &&
+                $scope.model.categoryOptionsReady){
 
-            var dataValueSetUrl = 'dataSet=' + $scope.model.selectedDataSet.id;
+            $scope.model.selectedAttributeOptionCombo = CommonUtils.getOptionComboIdFromOptionNames($scope.model.selectedAttributeCategoryCombo, $scope.model.selectedOptions);
+            if ( $scope.model.selectedAttributeOptionCombo && $scope.model.selectedAttributeOptionCombo.id ){
 
-            dataValueSetUrl += '&period=' + $scope.model.selectedPeriod.id;
+                var dataValueSetUrl = 'dataSet=' + $scope.model.selectedDataSet.id;
 
-            dataValueSetUrl += '&orgUnit=' + $scope.selectedOrgUnit.id;
+                dataValueSetUrl += '&attributeOptionCombo=' + $scope.model.selectedAttributeOptionCombo.id;
 
-            DataValueService.getDataValueSet( dataValueSetUrl ).then(function( response ){
-                if( response.dataValues && response.dataValues.length > 0 ){
-                    $scope.model.valueExists = true;
+                dataValueSetUrl += '&period=' + $scope.model.selectedPeriod.id;
 
-                    angular.forEach(response.dataValues, function(dv){
+                dataValueSetUrl += '&orgUnit=' + $scope.selectedOrgUnit.id;
 
-                        dv.value = CommonUtils.formatDataValue( $scope.model.dataElements[dv.dataElement], dv.value, $scope.model.optionSetsById, 'USER' );
+                DataValueService.getDataValueSet( dataValueSetUrl ).then(function( response ){
+                    if( response.dataValues && response.dataValues.length > 0 ){
+                        $scope.model.valueExists = true;
 
-                        if(!$scope.dataValues[dv.dataElement]){
-                            $scope.dataValues[dv.dataElement] = {};
-                            $scope.dataValues[dv.dataElement][dv.categoryOptionCombo] = {};
-                            $scope.dataValues[dv.dataElement][dv.categoryOptionCombo][dv.attributeOptionCombo] = dv;
-                        }
-                        else if(!$scope.dataValues[dv.dataElement][dv.categoryOptionCombo]){
-                            $scope.dataValues[dv.dataElement][dv.categoryOptionCombo] = {};
-                            $scope.dataValues[dv.dataElement][dv.categoryOptionCombo][dv.attributeOptionCombo] = dv;
-                        }
-                        else if(!$scope.dataValues[dv.dataElement][dv.categoryOptionCombo][dv.attributeOptionCombo]){
-                            $scope.dataValues[dv.dataElement][dv.categoryOptionCombo][dv.attributeOptionCombo] = dv;
-                        }
+                        angular.forEach(response.dataValues, function(dv){
 
-                        if( dv.comment ){
-                            $scope.dataValues[dv.dataElement][dv.categoryOptionCombo].hasComment = true;
-                        }
-                    });
+                            dv.value = CommonUtils.formatDataValue( dv.value, $scope.model.dataElements[dv.dataElement], $scope.model.optionSetsById, 'USER' );
 
-                    copyDataValues();
-                }
-            });
+                            if(!$scope.dataValues[dv.dataElement]){
+                                $scope.dataValues[dv.dataElement] = {};
+                                $scope.dataValues[dv.dataElement][dv.categoryOptionCombo] = dv;
+                            }
+                            else if(!$scope.dataValues[dv.dataElement][dv.categoryOptionCombo]){
+                                $scope.dataValues[dv.dataElement][dv.categoryOptionCombo] = dv;
+                            }
 
-            CompletenessService.get( $scope.model.selectedDataSet.id,
-                                    $scope.selectedOrgUnit.id,
-                                    $scope.model.selectedPeriod.startDate,
-                                    $scope.model.selectedPeriod.endDate,
-                                    false).then(function(response){
-                if( response &&
-                        response.completeDataSetRegistrations &&
-                        response.completeDataSetRegistrations.length &&
-                        response.completeDataSetRegistrations.length > 0){
-
-                    $scope.model.dataSetCompletness = true;
-                }
-            });
+                            if( dv.comment ){
+                                $scope.dataValues[dv.dataElement][dv.categoryOptionCombo].hasComment = true;
+                            }
+                        });
+                    }
+                });
+            }
+            else{
+                CommonUtils.notify('error', 'invalid_result_tagging_combination');
+                return;
+            }
         }
     };
 
@@ -255,7 +223,7 @@ rt.controller('DataEntryController',
         $scope.model.periods = PeriodService.getPeriods( $scope.model.selectedDataSet.periodType, $scope.model.periodOffset,  $scope.model.selectedDataSet.openFuturePeriods );
     };
 
-    $scope.saveDataValue = function( deId, ocId ){
+    $scope.saveDataValue = function( deId, ocId, saveComment ){
 
         //check for form validity
         if( $scope.outerForm.$invalid ){
@@ -265,59 +233,64 @@ rt.controller('DataEntryController',
         }
 
         //form is valid
-        $scope.saveStatus[ deId + '-' + ocId ] = {saved: false, pending: true, error: false};
+        var fieldId = deId + '-' + ocId;
+        if ( saveComment ){
+            fieldId += '-comment';
+        }
+        $scope.saveStatus = {};
+        $scope.saveStatus[ fieldId ] = {saved: false, pending: true, error: false};
 
         var dataValue = {ou: $scope.selectedOrgUnit.id,
                     pe: $scope.model.selectedPeriod.id,
                     de: deId,
                     co: ocId,
-                    value: $scope.dataValues[deId][ocId].value
+                    value: $scope.dataValues[deId][ocId].value,
+                    comment: $scope.dataValues[deId][ocId].comment
                 };
 
-        dataValue.value = CommonUtils.formatDataValue( $scope.model.dataElements[deId], dataValue.value, $scope.model.optionSetsById, 'API' );
-
-        var deleteComment = false;
-        if( !dataValue.value ){
-            dataValue.value =  "";
-            if( $scope.dataValues[deId][ocId].comment ){
-                deleteComment = true;
-                $scope.dataValues[deId][ocId].comment = "";
-            }
-        }
+        dataValue.value = CommonUtils.formatDataValue( dataValue.value, $scope.model.dataElements[deId], $scope.model.optionSetsById, 'API' );
 
         if( $scope.model.selectedAttributeCategoryCombo && !$scope.model.selectedAttributeCategoryCombo.isDefault ){
             dataValue.cc = $scope.model.selectedAttributeCategoryCombo.id;
             dataValue.cp = CommonUtils.getOptionIds($scope.model.selectedOptions);
         }
 
-        var processDataValue = function(){
-            copyDataValues();
-        };
+        var deleteValue = false, deleteComment;
+        if( !dataValue.value ){
+            dataValue.value =  "";
+            deleteValue = true;
+            if( $scope.dataValues[deId][ocId].comment ){
+                deleteComment = true;
+                $scope.dataValues[deId][ocId].comment = "";
+            }
+        }
 
         var saveSuccessStatus = function(){
-            $scope.saveStatus[deId + '-' + ocId].saved = true;
-            $scope.saveStatus[deId + '-' + ocId].pending = false;
-            $scope.saveStatus[deId + '-' + ocId].error = false;
+            $scope.saveStatus[fieldId].saved = true;
+            $scope.saveStatus[fieldId].pending = false;
+            $scope.saveStatus[fieldId].error = false;
         };
 
         var saveFailureStatus = function(){
-            $scope.saveStatus[deId + '-' + ocId].saved = false;
-            $scope.saveStatus[deId + '-' + ocId].pending = false;
-            $scope.saveStatus[deId + '-' + ocId].error = true;
+            $scope.saveStatus[fieldId].saved = false;
+            $scope.saveStatus[fieldId].pending = false;
+            $scope.saveStatus[fieldId].error = true;
         };
 
-        console.log('data value:  ', dataValue);
-        /*DataValueService.saveDataValue( dataValue ).then(function(){
-            if( deleteComment ){
-                dataValue.comment = "";
-                DataValueService.saveComment( dataValue ).then(function(){
-                });
-            }
-           saveSuccessStatus();
-           processDataValue();
-        }, function(){
-            saveFailureStatus();
-        });*/
+        if ( deleteValue ){
+            DataValueService.deleteDataValue( dataValue ).then(function(){
+               saveSuccessStatus();
+            }, function(){
+                saveFailureStatus();
+            });
+        }
+        else{
+            DataValueService.saveDataValue( dataValue ).then(function(){
+               saveSuccessStatus();
+            }, function(){
+                saveFailureStatus();
+            });
+        }
     };
 
     $scope.saveCompletness = function(){
@@ -380,9 +353,13 @@ rt.controller('DataEntryController',
         });
     };
 
-    $scope.getInputNotifcationClass = function(deId, ocId, aocId){
+    $scope.getInputNotifcationClass = function(deId, ocId, comment){
 
-        var currentElement = $scope.saveStatus[deId + '-' + ocId + '-' + aocId];
+        var currentElement = $scope.saveStatus[deId + '-' + ocId];
+        if ( comment ){
+            currentElement = $scope.saveStatus[deId + '-' + ocId + '-comment'];
+        }
+
         if( currentElement ){
             if(currentElement.pending){
                 return 'form-control input-pending';
@@ -397,66 +374,5 @@ rt.controller('DataEntryController',
         }
 
         return 'form-control';
-    };
-
-    $scope.getCommentValue = function( dataElementId, optionComboId ){
-        var comments = [], hasAttachement = false, hasExplanation = false;
-        if( $scope.dataValues[dataElementId] && $scope.dataValues[dataElementId][optionComboId] ){
-            var values = $scope.dataValues[dataElementId][optionComboId];
-            for( var key in values ){
-                if( values[key].comment ){
-                    var comment = JSON.parse( angular.copy( values[key].comment) );
-                    if(comment.attachment){
-                        hasAttachement = true;
-                    }
-                    if(comment.explanation){
-                        hasExplanation = true;
-                    }
-                }
-            }
-        }
-        if(hasAttachement){
-            comments.push('has_attachment');
-        }
-        if(hasExplanation){
-            comments.push('has_explanation');
-        }
-        return comments.join('_');
-    };
-
-    $scope.displayCommentBox = function( dataElementId, optionCombo ){
-        var dataElement = $scope.model.dataElements[dataElementId];
-        var modalInstance = $modal.open({
-            templateUrl: 'components/comment/comment.html',
-            controller: 'CommentController',
-            windowClass: 'comment-modal-window',
-            resolve: {
-                dataElement: function(){
-                    return dataElement;
-                },
-                selectedOrgUnit: function(){
-                    return $scope.selectedOrgUnit;
-                },
-                selectedPeriod: function(){
-                    return $scope.model.selectedPeriod;
-                },
-                dataValues: function(){
-                    return $scope.dataValues;
-                },
-                selectedCategoryOptionCombo: function(){
-                    return optionCombo;
-                },
-                selectedCategoryCombo: function(){
-                    return $scope.model.categoryCombosById[dataElement.categoryCombo.id];
-                },
-                selectedAttributeCategoryCombo: function(){
-                    return $scope.model.selectedAttributeCategoryCombo;
-                }
-            }
-        });
-
-        modalInstance.result.then(function( dataValues ) {
-            $scope.dataValues = dataValues;
-        });
     };
 });

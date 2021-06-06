@@ -249,7 +249,7 @@ dhis2.metadata.getMetaObjects = function( store, objs, url, filter, storage, db,
                 }
                 if( store === 'categoryCombos' ){
 
-                	if( obj.categories ){
+                    /*if( obj.categories ){
                         _.each( _.values( obj.categories ), function ( ca ) {
                             if( ca.categoryOptions ){
                                 _.each( _.values( ca.categoryOptions ), function ( co ) {
@@ -285,13 +285,8 @@ dhis2.metadata.getMetaObjects = function( store, objs, url, filter, storage, db,
                             }
                         });
                         obj.categoryOptionCombos = sortedOptionCombos;
-                        /*if( obj.categoryOptionCombos.length !== sortedOptionCombos.length ){
-                            console.log(obj.displayName, ' - ', obj.categoryOptionCombos.length, ' - ', sortedOptionCombos.length);
-                        }
-                        else{
-                            obj.categoryOptionCombos = sortedOptionCombos;
-                        }*/
-                    }
+
+                    }*/
                 }
                 else if( store === 'dataSets' ){
 
