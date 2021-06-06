@@ -1,5 +1,5 @@
 /* Pagination service */
-/* global angular, dhis2, moment */
+/* global angular, dhis2, moment, parseFloat */
 
 var d2Services = angular.module('d2Services', ['ngResource'])
 
@@ -286,7 +286,7 @@ var d2Services = angular.module('d2Services', ['ngResource'])
                             de.valueType === 'INTEGER_POSITIVE' ||
                             de.valueType === 'INTEGER_NEGATIVE' ||
                             de.valueType === 'INTEGER_ZERO_OR_POSITIVE' ||
-							de.valueType === 'PERCENTAGE'){
+                            de.valueType === 'PERCENTAGE'){
                         val = parseInt( val );
                     }
                     else if(de.valueType=== 'TRUE_ONLY'){
@@ -353,6 +353,15 @@ var d2Services = angular.module('d2Services', ['ngResource'])
             }
             return false;
         },*/
+        userHasAuthority: function( auth ){
+            var userInfo = SessionStorageService.get('USER_PROFILE');
+            if ( userInfo && userInfo.authorities ){
+                if ( userInfo.authorities.indexOf(auth) !== -1 || userInfo.authorities.indexOf('ALL') !== -1 ){
+                    return true;
+                }
+            }
+            return false;
+        },
         getUsername: function(){
             var userProfile = SessionStorageService.get('USER_PROFILE');
             var username = userProfile && userProfile.userCredentials && userProfile.userCredentials.username ? userProfile.userCredentials.username : '';

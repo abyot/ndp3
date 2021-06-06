@@ -17,6 +17,7 @@ ndpPerformanceDataEntry.controller('CommentController',
                 selectedCategoryCombo,
                 selectedCategoryOptionCombo,
                 selectedAttributeCategoryCombo,
+                dataSetCompleteness,
                 CommonUtils,
                 DateUtils,
                 MetaDataFactory,
@@ -34,6 +35,7 @@ ndpPerformanceDataEntry.controller('CommentController',
     $scope.selectedCategoryCombo = selectedCategoryCombo;
     $scope.selectedCategoryOptionCombo = selectedCategoryOptionCombo;
     $scope.selectedAttributeCategoryCombo = selectedAttributeCategoryCombo;
+    $scope.dataSetCompleteness = dataSetCompleteness;
     $scope.model = {
         fileInput: {},
         fileDataElement: null,
@@ -155,6 +157,10 @@ ndpPerformanceDataEntry.controller('CommentController',
         }
 
         return 'form-control';
+    };
+
+    $scope.isDisabled = function( aoc ){
+        return !aoc.dWrite || $scope.dataSetCompleteness;
     };
 
     $scope.cancelUpload = function( aoc ){

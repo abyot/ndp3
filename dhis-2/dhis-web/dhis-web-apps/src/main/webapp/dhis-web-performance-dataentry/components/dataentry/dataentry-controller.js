@@ -6,6 +6,7 @@
 ndpPerformanceDataEntry.controller('DataEntryController',
         function($scope,
                 $modal,
+                orderByFilter,
                 MetaDataFactory,
                 DataSetFactory,
                 PeriodService,
@@ -126,6 +127,7 @@ ndpPerformanceDataEntry.controller('DataEntryController',
                 return;
             }
 
+            $scope.model.selectedDataSet.dataElements = orderByFilter( $scope.model.selectedDataSet.dataElements, '-displayName').reverse();
             $scope.model.dataElements = [];
             $scope.tabOrder = {};
             var idx = 0;
@@ -148,6 +150,7 @@ ndpPerformanceDataEntry.controller('DataEntryController',
 
     $scope.loadDataEntryForm = function(){
         $scope.saveStatus = {};
+        $scope.model.dataSetCompleteness = false;
         if( $scope.selectedOrgUnit && $scope.selectedOrgUnit.id &&
                 $scope.model.selectedDataSet && $scope.model.selectedDataSet.id &&
                 $scope.model.selectedPeriod && $scope.model.selectedPeriod.id ){
@@ -198,7 +201,7 @@ ndpPerformanceDataEntry.controller('DataEntryController',
                         response.completeDataSetRegistrations.length &&
                         response.completeDataSetRegistrations.length > 0){
 
-                    $scope.model.dataSetCompletness = true;
+                    $scope.model.dataSetCompleteness = true;
                 }
             });
         }
@@ -307,12 +310,24 @@ ndpPerformanceDataEntry.controller('DataEntryController',
         });
     };
 
+    $scope.isDisabled = function( aoc ){
+        return !aoc.dWrite || $scope.model.dataSetCompleteness;
+    };
+
+    $scope.canSubmitData = function(){
+        return CommonUtils.userHasAuthority('F_COMPLETE_DATASET');
+    };
+
+    $scope.canUnSubmitData = function(){
+        return CommonUtils.userHasAuthority('F_UNCOMPLETE_DATASET');
+    };
+
     $scope.saveCompletness = function(){
         var modalOptions = {
             closeButtonText: 'no',
             actionButtonText: 'yes',
-            headerText: 'mark_complete',
-            bodyText: 'are_you_sure_to_save_completeness'
+            headerText: 'submit_data',
+            bodyText: 'are_you_sure_to_submit_data'
         };
 
         ModalService.showModal({}, modalOptions).then(function(result){
@@ -324,10 +339,10 @@ ndpPerformanceDataEntry.controller('DataEntryController',
             CompletenessService.saveDsr(dsr).then(function(response){
                 var dialogOptions = {
                     headerText: 'success',
-                    bodyText: 'marked_complete'
+                    bodyText: 'data_submitted'
                 };
                 DialogService.showDialog({}, dialogOptions);
-                $scope.model.dataSetCompletness = true;
+                $scope.model.dataSetCompleteness = true;
 
             }, function(response){
                 CommonUtils.errorNotifier( response );
@@ -339,8 +354,8 @@ ndpPerformanceDataEntry.controller('DataEntryController',
         var modalOptions = {
             closeButtonText: 'no',
             actionButtonText: 'yes',
-            headerText: 'mark_incomplete',
-            bodyText: 'are_you_sure_to_delete_completeness'
+            headerText: 'un_submit_data',
+            bodyText: 'are_you_sure_to_recall_data_and_edit'
         };
 
         ModalService.showModal({}, modalOptions).then(function(result){
@@ -355,10 +370,10 @@ ndpPerformanceDataEntry.controller('DataEntryController',
 
                     var dialogOptions = {
                         headerText: 'success',
-                        bodyText: 'marked_incomplete'
+                        bodyText: 'data_unsubmitted'
                     };
                     DialogService.showDialog({}, dialogOptions);
-                    $scope.model.dataSetCompletness = false;
+                    $scope.model.dataSetCompleteness = false;
 
                 }, function(response){
                     CommonUtils.errorNotifier( response );
@@ -438,6 +453,9 @@ ndpPerformanceDataEntry.controller('DataEntryController',
                 },
                 selectedAttributeCategoryCombo: function(){
                     return $scope.model.selectedAttributeCategoryCombo;
+                },
+                dataSetCompleteness: function(){
+                    return $scope.model.dataSetCompleteness;
                 }
             }
         });

@@ -33,7 +33,7 @@
             <td class="col-sm-4">
                 <input multiple type="file"
                        file-upload="model.fileInput[aoc.id]"
-                       ng-disabled="!dataValues[selectedDataElement.id][selectedCategoryOptionCombo.id][aoc.id].value" />
+                       ng-disabled="!dataValues[selectedDataElement.id][selectedCategoryOptionCombo.id][aoc.id].value || aoc.btaDimensionType !== 'actual' || isDisabled(aoc)" />
                 <table class="small-vertical-spacing table table-bordered table-striped" ng-if="model.comment[aoc.id] && model.comment[aoc.id].attachment">
                     <thead>
                         <tr>
@@ -91,7 +91,7 @@
                         name="foo"
                         ng-model="model.comment[aoc.id].explanation"
                         class="form-control"
-                        ng-disabled="!dataValues[selectedDataElement.id][selectedCategoryOptionCombo.id][aoc.id].value"
+                        ng-disabled="!dataValues[selectedDataElement.id][selectedCategoryOptionCombo.id][aoc.id].value || aoc.btaDimensionType !== 'actual' || isDisabled(aoc)"
                         ng-class="getInputNotifcationClass(selectedDataElement.id, selectedCategoryOptionCombo.id, aoc.id)"
                         d2-blur="saveComment(aoc)">
                 </textarea>
