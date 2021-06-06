@@ -13,12 +13,7 @@
                         {{'indicator'| translate}}
                     </th>
                     <th class="vertical-center" ng-repeat="aoc in model.selectedAttributeCategoryCombo.categoryOptionCombos">
-                        <span ng-if="aoc.displayName === 'default'">
-                            {{'value' | translate}}
-                        </span>
-                        <span ng-if="aoc.displayName !== 'default'">
-                            {{aoc.displayName}}
-                        </span>
+                        {{aoc.displayName}}
                     </th>
                     <th>
                         {{'explanation_attachment' | translate}}
@@ -32,10 +27,10 @@
                         {{de.displayFormName}} <span ng-if="ocos.length > 1"> - {{oco.displayName}}</span>
                     </td>
                     <td class="vertical-center" ng-repeat="aoc in model.selectedAttributeCategoryCombo.categoryOptionCombos">
-                        <ng-form name="innerForm" ng-if="aoc.btaDimensionType !== 'actual'">
+                        <ng-form name="innerForm" ng-if="aoc.btaDimensionType === 'target' || aoc.btaDimensionType === 'baseline'">
                             <span ng-if="de.optionSetValue">
                                 <ui-select theme="select2"
-                                        ng-model="dataValues[de.id][oco.id][aoc.id].value"
+                                        ng-model="dataValues[de.id][oco.id][aoc.id].aggregateValue"
                                         ng-disabled="!aoc.dWrite"
                                         name="foo"
                                         d2-tab-index
@@ -60,7 +55,7 @@
                                     <span ng-switch-when="LONG_TEXT">
                                         <textarea rows="5"
                                                   name="foo"
-                                                  ng-model="dataValues[de.id][oco.id][aoc.id].value"
+                                                  ng-model="dataValues[de.id][oco.id][aoc.id].aggregateValue"
                                                   ng-disabled="!aoc.dWrite"
                                                   d2-tab-index
                                                   tabindex={{tabOrder[de.id][oco.id][aoc.id]}}
@@ -73,7 +68,7 @@
                                     <span ng-switch-when="TEXT">
                                         <input type="text"
                                                name="foo"
-                                               ng-model="dataValues[de.id][oco.id][aoc.id].value"
+                                               ng-model="dataValues[de.id][oco.id][aoc.id].aggregateValue"
                                                ng-disabled="!aoc.dWrite"
                                                d2-tab-index
                                                tabindex={{tabOrder[de.id][oco.id][aoc.id]}}
@@ -87,7 +82,7 @@
                                                name="foo"
                                                d2-number-validator
                                                number-type={{de.valueType}}
-                                               ng-model="dataValues[de.id][oco.id][aoc.id].value"
+                                               ng-model="dataValues[de.id][oco.id][aoc.id].aggregateValue"
                                                ng-disabled="!aoc.dWrite"
                                                d2-tab-index
                                                tabindex={{tabOrder[de.id][oco.id][aoc.id]}}
@@ -102,7 +97,7 @@
                                                name="foo"
                                                d2-number-validator
                                                number-type={{de.valueType}}
-                                               ng-model="dataValues[de.id][oco.id][aoc.id].value"
+                                               ng-model="dataValues[de.id][oco.id][aoc.id].aggregateValue"
                                                ng-disabled="!aoc.dWrite"
                                                d2-tab-index
                                                tabindex={{tabOrder[de.id][oco.id][aoc.id]}}
@@ -117,7 +112,7 @@
                                                name="foo"
                                                d2-number-validator
                                                number-type={{de.valueType}}
-                                               ng-model="dataValues[de.id][oco.id][aoc.id].value"
+                                               ng-model="dataValues[de.id][oco.id][aoc.id].aggregateValue"
                                                ng-disabled="!aoc.dWrite"
                                                d2-tab-index
                                                tabindex={{tabOrder[de.id][oco.id][aoc.id]}}
@@ -132,7 +127,7 @@
                                                name="foo"
                                                d2-number-validator
                                                number-type={{de.valueType}}
-                                               ng-model="dataValues[de.id][oco.id][aoc.id].value"
+                                               ng-model="dataValues[de.id][oco.id][aoc.id].aggregateValue"
                                                ng-disabled="!aoc.dWrite"
                                                d2-tab-index
                                                tabindex={{tabOrder[de.id][oco.id][aoc.id]}}
@@ -147,7 +142,7 @@
                                                name="foo"
                                                d2-number-validator
                                                number-type={{de.valueType}}
-                                               ng-model="dataValues[de.id][oco.id][aoc.id].value"
+                                               ng-model="dataValues[de.id][oco.id][aoc.id].aggregateValue"
                                                ng-disabled="!aoc.dWrite"
                                                d2-tab-index
                                                tabindex={{tabOrder[de.id][oco.id][aoc.id]}}
@@ -160,7 +155,7 @@
                                     <span ng-switch-when="TRUE_ONLY">
                                         <input type="checkbox"
                                                name="foo"
-                                               ng-model="dataValues[de.id][oco.id][aoc.id].value"
+                                               ng-model="dataValues[de.id][oco.id][aoc.id].aggregateValue"
                                                ng-disabled="!aoc.dWrite"
                                                d2-tab-index
                                                tabindex={{tabOrder[de.id][oco.id][aoc.id]}}
@@ -174,7 +169,7 @@
                                                name="foo"
                                                d2-number-validator
                                                number-type={{de.valueType}}
-                                               ng-model="dataValues[de.id][oco.id][aoc.id].value"
+                                               ng-model="dataValues[de.id][oco.id][aoc.id].aggregateValue"
                                                ng-disabled="!aoc.dWrite"
                                                d2-tab-index
                                                tabindex={{tabOrder[de.id][oco.id][aoc.id]}}
@@ -186,7 +181,7 @@
                                     </span>
                                     <span ng-switch-when="BOOLEAN">
                                         <ui-select theme="select2"
-                                                   ng-model="dataValues[de.id][oco.id][aoc.id].value"
+                                                   ng-model="dataValues[de.id][oco.id][aoc.id].aggregateValue"
                                                    ng-disabled="!aoc.dWrite"
                                                    name="foo"
                                                    d2-tab-index
@@ -217,7 +212,6 @@
                             </span>
                         </ng-form>
                         <span ng-if="aoc.btaDimensionType === 'actual'">
-                            {{dataValues[de.id][oco.id][aoc.id].value}}
                         </span>
                     </td>
                     <td>
@@ -243,15 +237,15 @@
                 class="btn btn-success"
                 ng-click="saveCompletness()"
                 ng-hide="model.dataSetCompletness"
-                title="{{'submit_data'| translate}}">
-            {{'submit_data'| translate}}
+                title="{{'mark_complete'| translate}}">
+            {{'mark_complete'| translate}}
         </button>
         <button type="button"
                 class="btn btn-danger"
                 ng-click="deleteCompletness()"
                 ng-hide="!model.dataSetCompletness"
-                title="{{'un_submit_data'| translate}}">
-            {{'un_submit_data'| translate}}
+                title="{{'mark_incomplete'| translate}}">
+            {{'mark_incomplete'| translate}}
         </button>
     </div>-->
 </div>

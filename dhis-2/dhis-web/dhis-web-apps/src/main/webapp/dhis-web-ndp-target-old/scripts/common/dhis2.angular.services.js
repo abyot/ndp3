@@ -341,22 +341,17 @@ var d2Services = angular.module('d2Services', ['ngResource'])
             }
             return false;
         },
-        /*userHasWriteAccess: function( dataSetId ){
-            var dataSets = SessionStorageService.get('ACCESSIBLE_DATASETS');
-            dataSets = dataSets.dataSets;
-            if (dataSets && dataSets.length) {
-                for (var i = 0; i < dataSets.length; i++) {
-                    if (dataSets[i].id === dataSetId && dataSets[i].access && dataSets[i].access.data && dataSets[i].access.data.write) {
-                        return true;
-                    }
-                }
-            }
-            return false;
-        },*/
         getUsername: function(){
             var userProfile = SessionStorageService.get('USER_PROFILE');
             var username = userProfile && userProfile.userCredentials && userProfile.userCredentials.username ? userProfile.userCredentials.username : '';
             return username;
+        },
+        isNumberType: function( dataElement ){
+            var numberTypes = ['NUMBER', 'INTEGER_POSITIVE', 'INTEGER_NEGATIVE', 'INTEGER_ZERO_OR_POSITIVE', 'INTEGER'];
+            if ( dataElement && dataElement.valueType && numberTypes.indexOf( dataElement.valueType ) !== -1){
+                return true;
+            }
+            return false;
         },
         getSum: function( op1, op2 ){
             op1 = dhis2.validation.isNumber(op1) ? parseInt(op1) : 0;
@@ -373,6 +368,40 @@ var d2Services = angular.module('d2Services', ['ngResource'])
                 return $translate.instant('missing_target');
             }
             return parseFloat((op1 / op2)*100).toFixed(2) + '%';
+        },
+        getAverage: function( values ){
+            if ( values && values.length > 0 ){
+                var total = 0;
+                for( var i=0; i< values.length; i++){
+                    total = this.getSum( total, values[i] );
+                }
+                return total / values.length;
+            }
+            return 0;
+        },
+        getArraySum: function( values ){
+            var total = 0;
+            if ( values && values.length > 0 ){
+                for( var i=0; i< values.length; i++){
+                    total = this.getSum( total, values[i] );
+                }
+                return total;
+            }
+            return total;
+        },
+        getAgregateValue: function( dataElement, values ){
+            var result = '';
+            if ( this.isNumberType(dataElement) && dataElement.aggregationType ){
+                switch( dataElement.aggregationType ){
+                    case 'SUM':
+                        result = this.getArraySum( values );;
+                        break;
+                    case 'AVERAGE':
+                        result = this.getAverage( values );;
+                        break;
+                }
+            }
+            return result;
         },
         getRoleHeaders: function(){
             var headers = [];

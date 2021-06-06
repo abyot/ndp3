@@ -2,15 +2,15 @@
 
 /* App Module */
 
-var ndpDataEntry = angular.module('ndpDataEntry',
+var ndpTarget = angular.module('ndpTarget',
         ['ui.bootstrap', 
          'ngRoute', 
          'ngCookies',
          'ngSanitize',
          'ngMessages',
-         'ndpDataEntryServices',
-         'ndpDataEntryFilters',
-         'ndpDataEntryDirectives',
+         'ndpTargetServices',
+         'ndpTargetFilters',
+         'ndpTargetDirectives',
          'd2Directives',
          'd2Filters',
          'd2Services',

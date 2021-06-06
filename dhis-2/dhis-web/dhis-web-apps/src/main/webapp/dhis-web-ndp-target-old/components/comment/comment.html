@@ -23,17 +23,17 @@
                 </th>
             </tr>
         </thead>
-        <tr ng-repeat="aoc in selectedAttributeCategoryCombo.categoryOptionCombos">
+        <tr ng-repeat="aoc in selectedAttributeCategoryCombo.categoryOptionCombos" ng-if="aoc.btaDimensionType === 'target' || aoc.btaDimensionType === 'baseline'">
             <td class="col-sm-1 vertical-center">
                 {{aoc.displayName}}
             </td>
             <td class="col-sm-1 vertical-center">
-                {{dataValues[selectedDataElement.id][selectedCategoryOptionCombo.id][aoc.id].value}}
+                {{dataValues[selectedDataElement.id][selectedCategoryOptionCombo.id][aoc.id].aggregateValue}}
             </td>
             <td class="col-sm-4">
                 <input multiple type="file"
                        file-upload="model.fileInput[aoc.id]"
-                       ng-disabled="aoc.btaDimensionType !== 'actual' || !dataValues[selectedDataElement.id][selectedCategoryOptionCombo.id][aoc.id].value" />
+                       ng-disabled="aoc.btaDimensionType === 'actual' || !dataValues[selectedDataElement.id][selectedCategoryOptionCombo.id][aoc.id].value" />
                 <table class="small-vertical-spacing table table-bordered table-striped" ng-if="model.comment[aoc.id] && model.comment[aoc.id].attachment">
                     <thead>
                         <tr>
@@ -91,7 +91,7 @@
                         name="foo"
                         ng-model="model.comment[aoc.id].explanation"
                         class="form-control"
-                        ng-disabled="aoc.btaDimensionType !== 'actual' || !dataValues[selectedDataElement.id][selectedCategoryOptionCombo.id][aoc.id].value"
+                        ng-disabled="!dataValues[selectedDataElement.id][selectedCategoryOptionCombo.id][aoc.id].value"
                         ng-class="getInputNotifcationClass(selectedDataElement.id, selectedCategoryOptionCombo.id, aoc.id)"
                         d2-blur="saveComment(aoc)">
                 </textarea>

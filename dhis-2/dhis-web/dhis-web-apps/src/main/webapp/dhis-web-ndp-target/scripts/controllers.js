@@ -3,4 +3,4 @@
 'use strict';
 
 /* Controllers */
-var ndpTargetControllers = angular.module('ndpTargetControllers', []);
+var ndpDataEntryControllers = angular.module('ndpDataEntryControllers', []);

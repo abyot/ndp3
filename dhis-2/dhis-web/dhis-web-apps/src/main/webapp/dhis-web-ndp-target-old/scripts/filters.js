@@ -2,7 +2,7 @@
 
 /* Filters */
 
-var ndpDataEntryFilters = angular.module('ndpDataEntryFilters', [])
+var ndpTargetFilters = angular.module('ndpTargetFilters', [])
 
 .filter('fileSize', function(){
     return function(bytes){

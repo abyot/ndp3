@@ -4,7 +4,7 @@
 
 /* Directives */
 
-var ndpDataEntryDirectives = angular.module('ndpDataEntryDirectives', [])
+var ndpTargetDirectives = angular.module('ndpTargetDirectives', [])
 
 .directive('d2Blur', function () {
     return function (scope, elem, attrs) {

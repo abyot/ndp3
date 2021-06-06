@@ -1,5 +1,5 @@
 //Controller for column show/hide
-ndpDataEntry.controller('LeftBarMenuController',
+ndpTarget.controller('LeftBarMenuController',
         function($scope, $location) {
     $scope.showDataEntry = function(){
         selection.load();

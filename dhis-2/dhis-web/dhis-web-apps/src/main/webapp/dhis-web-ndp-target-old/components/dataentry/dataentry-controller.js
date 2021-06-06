@@ -1,9 +1,9 @@
-/* global angular, dhis2, ndpDataEntry */
+/* global angular, dhis2, ndpTarget */
 
 'use strict';
 
 //Controller for settings page
-ndpDataEntry.controller('DataEntryController',
+ndpTarget.controller('DataEntryController',
         function($scope,
                 $modal,
                 orderByFilter,
@@ -12,9 +12,7 @@ ndpDataEntry.controller('DataEntryController',
                 PeriodService,
                 CommonUtils,
                 DataValueService,
-                CompletenessService,
-                ModalService,
-                DialogService) {
+                EventService) {
 
     $scope.saveStatus = {};
     $scope.model = {
@@ -38,7 +36,9 @@ ndpDataEntry.controller('DataEntryController',
         attributes: [],
         selectedPeriod: null,
         periods: [],
-        periodOffset: 0
+        periodOffset: 0,
+        periodType: 'FinancialJuly',
+        actualPeriods: []
     };
 
     $scope.$watch('selectedOrgUnit', function() {
@@ -56,7 +56,6 @@ ndpDataEntry.controller('DataEntryController',
                             $scope.model.categoryCombosById[cc.id] = cc;
                         });
                         $scope.loadDataSets($scope.selectedOrgUnit);
-
                     });
                 });
             }
@@ -104,13 +103,23 @@ ndpDataEntry.controller('DataEntryController',
         $scope.dataValues = {};
         $scope.dataValuesCopy = {};
         $scope.saveStatus = {};
+
+        var getActualPeriods = function(){
+            $scope.model.actualPeriods = [];
+            if ( $scope.model.selectedPeriod && $scope.model.selectedPeriod.id ){
+                $scope.model.actualPeriods = PeriodService.getQuartersForYear( $scope.model.selectedPeriod, $scope.model.selectedDataSet.periodType );
+            }
+        };
+
+        getActualPeriods();
         $scope.loadDataEntryForm();
     });
+
 
     $scope.loadDataSetDetails = function(){
         if( $scope.model.selectedDataSet && $scope.model.selectedDataSet.id && $scope.model.selectedDataSet.periodType){
 
-            $scope.model.periods = PeriodService.getPeriods( $scope.model.selectedDataSet.periodType, $scope.model.periodOffset,  $scope.model.selectedDataSet.openFuturePeriods );
+            $scope.model.periods = PeriodService.getPeriods( $scope.model.periodType, $scope.model.periodOffset,  $scope.model.selectedDataSet.openFuturePeriods );
 
             if(!$scope.model.selectedDataSet.dataElements || $scope.model.selectedDataSet.dataElements.length < 1){
                 CommonUtils.notify('error', 'missing_data_elements_indicators');
@@ -152,11 +161,11 @@ ndpDataEntry.controller('DataEntryController',
         $scope.saveStatus = {};
         if( $scope.selectedOrgUnit && $scope.selectedOrgUnit.id &&
                 $scope.model.selectedDataSet && $scope.model.selectedDataSet.id &&
-                $scope.model.selectedPeriod && $scope.model.selectedPeriod.id ){
+                $scope.model.actualPeriods && $scope.model.actualPeriods.length > 0 ){
 
             var dataValueSetUrl = 'dataSet=' + $scope.model.selectedDataSet.id;
 
-            dataValueSetUrl += '&period=' + $scope.model.selectedPeriod.id;
+            dataValueSetUrl += '&period=' + $.map($scope.model.actualPeriods, function(pe){return pe.id;}).join(',');
 
             dataValueSetUrl += '&orgUnit=' + $scope.selectedOrgUnit.id;
 
@@ -165,42 +174,34 @@ ndpDataEntry.controller('DataEntryController',
                     $scope.model.valueExists = true;
 
                     angular.forEach(response.dataValues, function(dv){
-
+                        dv.period = $scope.model.selectedPeriod.id;
                         dv.value = CommonUtils.formatDataValue( $scope.model.dataElements[dv.dataElement], dv.value, $scope.model.optionSetsById, 'USER' );
+                        var de = $scope.model.dataElements[dv.dataElement];
 
-                        if(!$scope.dataValues[dv.dataElement]){
-                            $scope.dataValues[dv.dataElement] = {};
-                            $scope.dataValues[dv.dataElement][dv.categoryOptionCombo] = {};
-                            $scope.dataValues[dv.dataElement][dv.categoryOptionCombo][dv.attributeOptionCombo] = dv;
-                        }
-                        else if(!$scope.dataValues[dv.dataElement][dv.categoryOptionCombo]){
-                            $scope.dataValues[dv.dataElement][dv.categoryOptionCombo] = {};
-                            $scope.dataValues[dv.dataElement][dv.categoryOptionCombo][dv.attributeOptionCombo] = dv;
-                        }
-                        else if(!$scope.dataValues[dv.dataElement][dv.categoryOptionCombo][dv.attributeOptionCombo]){
-                            $scope.dataValues[dv.dataElement][dv.categoryOptionCombo][dv.attributeOptionCombo] = dv;
-                        }
+                        if ( de ){
+                            if(!$scope.dataValues[dv.dataElement]){
+                                $scope.dataValues[dv.dataElement] = {};
+                                $scope.dataValues[dv.dataElement][dv.categoryOptionCombo] = {};
+                                $scope.dataValues[dv.dataElement][dv.categoryOptionCombo][dv.attributeOptionCombo] = {quarterValues: []};
+                            }
+                            if(!$scope.dataValues[dv.dataElement][dv.categoryOptionCombo]){
+                                $scope.dataValues[dv.dataElement][dv.categoryOptionCombo] = {};
+                                $scope.dataValues[dv.dataElement][dv.categoryOptionCombo][dv.attributeOptionCombo] = {quarterValues: []};
+                            }
+                            if(!$scope.dataValues[dv.dataElement][dv.categoryOptionCombo][dv.attributeOptionCombo]){
+                                $scope.dataValues[dv.dataElement][dv.categoryOptionCombo][dv.attributeOptionCombo] = {quarterValues: []};
+                            }
 
-                        if( dv.comment ){
-                            $scope.dataValues[dv.dataElement][dv.categoryOptionCombo].hasComment = true;
+                            $scope.dataValues[dv.dataElement][dv.categoryOptionCombo][dv.attributeOptionCombo] = Object.assign($scope.dataValues[dv.dataElement][dv.categoryOptionCombo][dv.attributeOptionCombo], dv);
+                            $scope.dataValues[dv.dataElement][dv.categoryOptionCombo][dv.attributeOptionCombo].quarterValues.push( dv.value );
+                            $scope.dataValues[dv.dataElement][dv.categoryOptionCombo][dv.attributeOptionCombo].aggregateValue = CommonUtils.getAgregateValue( de, $scope.dataValues[dv.dataElement][dv.categoryOptionCombo][dv.attributeOptionCombo].quarterValues)
+
+                            if( dv.comment ){
+                                $scope.dataValues[dv.dataElement][dv.categoryOptionCombo][dv.attributeOptionCombo].hasComment = true;
+                            }
                         }
                     });
-
                     copyDataValues();
-                }
-            });
-
-            CompletenessService.get( $scope.model.selectedDataSet.id,
-                                    $scope.selectedOrgUnit.id,
-                                    $scope.model.selectedPeriod.startDate,
-                                    $scope.model.selectedPeriod.endDate,
-                                    false).then(function(response){
-                if( response &&
-                        response.completeDataSetRegistrations &&
-                        response.completeDataSetRegistrations.length &&
-                        response.completeDataSetRegistrations.length > 0){
-
-                    $scope.model.dataSetCompletness = true;
                 }
             });
         }
@@ -242,7 +243,7 @@ ndpDataEntry.controller('DataEntryController',
 
         $scope.model.periodOffset = mode === 'NXT' ? ++$scope.model.periodOffset : --$scope.model.periodOffset;
 
-        $scope.model.periods = PeriodService.getPeriods( $scope.model.selectedDataSet.periodType, $scope.model.periodOffset,  $scope.model.selectedDataSet.openFuturePeriods );
+        $scope.model.periods = PeriodService.getPeriods( $scope.model.periodType, $scope.model.periodOffset,  $scope.model.selectedDataSet.openFuturePeriods );
     };
 
     $scope.saveDataValue = function( deId, ocId, aoc ){
@@ -256,29 +257,35 @@ ndpDataEntry.controller('DataEntryController',
 
         //form is valid
         $scope.saveStatus[ deId + '-' + ocId + '-' + aoc.id ] = {saved: false, pending: true, error: false};
-
-        var dataValue = {ou: $scope.selectedOrgUnit.id,
-                    pe: $scope.model.selectedPeriod.id,
-                    de: deId,
-                    co: ocId,
-                    value: $scope.dataValues[deId][ocId][aoc.id].value
-                };
-
-        dataValue.value = CommonUtils.formatDataValue( $scope.model.dataElements[deId], dataValue.value, $scope.model.optionSetsById, 'API' );
-
-        var deleteComment = false;
-        if( !dataValue.value ){
-            dataValue.value =  "";
-            if( $scope.dataValues[deId][ocId][aoc.id].comment ){
-                deleteComment = true;
-                $scope.dataValues[deId][ocId][aoc.id].comment = "";
+        var de = $scope.model.dataElements[deId];
+        var value = CommonUtils.formatDataValue( de, $scope.dataValues[deId][ocId][aoc.id].aggregateValue, $scope.model.optionSetsById, 'API' );
+        var comment = $scope.dataValues[deId][ocId][aoc.id].comment;
+        var eventsToClear = [];
+        if( !value || value === "" ){
+            value = "";
+            comment = JSON.parse( comment );
+            if ( comment && comment.attachment ){
+                eventsToClear = comment.attachment;
             }
         }
-
-        if( $scope.model.selectedAttributeCategoryCombo && !$scope.model.selectedAttributeCategoryCombo.isDefault ){
-            dataValue.cc = $scope.model.selectedAttributeCategoryCombo.id;
-            dataValue.cp = CommonUtils.getOptionIds(aoc.categoryOptions);
+        else {
+            value = de && de.aggregationType === 'SUM' ? value / 4 : value;
         }
+        var dataValueSet = {
+            dataValues: []
+        };
+        angular.forEach($scope.model.actualPeriods, function(p){
+            dataValueSet.dataValues.push( {
+                orgUnit: $scope.selectedOrgUnit.id,
+                dataElement: deId,
+                categoryOptionCombo: ocId,
+                attributeOptionCombo: aoc.id,
+                value: value,
+                deleted: value === "" || !value,
+                period: p.id,
+                comment: comment
+            });
+        });
 
         var processDataValue = function(){
             copyDataValues();
@@ -296,76 +303,19 @@ ndpDataEntry.controller('DataEntryController',
             $scope.saveStatus[deId + '-' + ocId + '-' + aoc.id].error = true;
         };
 
-        DataValueService.saveDataValue( dataValue ).then(function(){
-            if( deleteComment ){
-                dataValue.comment = "";
-                DataValueService.saveComment( dataValue ).then(function(){
+        DataValueService.saveDataValueSet( dataValueSet ).then(function(){
+            saveSuccessStatus();
+            processDataValue();
+            if ( eventsToClear.length > 0 ){
+                angular.forEach(eventsToClear, function(ev){
+                    EventService.deleteEvent(ev).then(function(data){
+                        delete $scope.dataValues[deId][ocId][aoc.id].comment;
+                        $scope.dataValues[deId][ocId][aoc.id].hasComment = false;
+                    });
                 });
-            }
-           saveSuccessStatus();
-           processDataValue();
+           }
         }, function(){
             saveFailureStatus();
-        });
-    };
-
-    $scope.saveCompletness = function(){
-        var modalOptions = {
-            closeButtonText: 'no',
-            actionButtonText: 'yes',
-            headerText: 'mark_complete',
-            bodyText: 'are_you_sure_to_save_completeness'
-        };
-
-        ModalService.showModal({}, modalOptions).then(function(result){
-            var dsr = {completeDataSetRegistrations: []};
-            angular.forEach($scope.model.selectedAttributeCategoryCombo.categoryOptionCombos, function(aoc){
-                dsr.completeDataSetRegistrations.push( {dataSet: $scope.model.selectedDataSet.id, organisationUnit: $scope.selectedOrgUnit.id, period: $scope.model.selectedPeriod.id, attributeOptionCombo: aoc.id} );
-            });
-
-            CompletenessService.saveDsr(dsr).then(function(response){
-                var dialogOptions = {
-                    headerText: 'success',
-                    bodyText: 'marked_complete'
-                };
-                DialogService.showDialog({}, dialogOptions);
-                $scope.model.dataSetCompletness = true;
-
-            }, function(response){
-                CommonUtils.errorNotifier( response );
-            });
-        });
-    };
-
-    $scope.deleteCompletness = function( orgUnit, multiOrgUnit){
-        var modalOptions = {
-            closeButtonText: 'no',
-            actionButtonText: 'yes',
-            headerText: 'mark_incomplete',
-            bodyText: 'are_you_sure_to_delete_completeness'
-        };
-
-        ModalService.showModal({}, modalOptions).then(function(result){
-
-            angular.forEach($scope.model.selectedAttributeCategoryCombo.categoryOptionCombos, function(aoc){
-                CompletenessService.delete($scope.model.selectedDataSet.id,
-                    $scope.model.selectedPeriod.id,
-                    $scope.selectedOrgUnit.id,
-                    $scope.model.selectedAttributeCategoryCombo.id,
-                    CommonUtils.getOptionIds(aoc.categoryOptions),
-                    false).then(function(response){
-
-                    var dialogOptions = {
-                        headerText: 'success',
-                        bodyText: 'marked_incomplete'
-                    };
-                    DialogService.showDialog({}, dialogOptions);
-                    $scope.model.dataSetCompletness = false;
-
-                }, function(response){
-                    CommonUtils.errorNotifier( response );
-                });
-            });
         });
     };
 
@@ -429,6 +379,9 @@ ndpDataEntry.controller('DataEntryController',
                 selectedPeriod: function(){
                     return $scope.model.selectedPeriod;
                 },
+                actualPeriods: function(){
+                    return $scope.model.actualPeriods;
+                },
                 dataValues: function(){
                     return $scope.dataValues;
                 },
@@ -440,6 +393,9 @@ ndpDataEntry.controller('DataEntryController',
                 },
                 selectedAttributeCategoryCombo: function(){
                     return $scope.model.selectedAttributeCategoryCombo;
+                },
+                optionSetsById: function(){
+                    return $scope.model.optionSetsById;
                 }
             }
         });
