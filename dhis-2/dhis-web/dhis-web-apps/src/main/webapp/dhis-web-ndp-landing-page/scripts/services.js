@@ -532,62 +532,6 @@ var ndpFrameworkServices = angular.module('ndpFrameworkServices', ['ngResource']
             });
             return promise;
         },
-        /*getMdas: function(){
-            var filter = '?paging=false&fields=id,displayName,organisationUnitGroups[id,displayName,code,attributeValues[value,attribute[id,code,valueType]],organisationUnits[id,displayName,code,dataSets[dataSetElements[dataElement[dataElementGroups[groupSets[id]]]]]]],attributeValues[value,attribute[id,code,valueType]]';
-            var url = dhis2.ndp.apiUrl + '/organisationUnitGroupSets.json' + encodeURI( filter );
-            var promise = $http.get( url ).then(function(response){
-                var mdas = [];
-                if( response && response.data && response.data.organisationUnitGroupSets){
-                    var ogss = response.data.organisationUnitGroupSets;
-                    angular.forEach(ogss, function(ogs){
-                        ogs = dhis2.metadata.processMetaDataAttribute( ogs );
-                        if( ogs.orgUnitGroupSetType && ogs.orgUnitGroupSetType === 'mdalg' && ogs.organisationUnitGroups.length > 0 ){
-                            angular.forEach(ogs.organisationUnitGroups, function(og){
-                                og = dhis2.metadata.processMetaDataAttribute( og );
-                                if( og.orgUnitGroupType && og.orgUnitGroupType === 'mda' && og.organisationUnits){
-                                    angular.forEach(og.organisationUnits, function(ou){
-                                        mdas.push( ou.id );
-                                    });
-                                }
-                            });
-                        }
-                    });
-                }
-                return mdas;
-            }, function(response){
-                CommonUtils.errorNotifier(response);
-                return response.data;
-            });
-            return promise;
-        },
-        getLgs: function(){
-            var filter = '?paging=false&fields=id,displayName,organisationUnitGroups[id,displayName,code,attributeValues[value,attribute[id,code,valueType]],organisationUnits[id,displayName,code,dataSets[dataSetElements[dataElement[dataElementGroups[groupSets[id]]]]]]],attributeValues[value,attribute[id,code,valueType]]';
-            var url = dhis2.ndp.apiUrl + '/organisationUnitGroupSets.json' + encodeURI( filter );
-            var promise = $http.get( url ).then(function(response){
-                var lgs = [];
-                if( response && response.data && response.data.organisationUnitGroupSets){
-                    var ogss = response.data.organisationUnitGroupSets;
-                    angular.forEach(ogss, function(ogs){
-                        ogs = dhis2.metadata.processMetaDataAttribute( ogs );
-                        if( ogs.orgUnitGroupSetType && ogs.orgUnitGroupSetType === 'mdalg' && ogs.organisationUnitGroups.length > 0 ){
-                            angular.forEach(ogs.organisationUnitGroups, function(og){
-                                og = dhis2.metadata.processMetaDataAttribute( og );
-                                if( og.orgUnitGroupType && og.orgUnitGroupType === 'lg' && og.organisationUnits){
-                                    angular.forEach(og.organisationUnits, function(ou){
-                                        lgs.push( ou.id );
-                                    });
-                                }
-                            });
-                        }
-                    });
-                }
-                return lgs;
-            }, function(response){
-                CommonUtils.errorNotifier(response);
-                return response.data;
-            });
-            return promise;
-        },*/
         getByGroup: function( group ){
             if ( !group ){
                 return CommonUtils.dummyPromise([]);
@@ -1512,7 +1456,6 @@ var ndpFrameworkServices = angular.module('ndpFrameworkServices', ['ngResource']
         }
     };
 })
-
 
 .service('DataValueService', function($http, CommonUtils) {
 

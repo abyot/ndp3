@@ -145,6 +145,11 @@ ndpFramework.controller('ObjectiveController',
 
         $scope.model.bta = bta;
         $scope.model.baseLineTargetActualDimensions = $.map($scope.model.bta.options, function(d){return d.id;});
+        $scope.model.targetDimension = $.map($scope.model.bta.options, function(d){
+            if( d.btaDimensionType === 'target' ){
+                return d;
+            }
+        });
 
         MetaDataFactory.getAll('dataElements').then(function(dataElements){
 
@@ -306,6 +311,7 @@ ndpFramework.controller('ObjectiveController',
                             selectedDataElementGroup: $scope.model.selectedKra,
                             dataElementGroups: $scope.model.dataElementGroups,
                             basePeriod: $scope.model.basePeriod,
+                            targetDimension: $scope.model.targetDimension,
                             maxPeriod: $scope.model.selectedPeriods.slice(-1)[0],
                             allPeriods: $scope.model.allPeriods,
                             dataElementsById: $scope.model.dataElementsById,

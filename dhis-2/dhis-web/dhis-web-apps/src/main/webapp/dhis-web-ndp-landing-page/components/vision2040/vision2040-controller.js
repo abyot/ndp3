@@ -56,7 +56,7 @@ ndpFramework.controller('Vision2040Controller',
         $scope.model.bta = bta;
         $scope.model.targetDimension = $.map($scope.model.bta.options, function(d){
             if( d.btaDimensionType === 'target' ){
-                return d.id;
+                return d;
             }
         });
 
@@ -178,7 +178,7 @@ ndpFramework.controller('Vision2040Controller',
         }
 
         if( !$scope.model.dataElementGroup || $scope.model.dataElementGroup.length === 0){
-            NotificationService.showNotifcationDialog($translate.instant("error"), $translate.instant("missing_goal"));
+            NotificationService.showNotifcationDialog($translate.instant("error"), $translate.instant("missing_vision2040_items"));
             return;
         }
 
@@ -228,7 +228,6 @@ ndpFramework.controller('Vision2040Controller',
             co: oc
         };
 
-        console.log('fitlerr: ', filterParams);
         var res = $filter('dataFilter')($scope.model.data, filterParams);
         return res && res[0] && res[0].value ? res[0].value : '';
     };

@@ -20,9 +20,9 @@
                             {{aoc.displayName}}
                         </span>
                     </th>
-                    <th>
+                    <!--<th>
                         {{'explanation_attachment' | translate}}
-                    </th>
+                    </th>-->
                 </tr>
             </thead>
             <tbody ng-repeat="de in model.selectedDataSet.dataElements"
@@ -220,7 +220,7 @@
                             {{dataValues[de.id][oco.id][aoc.id].value}}
                         </span>
                     </td>
-                    <td>
+                    <!--<td>
                         <div class="input-group cursor-pointer" ng-click="displayCommentBox(de.id, oco)">
                             <input type="text"
                                 name="foo"
@@ -232,7 +232,7 @@
                                 </button>
                             </span>
                         </div>
-                    </td>
+                    </td>-->
                 </tr>
             </tbody>
         </table>

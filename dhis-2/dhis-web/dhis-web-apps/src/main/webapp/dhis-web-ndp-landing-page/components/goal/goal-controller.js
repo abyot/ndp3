@@ -144,6 +144,11 @@ ndpFramework.controller('GoalController',
 
         $scope.model.bta = bta;
         $scope.model.baseLineTargetActualDimensions = $.map($scope.model.bta.options, function(d){return d.id;});
+        $scope.model.targetDimension = $.map($scope.model.bta.options, function(d){
+            if( d.btaDimensionType === 'target' ){
+                return d;
+            }
+        });
 
         MetaDataFactory.getAll('dataElements').then(function(dataElements){
 
@@ -181,9 +186,12 @@ ndpFramework.controller('GoalController',
                                 o.hasChildren = o.children && o.children.length > 0 ? true : false;
                             });
                         });
-                        $scope.selectedOrgUnit = $scope.orgUnits[0] ? $scope.orgUnits[0] : null;
 
-                        $scope.model.dashboardName = 'Goals';
+                        $scope.selectedOrgUnit = $scope.orgUnits[0] ? $scope.orgUnits[0] : null;
+                        $scope.model.dashboardFetched = true;
+                        $scope.populateMenu();
+
+                        /*$scope.model.dashboardName = 'Goals';
                         DashboardService.getByName( $scope.model.dashboardName ).then(function( result ){
                             $scope.model.dashboardItems = result.dashboardItems;
                             $scope.model.charts = result.charts;
@@ -192,7 +200,7 @@ ndpFramework.controller('GoalController',
                             $scope.model.dashboardFetched = true;
 
                             $scope.populateMenu();
-                        });
+                        });*/
                     });
                 });
             });
@@ -305,6 +313,7 @@ ndpFramework.controller('GoalController',
                             selectedDataElementGroup: $scope.model.selectedKra,
                             dataElementGroups: $scope.model.dataElementGroups,
                             basePeriod: $scope.model.basePeriod,
+                            targetDimension: $scope.model.targetDimension,
                             maxPeriod: $scope.model.selectedPeriods.slice(-1)[0],
                             allPeriods: $scope.model.allPeriods,
                             dataElementsById: $scope.model.dataElementsById,
@@ -312,11 +321,11 @@ ndpFramework.controller('GoalController',
                             displayVision2040: true
                         };
 
-                        var processedData = Analytics.processData( dataParams );
+                        var processedData = Analytics.processData( dataParams ) || {};
 
-                        $scope.model.dataHeaders = processedData.dataHeaders;
-                        $scope.model.reportPeriods = processedData.reportPeriods;
-                        $scope.model.dataExists = processedData.dataExists;
+                        $scope.model.dataHeaders = processedData.dataHeaders || [];
+                        $scope.model.reportPeriods = processedData.reportPeriods || [];
+                        $scope.model.dataExists = processedData.dataExists || false;
                         $scope.model.resultData = processedData.resultData || [];
                         $scope.model.performanceData = processedData.performanceData || [];
                         $scope.model.cumulativeData = processedData.cumulativeData || [];

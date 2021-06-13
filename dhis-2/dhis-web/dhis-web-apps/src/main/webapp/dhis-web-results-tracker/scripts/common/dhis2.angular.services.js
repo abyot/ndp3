@@ -426,6 +426,13 @@ var d2Services = angular.module('d2Services', ['ngResource'])
 
             return optionNames.slice(0,-1);
         },
+        notify: function(header, body){
+            var dialogOptions = {
+                headerText: $translate.instant(header),
+                bodyText: $translate.instant(body)
+            };
+            DialogService.showDialog({}, dialogOptions);
+        },
         errorNotifier: function(response){
             if( response && response.data && response.data.status === 'ERROR'){
                 var dialogOptions = {
