@@ -648,12 +648,13 @@ var ndpFrameworkServices = angular.module('ndpFrameworkServices', ['ngResource']
             var dataHeaders = [];
             var performanceHeaders = orderByFilter( dataParams.reportPeriods, '-id').reverse();
             var resultData = [];
+            var physicalPerformanceData = []
             var performanceData = [];
             var cumulativeData = [];
             var costData = [];
             var costEffData = [];
             var redCells = 0, yellowCells = 0, greenCells = 0, totalRows = 0;
-            var hasTrafficLight = false;
+            var hasPhysicalPerformanceData = true;
 
             var mergeBtaData = function( _data ){
                 var data = angular.copy( _data );
@@ -746,17 +747,17 @@ var ndpFrameworkServices = angular.module('ndpFrameworkServices', ['ngResource']
                     if ( val <= r ){
                         color = 'red';
                         redCells++;
-                        hasTrafficLight = true;
+                        hasPhysicalPerformanceData = true;
                     }
                     else if( val >= y1 && val <= y2 ){
                         color = 'yellow';
                         yellowCells++;
-                        hasTrafficLight = true;
+                        hasPhysicalPerformanceData = true;
                     }
                     else if( val >= g){
                         color = 'green';
                         greenCells++;
-                        hasTrafficLight = true;
+                        hasPhysicalPerformanceData = true;
                     }
                     else {
                         color = "";
@@ -889,6 +890,7 @@ var ndpFrameworkServices = angular.module('ndpFrameworkServices', ['ngResource']
                 performanceData = [];
                 costData = [];
                 var resultRow = [], parsedResultRow = [],
+                    physicalPerformanceRow = [], parsedPhysicalPerformanceRow = [],
                     performanceRow = [], parsedPerformanceRow = [],
                     cumulativeRow = [], parsedCumulativeRow = [],
                     costRow = [], parsedCostRow = [],
@@ -899,6 +901,7 @@ var ndpFrameworkServices = angular.module('ndpFrameworkServices', ['ngResource']
                     var groupSet = {val: degs.displayName, span: 0};
                     var addLeadingRow = function(){
                         resultRow.push(groupSet);
+                        physicalPerformanceRow.push(groupSet);
                         performanceRow.push(groupSet);
                         cumulativeRow.push(groupSet);
                         costRow.push(groupSet);
@@ -918,6 +921,7 @@ var ndpFrameworkServices = angular.module('ndpFrameworkServices', ['ngResource']
 
                                     //Result data
                                     resultRow.push({val: name , span: 1, info: de.id});
+                                    physicalPerformanceRow.push({val: name , span: 1, info: de.id});
                                     angular.forEach(dataHeaders, function(dh){
                                         var period = {
                                             id: dh.periodId,
@@ -938,13 +942,22 @@ var ndpFrameworkServices = angular.module('ndpFrameworkServices', ['ngResource']
                                         var val = filterResultData(dh, de.id, oc.id, data, dataParams);
                                         var trafficLight = getTrafficLight(val, de.id, dh.dimensionId);
 
-                                        resultRow.push({val: val, span: 1, trafficLight: trafficLight, details: de.id, period: period, coc: oc, aoc: dh.dimensionId});
+                                        if ( dh.dimensionId === dataParams.targetDimension.id ){
+                                            resultRow.push({val: val, span: 1, details: de.id, period: period, coc: oc, aoc: dh.dimensionId});
+                                        }
+
+                                        physicalPerformanceRow.push({val: val, span: 1, trafficLight: trafficLight, details: de.id, period: period, coc: oc, aoc: dh.dimensionId});
+
                                     });
                                     if ( dataParams.displayVision2040 && dataParams.dataElementsById[de.id] ){
                                         resultRow.push({vision2040: dataParams.dataElementsById[de.id].vision2040});
+                                        physicalPerformanceRow.push({vision2040: dataParams.dataElementsById[de.id].vision2040});
                                     }
                                     parsedResultRow.push(resultRow);
                                     resultRow = [];
+
+                                    parsedPhysicalPerformanceRow.push(physicalPerformanceRow);
+                                    physicalPerformanceRow = [];
 
                                     //Action data
                                     var actions = dataParams.actionsByDataElement && dataParams.actionsByDataElement[de.id] ? dataParams.actionsByDataElement[de.id] : [];
@@ -1090,6 +1103,7 @@ var ndpFrameworkServices = angular.module('ndpFrameworkServices', ['ngResource']
 
                         //Result data
                         resultRow.push({val: "" , span: 1, info: ""});
+                        physicalPerformanceRow.push({val: "" , span: 1, info: ""});
                         angular.forEach(dataHeaders, function(dh){
                             var period = {
                                 id: dh.periodId,
@@ -1099,9 +1113,13 @@ var ndpFrameworkServices = angular.module('ndpFrameworkServices', ['ngResource']
                             var val = "";
                             var trafficLight = "";
                             resultRow.push({val: val, span: 1, trafficLight: trafficLight, details: "", period: period, coc: "", aoc: dh.dimensionId});
+                            physicalPerformanceRow.push({val: val, span: 1, trafficLight: trafficLight, details: "", period: period, coc: "", aoc: dh.dimensionId});
                         });
                         parsedResultRow.push(resultRow);
                         resultRow = [];
+
+                        parsedPhysicalPerformanceRow.push(physicalPerformanceRow);
+                        physicalPerformanceRow = [];
                     };
 
                     if ( degs.dataElementGroups && degs.dataElementGroups.length > 0 ){
@@ -1111,6 +1129,7 @@ var ndpFrameworkServices = angular.module('ndpFrameworkServices', ['ngResource']
                                 if ( deg.id === dataParams.selectedDataElementGroup.id ){
                                     var group = {val: deg.displayName, span: 0};
                                     resultRow.push(group);
+                                    physicalPerformanceRow.push(group);
                                     performanceRow.push(group);
                                     cumulativeRow.push(group);
                                     costRow.push(group);
@@ -1123,6 +1142,7 @@ var ndpFrameworkServices = angular.module('ndpFrameworkServices', ['ngResource']
                             else{
                                 var group = {val: deg.displayName, span: 0};
                                 resultRow.push(group);
+                                physicalPerformanceRow.push(group);
                                 performanceRow.push(group);
                                 cumulativeRow.push(group);
                                 costRow.push(group);
@@ -1138,6 +1158,7 @@ var ndpFrameworkServices = angular.module('ndpFrameworkServices', ['ngResource']
                     }
                 });
                 resultData = parsedResultRow;
+                physicalPerformanceData = parsedPhysicalPerformanceRow;
                 performanceData = parsedPerformanceRow;
                 cumulativeData = parsedCumulativeRow;
                 costData = parsedCostRow;
@@ -1147,6 +1168,7 @@ var ndpFrameworkServices = angular.module('ndpFrameworkServices', ['ngResource']
             return {
                 performanceData: performanceData,
                 resultData: resultData,
+                physicalPerformanceData: physicalPerformanceData,
                 cumulativeData: cumulativeData,
                 costData: costData,
                 costEffData: costEffData,
@@ -1157,7 +1179,7 @@ var ndpFrameworkServices = angular.module('ndpFrameworkServices', ['ngResource']
                 yellowCells: yellowCells,
                 greenCells: greenCells,
                 totalRows: totalRows,
-                hasTrafficLight: hasTrafficLight,
+                hasPhysicalPerformanceData: hasPhysicalPerformanceData,
                 actionCost: actionCost
             };
         }

@@ -144,9 +144,14 @@ ndpFramework.controller('GoalController',
 
         $scope.model.bta = bta;
         $scope.model.baseLineTargetActualDimensions = $.map($scope.model.bta.options, function(d){return d.id;});
-        $scope.model.targetDimension = $.map($scope.model.bta.options, function(d){
-            if( d.btaDimensionType === 'target' ){
-                return d;
+        $scope.model.actualDimension = null;
+        $scope.model.targetDimension = null;
+        angular.forEach(bta.options, function(op){
+            if ( op.btaDimensionType === 'actual' ){
+                $scope.model.actualDimension = op;
+            }
+            if ( op.btaDimensionType === 'target' ){
+                $scope.model.targetDimension = op;
             }
         });
 

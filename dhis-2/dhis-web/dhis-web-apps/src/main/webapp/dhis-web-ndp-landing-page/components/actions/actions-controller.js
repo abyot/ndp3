@@ -332,7 +332,7 @@ ndpFramework.controller('ActionsController',
                         $scope.model.resultData = processedData.resultData || [];
                         $scope.model.performanceData = processedData.performanceData || [];
                         $scope.model.cumulativeData = processedData.cumulativeData || [];
-                        $scope.model.hasTrafficLight = processedData.hasTrafficLight;
+                        $scope.model.hasPhysicalPerformanceData = processedData.hasPhysicalPerformanceData;
                         $scope.model.actionData = processedData.actionCost;
                     }
                 });

@@ -52,7 +52,7 @@
                         <th class="sticky"></th>
                         <th class="sticky"></th>
                         <th class="sticky"></th>
-                        <th class="center sticky" colspan="{{period.colSpan}}" ng-repeat="period in model.reportPeriods" ng-if="period.hasData">
+                        <th class="center sticky" ng-repeat="period in model.reportPeriods" ng-if="period.hasData">
                             {{period.displayName}}
                         </th>
                     </tr>
@@ -60,7 +60,7 @@
                         <th class="sticky">{{'programme_objectives'| translate}}</th>
                         <th class="sticky">{{'outcomes'| translate}}</th>
                         <th class="sticky">{{'indicator'| translate}}</th>
-                        <th class="center sticky" ng-repeat="header in model.dataHeaders">
+                        <th class="center sticky" ng-repeat="header in model.dataHeaders" ng-if="header.dimensionId === model.targetDimension.id">
                             {{model.metaData.items[header.dimensionId].name}}
                         </th>
                     </tr>

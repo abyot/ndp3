@@ -44,7 +44,7 @@ ndpFramework.controller('SubProgrammeOutputController',
 
     $scope.model.horizontalMenus = [
         {id: 'result', title: 'results', order: 1, view: 'components/sub-programme-output/results.html', active: true, class: 'main-horizontal-menu'},
-        {id: 'trafficLight', title: 'traffic_light', order: 2, view: 'components/sub-programme-output/traffic-light.html', class: 'main-horizontal-menu'},
+        {id: 'physicalPerformance', title: 'physical_performance', order: 2, view: 'components/sub-programme-output/physical-performance.html', class: 'main-horizontal-menu'},
         {id: 'budgetPerformance', title: 'budget_performance', order: 3, view: 'components/sub-programme-output/budget-performance.html', class: 'main-horizontal-menu'},
         {id: 'dashboard', title: 'dashboard', order: 6, view: 'views/dashboard.html', class: 'main-horizontal-menu'}
     ];
@@ -139,9 +139,13 @@ ndpFramework.controller('SubProgrammeOutputController',
             $scope.model.bta = bta;
             $scope.model.baseLineTargetActualDimensions = $.map($scope.model.bta.options, function(d){return d.id;});
             $scope.model.actualDimension = null;
+            $scope.model.targetDimension = null;
             angular.forEach(bta.options, function(op){
                 if ( op.btaDimensionType === 'actual' ){
                     $scope.model.actualDimension = op;
+                }
+                if ( op.btaDimensionType === 'target' ){
+                    $scope.model.targetDimension = op;
                 }
             });
 
@@ -282,6 +286,7 @@ ndpFramework.controller('SubProgrammeOutputController',
                         reportPeriods: angular.copy( $scope.model.selectedPeriods ),
                         bta: $scope.model.bta,
                         actualDimension: $scope.model.actualDimension,
+                        targetDimension: $scope.model.targetDimension,
                         selectedDataElementGroupSets: $scope.model.selectedDataElementGroupSets,
                         selectedDataElementGroup: $scope.model.selectedKra,
                         dataElementGroups: $scope.model.dataElementGroups,
@@ -297,9 +302,10 @@ ndpFramework.controller('SubProgrammeOutputController',
                     $scope.model.reportPeriods = processedData.reportPeriods;
                     $scope.model.dataExists = processedData.dataExists;
                     $scope.model.resultData = processedData.resultData || [];
+                    $scope.model.physicalPerformanceData = processedData.physicalPerformanceData || [];
                     $scope.model.performanceData = processedData.performanceData || [];
                     $scope.model.cumulativeData = processedData.cumulativeData || [];
-                    $scope.model.hasTrafficLight = processedData.hasTrafficLight;
+                    $scope.model.hasPhysicalPerformanceData = processedData.hasPhysicalPerformanceData;
                 }
             });
         }
