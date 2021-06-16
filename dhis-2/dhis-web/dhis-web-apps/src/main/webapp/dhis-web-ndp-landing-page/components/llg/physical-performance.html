@@ -104,7 +104,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <tr ng-repeat="row in model.resultData">
+                    <tr ng-repeat="row in model.physicalPerformanceData">
                         <td class="vertical-center" ng-repeat="col in row" rowspan="{{col.span}}" ng-class="col.trafficLight">
                             {{col.val}}
                             <span ng-if="col.info" ng-click="getIndicatorDictionary(col.info)">

@@ -3,7 +3,7 @@
         <div class="col-sm-7 green-info-area">
             <div class="row small-vertical-spacing">
                 <div class="col-sm-2">
-                    {{'mda'| translate}}
+                    {{'lg'| translate}}
                 </div>
                 <div class="col-sm-10">
                     <div class="input-group">
@@ -104,7 +104,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <tr ng-repeat="row in model.resultData">
+                    <tr ng-repeat="row in model.physicalPerformanceData">
                         <td class="vertical-center" ng-repeat="col in row" rowspan="{{col.span}}" ng-class="col.trafficLight">
                             {{col.val}}
                             <span ng-if="col.info" ng-click="getIndicatorDictionary(col.info)">
@@ -125,5 +125,5 @@
 </div>
 
 <div class="alert alert-warning" ng-if="selectedOrgUnit && model.dataElementGroup.length === 0">
-    {{'mda_has_no_interventions'| translate}}
+    {{'lg_has_no_interventions'| translate}}
 </div>

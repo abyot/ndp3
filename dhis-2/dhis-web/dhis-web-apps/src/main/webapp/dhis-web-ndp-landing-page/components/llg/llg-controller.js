@@ -43,7 +43,7 @@ ndpFramework.controller('LLGController',
     };
 
     $scope.model.horizontalMenus = [
-        {id: 'trafficLight', title: 'traffic_light', order: 1, view: 'components/llg/traffic-light.html', active: true, class: 'main-horizontal-menu'},
+        {id: 'physicalPerformance', title: 'physical_performance', order: 1, view: 'components/llg/physical-performance.html', active: true, class: 'main-horizontal-menu'},
         {id: 'budgetPerformance', title: 'budget_performance', order: 2, view: 'components/llg/budget-performance.html', class: 'main-horizontal-menu'},
         {id: 'dashboard', title: 'dashboard', order: 3, view: 'components/llg/dashboard.html', class: 'main-horizontal-menu'}
     ];
@@ -167,9 +167,17 @@ ndpFramework.controller('LLGController',
                     $scope.model.bta = bta;
                     $scope.model.baseLineTargetActualDimensions = $.map($scope.model.bta.options, function(d){return d.id;});
                     $scope.model.actualDimension = null;
+                    $scope.model.targetDimension = null;
+                    $scope.model.baselineDimension = null;
                     angular.forEach(bta.options, function(op){
                         if ( op.btaDimensionType === 'actual' ){
                             $scope.model.actualDimension = op;
+                        }
+                        if ( op.btaDimensionType === 'target' ){
+                            $scope.model.targetDimension = op;
+                        }
+                        if ( op.btaDimensionType === 'baseline' ){
+                            $scope.model.baselineDimension = op;
                         }
                     });
 
@@ -363,6 +371,8 @@ ndpFramework.controller('LLGController',
                         reportPeriods: angular.copy( $scope.model.selectedPeriods ),
                         bta: $scope.model.bta,
                         actualDimension: $scope.model.actualDimension,
+                        targetDimension: $scope.model.targetDimension,
+                        baselineDimension: $scope.model.baselineDimension,
                         selectedDataElementGroupSets: $scope.model.selectedDataElementGroupSets,
                         selectedDataElementGroup: $scope.model.selectedKra,
                         dataElementGroups: $scope.model.dataElementGroups,
@@ -377,9 +387,10 @@ ndpFramework.controller('LLGController',
 
                     $scope.model.dataHeaders = processedData.dataHeaders;
                     $scope.model.reportPeriods = processedData.reportPeriods;
-                    $scope.model.dataExists = processedData.dataExists;
+                    $scope.model.dataExists = processedData.dataExists || false;
                     $scope.model.resultData = processedData.resultData || [];
                     $scope.model.performanceData = processedData.performanceData || [];
+                    $scope.model.physicalPerformanceData = processedData.physicalPerformanceData || [];
                     $scope.model.cumulativeData = processedData.cumulativeData || [];
                 }
             });

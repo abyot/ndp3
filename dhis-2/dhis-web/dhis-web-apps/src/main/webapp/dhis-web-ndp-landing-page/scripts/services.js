@@ -648,7 +648,7 @@ var ndpFrameworkServices = angular.module('ndpFrameworkServices', ['ngResource']
             var dataHeaders = [];
             var performanceHeaders = orderByFilter( dataParams.reportPeriods, '-id').reverse();
             var resultData = [];
-            var physicalPerformanceData = []
+            var physicalPerformanceData = [];
             var performanceData = [];
             var cumulativeData = [];
             var costData = [];
@@ -877,7 +877,9 @@ var ndpFrameworkServices = angular.module('ndpFrameworkServices', ['ngResource']
                         }
                     });
                 }
-                pe.colSpan = colSpan;
+                if ( pe.hasData) {
+                    pe.colSpan = colSpan;
+                }
             });
 
             if( Object.keys( data ).length === 0 ){
@@ -942,7 +944,8 @@ var ndpFrameworkServices = angular.module('ndpFrameworkServices', ['ngResource']
                                         var val = filterResultData(dh, de.id, oc.id, data, dataParams);
                                         var trafficLight = getTrafficLight(val, de.id, dh.dimensionId);
 
-                                        if ( dh.dimensionId === dataParams.targetDimension.id ){
+                                        if ( dh.dimensionId === dataParams.targetDimension.id || dh.dimensionId === dataParams.baselineDimension.id ){
+                                            dh.hasResultData = true;
                                             resultRow.push({val: val, span: 1, details: de.id, period: period, coc: oc, aoc: dh.dimensionId});
                                         }
 

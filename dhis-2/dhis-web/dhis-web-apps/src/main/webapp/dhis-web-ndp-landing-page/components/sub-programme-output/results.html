@@ -75,7 +75,7 @@
                         <th class="sticky">{{'interventions'| translate}}</th>
                         <th class="sticky">{{'outputs'| translate}}</th>
                         <th class="sticky">{{'indicator'| translate}}</th>
-                        <th class="center sticky" ng-repeat="header in model.dataHeaders" ng-if="header.dimensionId === model.targetDimension.id">
+                        <th class="center sticky" ng-repeat="header in model.dataHeaders" ng-if="header.hasResultData">
                             {{model.metaData.items[header.dimensionId].name}}
                         </th>
                     </tr>

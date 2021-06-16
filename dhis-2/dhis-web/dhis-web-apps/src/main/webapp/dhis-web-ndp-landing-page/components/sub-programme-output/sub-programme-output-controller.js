@@ -140,12 +140,16 @@ ndpFramework.controller('SubProgrammeOutputController',
             $scope.model.baseLineTargetActualDimensions = $.map($scope.model.bta.options, function(d){return d.id;});
             $scope.model.actualDimension = null;
             $scope.model.targetDimension = null;
+            $scope.model.baselineDimension = null;
             angular.forEach(bta.options, function(op){
                 if ( op.btaDimensionType === 'actual' ){
                     $scope.model.actualDimension = op;
                 }
                 if ( op.btaDimensionType === 'target' ){
                     $scope.model.targetDimension = op;
+                }
+                if ( op.btaDimensionType === 'baseline' ){
+                    $scope.model.baselineDimension = op;
                 }
             });
 
@@ -287,6 +291,7 @@ ndpFramework.controller('SubProgrammeOutputController',
                         bta: $scope.model.bta,
                         actualDimension: $scope.model.actualDimension,
                         targetDimension: $scope.model.targetDimension,
+                        baselineDimension: $scope.model.baselineDimension,
                         selectedDataElementGroupSets: $scope.model.selectedDataElementGroupSets,
                         selectedDataElementGroup: $scope.model.selectedKra,
                         dataElementGroups: $scope.model.dataElementGroups,
