@@ -235,6 +235,11 @@ ndpFramework.controller('DictionaryController',
 
                                     if( vote && vote.length > 0 ){
                                         vote = vote.sort();
+                                        if ( vote.length > 10 ){
+                                            de.orgUnit = vote.slice(0,5);
+                                            de.orgUnit.push('...');
+                                            de.orgUnit = de.orgUnit.join(', ');
+                                        }
                                         de.vote = vote.join(', ');
                                     }
 

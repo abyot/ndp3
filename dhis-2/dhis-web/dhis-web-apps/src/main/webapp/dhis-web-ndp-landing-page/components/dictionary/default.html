@@ -67,7 +67,7 @@
                     {{item.completenessRate}}
                 </td>
                 <td class="cursor-pointer" ng-repeat="header in model.dictionaryHeaders| filter: {show: true}">
-                    {{item[header.id]}}
+                    {{header.id ==='vote' && item.orgUnit? item.orgUnit : item[header.id]}}
                 </td>
             </tr>
         </tbody>
