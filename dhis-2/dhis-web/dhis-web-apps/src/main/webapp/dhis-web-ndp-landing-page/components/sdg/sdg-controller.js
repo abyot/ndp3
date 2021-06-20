@@ -50,7 +50,7 @@ ndpFramework.controller('SDGController',
     };
 
     $scope.model.horizontalMenus = [
-        {id: 'trafficLight', title: 'traffic_light', order: 1, view: 'components/sdg/traffic-light.html', active: true, class: 'main-horizontal-menu'},
+        {id: 'physicalPerformance', title: 'physical_performance', order: 1, view: 'components/sdg/physical-performance.html', active: true, class: 'main-horizontal-menu'},
         {id: 'budgetPerformance', title: 'budget_performance', order: 2, view: 'components/sdg/budget-performance.html', class: 'main-horizontal-menu'},
         {id: 'dashboard', title: 'dashboard', order: 6, view: 'views/dashboard.html', class: 'main-horizontal-menu'}
     ];

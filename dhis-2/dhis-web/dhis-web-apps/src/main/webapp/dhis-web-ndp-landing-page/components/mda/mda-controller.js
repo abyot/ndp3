@@ -211,6 +211,8 @@ ndpFramework.controller('MDAController',
                                        $scope.model.selectedPeriods.push(pe);
                                     }
                                 });
+
+                                $scope.model.metaDataCached = true;
                             });
                         });
                     });
@@ -449,6 +451,23 @@ ndpFramework.controller('MDAController',
             controller: 'DictionaryDetailsController',
             resolve: {
                 dictionaryItem: function(){
+                    return item;
+                }
+            }
+        });
+
+        modalInstance.result.then(function () {
+
+        });
+    };
+
+    $scope.getDataValueExplanation = function( item ){
+        var modalInstance = $modal.open({
+            templateUrl: 'components/explanation/explanation-modal.html',
+            controller: 'DataValueExplanationController',
+            windowClass: 'comment-modal-window',
+            resolve: {
+                item: function(){
                     return item;
                 }
             }
