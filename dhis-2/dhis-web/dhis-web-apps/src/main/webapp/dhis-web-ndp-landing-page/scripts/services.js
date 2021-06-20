@@ -492,7 +492,7 @@ var ndpFrameworkServices = angular.module('ndpFrameworkServices', ['ngResource']
                                     de.code = _de.code;
                                 });
 
-                                //deg.dataElements = orderByFilter(deg.dataElements, '-displayName').reverse();
+                                deg.dataElements = orderByFilter(deg.dataElements, '-displayName').reverse();
                             });
                             $rootScope.$apply(function(){
                                def.resolve(dataElementGroups);
