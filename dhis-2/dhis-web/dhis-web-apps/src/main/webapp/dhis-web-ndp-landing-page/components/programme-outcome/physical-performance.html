@@ -69,9 +69,15 @@
                 <tbody>
                     <tr ng-repeat="row in model.physicalPerformanceData">
                         <td class="vertical-center" ng-repeat="col in row" rowspan="{{col.span}}" ng-class="col.trafficLight">
-                            {{col.val}}
+                            <span ng-if="col.details" ng-click="getDataValueExplanation(col)" title="{{'click_here_for_details'| translate}}" class="link-text">
+                                {{col.val}}
+                            </span>
+                            <span ng-if="!col.details && !col.info">
+                                {{col.val}}
+                            </span>
                             <span ng-if="col.info" ng-click="getIndicatorDictionary(col.info)">
-                                <i class="fa fa-info-circle info-icon cursor-pointer" aria-hidden="true" title="{{'indicator_dictionary'| translate}}"></i>
+                                {{col.val}}
+                                <i class="fa fa-info-circle info-icon cursor-pointer hideInPrint" aria-hidden="true" title="{{'indicator_dictionary'| translate}}"></i>
                             </span>
                         </td>
                     </tr>
