@@ -487,9 +487,11 @@ var ndpFrameworkServices = angular.module('ndpFrameworkServices', ['ngResource']
                             angular.forEach(dataElementGroups, function(deg){
                                 angular.forEach(deg.dataElements, function(de){
                                     var _de = dataElementsById[de.id];
-                                    de.categoryOptionCombos = _de.categoryOptionCombos ? _de.categoryOptionCombos : [];
-                                    de.displayName = _de.displayName;
-                                    de.code = _de.code;
+                                    if ( _de ){
+                                        de.categoryOptionCombos = _de.categoryOptionCombos ? _de.categoryOptionCombos : [];
+                                        de.displayName = _de.displayName;
+                                        de.code = _de.code;
+                                    }
                                 });
 
                                 deg.dataElements = orderByFilter(deg.dataElements, '-displayName').reverse();
@@ -944,7 +946,7 @@ var ndpFrameworkServices = angular.module('ndpFrameworkServices', ['ngResource']
                                         var val = filterResultData(dh, de.id, oc.id, data, dataParams);
                                         var trafficLight = getTrafficLight(val, de.id, dh.dimensionId);
 
-                                        if ( dh.dimensionId === dataParams.targetDimension.id || dh.dimensionId === dataParams.baselineDimension.id ){
+                                        if ( dh.dimensionId === dataParams.targetDimension.id ){
                                             dh.hasResultData = true;
                                             resultRow.push({val: val, span: 1, details: de.id, period: period, coc: oc, aoc: dh.dimensionId});
                                         }
