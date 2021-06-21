@@ -31,7 +31,8 @@ ndpFramework.controller('HomeController',
         allPeriods: [],
         periodOffset: 0,
         openFuturePeriods: 10,
-        selectedPeriodType: 'FinancialJuly'
+        selectedPeriodType: 'FinancialJuly',
+        slides: []
     };
 
     var start = new Date();
@@ -78,54 +79,19 @@ ndpFramework.controller('HomeController',
 
                             $scope.model.metaDataCached = true;
 
-                            $scope.model.slides = [
-                                {
-                                    id: '1',
+                            for( var i=1; i<12; i++ ){
+                                $scope.model.slides.push({
+                                    id: i,
                                     type: 'IMG',
-                                    heading: 'Header',
-                                    description: 'Sectoral Contribution to GDP - Targets',
-                                    path: 'images/sectoral-contribution-to-gdp.png',
-                                    style: 'background-image:url(images/sectoral-contribution-to-gdp.png)'
-                                },
-                                {
-                                    id: '7',
-                                    type: 'IMG',
-                                    heading: 'Header',
-                                    description: 'Income per capital (USD) - Targets',
-                                    path: 'images/income-per-capita.png',
-                                    style: 'background-image:url(images/income-per-capita.png)'
-                                }/*,
-                                {
-                                    id: '1',
-                                    type: 'TABLE',
-                                    heading: $translate.instant('goal_slider_title')
-                                },
-                                {
-                                    id: '2',
-                                    type: 'TEXT',
-                                    heading: 'Slide 2',
-                                    description: 'Slide 2 Description'
-                                },{
-                                    id: '3',
-                                    type: 'IMG',
-                                    heading: 'UGANDA',
-                                    description: 'More about Map of Uganda 1',
-                                    path: 'images/1200px-Flag-map_of_Uganda.svg.png'
-                                },{
-                                    id: '4',
-                                    type: 'IMG',
-                                    heading: 'UGANDA',
-                                    description: 'More about Map of Uganda 2',
-                                    path: 'images/logo_front.png'
-                                }*/
-                            ];
+                                    path: 'images/NDPII_Visualizations/' + i + '.png',
+                                    style: 'background-image:url(images/NDPII_Visualizations/' + i + '.png)'
+                                });
+                            }
 
                             var periods = PeriodService.getPeriods($scope.model.selectedPeriodType, $scope.model.periodOffset, $scope.model.openFuturePeriods);
                             $scope.model.allPeriods = angular.copy( periods );
                             $scope.model.periods = periods;
-
                             var selectedPeriodNames = ['2024/25'];
-
                             angular.forEach($scope.model.periods, function(pe){
                                 if(selectedPeriodNames.indexOf(pe.displayName) > -1 ){
                                    $scope.model.selectedPeriods.push(pe);
@@ -134,77 +100,84 @@ ndpFramework.controller('HomeController',
 
                             var ndpMenus = [], order = 0;
                             angular.forEach($scope.model.ndp.options, function(op){
+                                console.log('op:  ', op);
+                                op.children = [];
+                                op.hasChildren = false;
+                                op.show = false;
                                 op.order = order;
+                                op.ndp = true;
                                 order++;
 
                                 var objectives = $filter('filter')($scope.model.dataElementGroupSets, {ndp: op.code, indicatorGroupSetType: 'resultsFrameworkObjective'}, true);
                                 var goals = $filter('filter')($scope.model.dataElementGroupSets, {ndp: op.code, indicatorGroupSetType: 'goal'}, true);
-                                var programs = $filter('filter')($scope.model.optionSets, {ndp: op.code, code: 'program'}, true);
-                                //var sdgs = $filter('filter')($scope.model.dataElementGroupSets, {indicatorGroupSetType: 'sdgGoals'}, true);
-
-                                op.children = [];
-
-                                op.hasChildren = true;
-                                op.show = true;
-
-                                var hl = {
-                                    id: op.code + '-HGH',
-                                    order: 1,
-                                    displayName: $translate.instant('high_level'),
-                                    show: true,
-                                    ndp: op.code,
-                                    domain: 'HGH',
-                                    hasChildren: true,
-                                    children: [],
-                                    color: 'ndp-menu'
-                                };
-
-                                op.children.push( hl );
-
-                                hl.hasChildren = true;
-                                hl.show = true;
-                                hl.children.push( {
-                                    id: op.code + '-VSN',
-                                    domain: 'VSN',
-                                    code: 'vision2040',
-                                    ndp: op.code,
-                                    order: 2,
-                                    displayName: $translate.instant('vision_2040_targets'),
-                                    children: [],
-                                    view: 'components/vision2040/vision2040-status.html',
-                                    color: 'ndp-menu'
-                                });
-
-                                if( goals.length > 0 ){
-
-
-                                    hl.children.push( {
-                                        id: op.code + '-GOL',
-                                        domain: 'NOUT',
-                                        code: 'resultsFrameworkObjective',
-                                        ndp: op.code,
-                                        order: 3,
-                                        displayName: $translate.instant('goal_impact'),
-                                        children: [],
-                                        view: 'components/goal/goal-status.html',
-                                        color: 'ndp-menu'
-                                    } );
+                                var vision2040Targets = $filter('filter')($scope.model.dataElementGroupSets, {ndp: op.code, indicatorGroupSetType: 'vision2040'}, true);
+                                var programs = []
+                                var pr = $filter('getFirst')($scope.model.optionSets, {ndp: op.code, isNDPProgramme: true}, true);
+                                if ( pr && pr.options && pr.options.length > 0 ){
+                                    programs = pr.options;
                                 }
 
-                                if( objectives.length > 0 ){
+                                if ( objectives.length > 0 || goals.length > 0 || vision2040Targets.length > 0 || programs.length > 0){
+                                    op.children = [];
+                                    op.hasChildren = true;
+                                    op.show = op.code === 'NDPIII';
+
+                                    var hl = {
+                                        id: op.code + '-HGH',
+                                        order: 1,
+                                        displayName: $translate.instant('high_level'),
+                                        show: true,
+                                        ndp: op.code,
+                                        domain: 'HGH',
+                                        hasChildren: true,
+                                        children: [],
+                                        color: 'ndp-menu'
+                                    };
+                                    op.children.push( hl );
                                     hl.hasChildren = true;
                                     hl.show = true;
-                                    hl.children.push( {
-                                        id: op.code + '-OBJ',
-                                        domain: 'NOUT',
-                                        code: 'resultsFrameworkObjective',
-                                        ndp: op.code,
-                                        order: 3,
-                                        displayName: $translate.instant('objective_level'),
-                                        children: [],
-                                        view: 'components/objective/objective-status.html',
-                                        color: 'ndp-menu'
-                                    } );
+
+                                    if ( vision2040Targets.length > 0 ){
+                                        hl.children.push( {
+                                            id: op.code + '-VSN',
+                                            domain: 'VSN',
+                                            code: 'vision2040',
+                                            ndp: op.code,
+                                            order: 2,
+                                            displayName: $translate.instant('vision_2040_targets'),
+                                            children: [],
+                                            view: 'components/vision2040/vision2040-status.html',
+                                            color: 'ndp-menu'
+                                        });
+                                    }
+
+                                    if( goals.length > 0 ){
+                                        hl.children.push( {
+                                            id: op.code + '-GOL',
+                                            domain: 'NOUT',
+                                            code: 'resultsFrameworkObjective',
+                                            ndp: op.code,
+                                            order: 3,
+                                            displayName: $translate.instant('goal_impact'),
+                                            children: [],
+                                            view: 'components/goal/goal-status.html',
+                                            color: 'ndp-menu'
+                                        } );
+                                    }
+
+                                    if( objectives.length > 0 ){
+                                        hl.children.push( {
+                                            id: op.code + '-OBJ',
+                                            domain: 'NOUT',
+                                            code: 'resultsFrameworkObjective',
+                                            ndp: op.code,
+                                            order: 3,
+                                            displayName: $translate.instant('objective_level'),
+                                            children: [],
+                                            view: 'components/objective/objective-status.html',
+                                            color: 'ndp-menu'
+                                        } );
+                                    }
                                 }
 
                                 if( programs.length > 0 ){
@@ -289,8 +262,6 @@ ndpFramework.controller('HomeController',
                                         color: 'ndp-menu'
                                     } );
 
-                                    op.hasChildren = true;
-                                    op.show = true;
                                     op.children.push(sp);
 
                                     var pr = {

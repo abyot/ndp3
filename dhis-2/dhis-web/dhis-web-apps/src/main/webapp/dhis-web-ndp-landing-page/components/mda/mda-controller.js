@@ -66,7 +66,7 @@ ndpFramework.controller('MDAController',
         $scope.model.selectedDataElementGroupSets = [];
 
         if( angular.isObject($scope.model.selectedNDP) && $scope.model.selectedNDP.id && $scope.model.selectedNDP.code){
-            $scope.model.ndpProgram = $filter('getFirst')($scope.model.optionSets, {ndp: $scope.model.selectedNDP.code, code: 'program'}, true);
+            $scope.model.ndpProgram = $filter('getFirst')($scope.model.optionSets, {ndp: $scope.model.selectedNDP.code, isNDPProgramme: true}, true);
 
             $scope.getInterventions();
         }
