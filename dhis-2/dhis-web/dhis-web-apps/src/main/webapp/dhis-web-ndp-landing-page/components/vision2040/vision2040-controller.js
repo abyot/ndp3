@@ -14,7 +14,6 @@ ndpFramework.controller('Vision2040Controller',
         PeriodService,
         MetaDataFactory,
         OrgUnitFactory,
-        DashboardService,
         OptionComboService,
         FinancialDataService,
         Analytics) {
@@ -42,8 +41,7 @@ ndpFramework.controller('Vision2040Controller',
     };
 
     $scope.model.horizontalMenus = [
-        {id: 'result', title: 'results', order: 1, view: 'components/vision2040/results.html', active: true, class: 'main-horizontal-menu'},
-        {id: 'dashboard', title: 'dashboard', order: 6, view: 'views/dashboard.html', class: 'main-horizontal-menu'}
+        {id: 'result', title: 'results', order: 1, view: 'components/vision2040/results.html', active: true, class: 'main-horizontal-menu'}
     ];
 
     OptionComboService.getBtaDimensions().then(function( bta ){
@@ -88,20 +86,14 @@ ndpFramework.controller('Vision2040Controller',
 
                         var selectedPeriodNames = ['2024/25'];
 
+                        $scope.model.selectedPeriods.push( {displayName: '2009/10', id: '2009July'} );
                         angular.forEach($scope.model.periods, function(pe){
                             if(selectedPeriodNames.indexOf(pe.displayName) > -1 ){
                                $scope.model.selectedPeriods.push(pe);
                             }
                         });
 
-                        /*$scope.model.dashboardName = 'Vision2040';
-                        DashboardService.getByName( $scope.model.dashboardName ).then(function( result ){
-                            $scope.model.dashboardItems = result.dashboardItems;
-                            $scope.model.charts = result.charts;
-                            $scope.model.tables = result.tables;
-                            $scope.model.maps = result.maps;
-                            $scope.model.dashboardFetched = true;
-                        });*/
+                        $scope.model.selectedPeriods.push( {displayName: '2039/40', id: '2039July'} );
 
                         //Get orgunits for the logged in user
                         OrgUnitFactory.getViewTreeRoot().then(function(response) {
@@ -147,26 +139,6 @@ ndpFramework.controller('Vision2040Controller',
         }
     };
 
-    $scope.getBasePeriod = function(){
-        $scope.model.basePeriod = null;
-        var location = -1;
-
-        var getBase = function(){
-            $scope.model.selectedPeriods = orderByFilter( $scope.model.selectedPeriods, '-id').reverse();
-            var p = $scope.model.selectedPeriods[0];
-            var res = PeriodService.getPreviousPeriod( p.id, $scope.model.allPeriods );
-            $scope.model.basePeriod = res.period;
-            location = res.location;
-        };
-
-        getBase();
-
-        if( location === 0 ){
-            $scope.getPeriods('PREV');
-            getBase();
-        }
-    };
-
     $scope.getAnalyticsData = function(){
 
         $scope.model.data = null;
@@ -182,17 +154,10 @@ ndpFramework.controller('Vision2040Controller',
             return;
         }
 
-        $scope.getBasePeriod();
-
-        if ( !$scope.model.basePeriod || !$scope.model.basePeriod.id ){
-            NotificationService.showNotifcationDialog($translate.instant("error"), $translate.instant("invalid_base_period"));
-            return;
-        }
-
         if( $scope.model.dataElementGroup && $scope.model.dataElementGroup.length > 0 && $scope.model.selectedPeriods.length > 0){
             analyticsUrl += '&filter=ou:'+ $scope.selectedOrgUnit.id +'&displayProperty=NAME&includeMetadataDetails=true';
             analyticsUrl += '&dimension=co&dimension=' + $scope.model.bta.category + ':' + $.map($scope.model.baseLineTargetActualDimensions, function(dm){return dm;}).join(';');
-            analyticsUrl += '&dimension=pe:' + $.map($scope.model.selectedPeriods.concat( $scope.model.basePeriod ), function(pe){return pe.id;}).join(';');
+            analyticsUrl += '&dimension=pe:' + $.map($scope.model.selectedPeriods, function(pe){return pe.id;}).join(';');
 
             $scope.model.dataElements = [];
             angular.forEach($scope.model.dataElementGroup, function(deg){
@@ -213,18 +178,41 @@ ndpFramework.controller('Vision2040Controller',
                         $scope.model.metaData = data.metaData;
                         $scope.model.reportReady = true;
                         $scope.model.reportStarted = false;
-                        console.log('data:  ', $scope.model.data);
                     }
                 });
             });
         }
     };
 
-    $scope.getTargetValue = function( dataElement, oc ){
+    $scope.getBaselineValue = function( dataElement, oc ){
 
         var filterParams = {
             dx: dataElement.id,
             pe: $scope.model.selectedPeriods[0].id,
+            co: oc
+        };
+
+        var res = $filter('dataFilter')($scope.model.data, filterParams);
+        return res && res[0] && res[0].value ? res[0].value : '';
+    };
+
+    $scope.getTargetValue = function( dataElement, oc ){
+
+        var filterParams = {
+            dx: dataElement.id,
+            pe: $scope.model.selectedPeriods[1].id,
+            co: oc
+        };
+
+        var res = $filter('dataFilter')($scope.model.data, filterParams);
+        return res && res[0] && res[0].value ? res[0].value : '';
+    };
+
+    $scope.getVision2040Value = function( dataElement, oc ){
+
+        var filterParams = {
+            dx: dataElement.id,
+            pe: $scope.model.selectedPeriods[2].id,
             co: oc
         };
 
@@ -237,10 +225,10 @@ ndpFramework.controller('Vision2040Controller',
             type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=utf-8"
         });
 
-        var reportName =$scope.model.selectedMenu.displayName + ".xls";
+        var reportName = $scope.model.selectedMenu.displayName + "Vision 2040 Targets.xls";
 
         if( name ){
-            reportName = name + ' performance.xls';
+            reportName = name + '.xls';
         }
         saveAs(blob, reportName);
     };
