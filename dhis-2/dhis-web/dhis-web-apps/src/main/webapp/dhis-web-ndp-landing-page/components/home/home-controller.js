@@ -79,7 +79,7 @@ ndpFramework.controller('HomeController',
 
                             $scope.model.metaDataCached = true;
 
-                            for( var i=1; i<12; i++ ){
+                            for( var i=1; i<=12; i++ ){
                                 $scope.model.slides.push({
                                     id: i,
                                     type: 'IMG',
@@ -100,7 +100,6 @@ ndpFramework.controller('HomeController',
 
                             var ndpMenus = [], order = 0;
                             angular.forEach($scope.model.ndp.options, function(op){
-                                console.log('op:  ', op);
                                 op.children = [];
                                 op.hasChildren = false;
                                 op.show = false;
