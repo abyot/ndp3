@@ -54,7 +54,7 @@ ndpFramework.controller('CompletenessController',
         $scope.model.objectives = [];
         if( angular.isObject($scope.model.selectedNDP) && $scope.model.selectedNDP.id && $scope.model.selectedNDP.code){
             $scope.model.selectedDataElementGroupSets = $filter('filter')($scope.model.dataElementGroupSets, {ndp: $scope.model.selectedNDP.code, indicatorGroupSetType: 'program'}, true);
-            $scope.model.ndpProgram = $filter('filter')($scope.model.optionSets, {ndp: $scope.model.selectedNDP.code, code: 'program'}, true)[0];
+            $scope.model.ndpProgram = $filter('filter')($scope.model.optionSets, {ndp: $scope.model.selectedNDP.code, isNDPProgramme: true}, true)[0];
         }
     });
 
@@ -296,7 +296,7 @@ ndpFramework.controller('CompletenessController',
     };
 
     $scope.getCoverage = function(numerator, denominator){
-        return CommonUtils.getPercent(numerator, denominator);
+        return CommonUtils.getPercent(numerator, denominator, false);
     };
 
     $scope.exportData = function ( name ) {
