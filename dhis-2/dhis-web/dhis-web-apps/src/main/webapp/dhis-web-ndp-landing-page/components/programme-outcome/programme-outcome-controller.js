@@ -88,7 +88,6 @@ ndpFramework.controller('ProgrammeOutcomeController',
         if( angular.isObject($scope.model.selectedNdpProgram) ){
             if( $scope.model.selectedNdpProgram && $scope.model.selectedNdpProgram.code ){
                 var filter = {ndp: $scope.model.selectedMenu.ndp, indicatorGroupSetType: $scope.model.selectedMenu.code, ndpProgramme: $scope.model.selectedNdpProgram.code};
-                console.log('filter: ', filter);
                 $scope.model.selectedDataElementGroupSets = $filter('filter')($scope.model.dataElementGroupSets, filter, true);
                 $scope.getOutcomes();
             }
