@@ -500,7 +500,7 @@ ul.tree ul li:last-child:before {
 
 .link-text {
     cursor: pointer;
-    color: #3b73b8;
+    color: #2d2db3;
     text-decoration: none;
 }
 
@@ -532,19 +532,16 @@ ul.tree ul li:last-child:before {
     margin-top: 60px;
 }
 
-.green {
-    background-color: #19d219 !important;
-    max-width: 15px !important;
+.green-traffic-light {
+    background-color: #339D73 !important;
 }
 
-.yellow {
-    background-color: yellow !important;
-    max-width: 15px !important;
+.yellow-traffic-light {
+    background-color: #F4CD4D !important;
 }
 
-.red {
-    background-color: red !important;
-    max-width: 15px !important;
+.red-traffic-light {
+    background-color: #CD615A !important;
 }
 
 .main-horizontal-menu > a:link {
