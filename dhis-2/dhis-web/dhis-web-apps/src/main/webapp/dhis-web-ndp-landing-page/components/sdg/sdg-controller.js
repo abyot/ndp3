@@ -27,6 +27,7 @@ ndpFramework.controller('SDGController',
         dataElements: [],
         dataElementsById: [],
         kra: [],
+        goals: [],
         objectives: [],
         selectedKra: null,
         selectedSdg: null,
@@ -115,13 +116,7 @@ ndpFramework.controller('SDGController',
             $scope.model.optionSetsById[optionSet.id] = optionSet;
         });
 
-        var ndp = $filter('getFirst')($scope.model.optionSets, {code: 'ndp'});
-        if ( ndp && ndp.options ){
-            $scope.model.ndps = ndp.options;
-            if ( $scope.model.ndps.length === 1 ){
-                $scope.model.selectedNDP = $scope.model.ndps[0];
-            }
-        }
+        $scope.model.ndp = $filter('filter')($scope.model.optionSets, {code: 'ndp'})[0];
         var goals = $filter('getFirst')($scope.model.optionSets, {code: 'sdgGoals'});
         if ( goals && goals.options ){
             $scope.model.goals = goals.options;

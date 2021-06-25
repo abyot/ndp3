@@ -9,9 +9,9 @@
                     <ui-select ng-model="model.selectedNDP"
                                theme="select2"
                                style="width:100%;">
-                        <ui-select-match allow-clear="true" class="form-control-ui-select" placeholder="{{model.ndp && model.ndp.length > 0 ? 'select_or_search' : 'empty'| translate}}">{{$select.selected.displayName|| $select.selected}}</ui-select-match>
-                        <ui-select-choices repeat="ndp in model.ndp | filter: $select.search | limitTo:maxOptionSize | orderBy: ['displayName']">
-                            <span ng-bind-html="ndp.displayName | highlight: $select.search"></span>
+                        <ui-select-match allow-clear="true" class="form-control-ui-select" placeholder="{{model.ndp && model.ndp.options && model.ndp.options.length > 0 ? 'select_or_search' : 'empty'| translate}}">{{$select.selected.displayName|| $select.selected}}</ui-select-match>
+                        <ui-select-choices repeat="option in model.ndp.options | filter: $select.search | limitTo:maxOptionSize | orderBy: ['displayName']">
+                            <span ng-bind-html="option.displayName | highlight: $select.search"></span>
                         </ui-select-choices>
                     </ui-select>
                 </div>
