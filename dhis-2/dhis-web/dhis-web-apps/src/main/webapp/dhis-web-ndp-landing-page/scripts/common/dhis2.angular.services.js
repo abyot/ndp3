@@ -404,7 +404,6 @@ var d2Services = angular.module('d2Services', ['ngResource'])
                 return $translate.instant('missing_target');
             }
             var res = (parseFloat(op1 / op2)*100).toFixed(2);
-            console.log('res:  ', res);
             return turnOffPercent ? res : res + '%';
         },
         getRoleHeaders: function(){

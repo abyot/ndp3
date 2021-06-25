@@ -30,7 +30,7 @@ if( dhis2.ndp.memoryOnly ) {
 dhis2.ndp.store = new dhis2.storage.Store({
     name: 'dhis2ndp',
     adapters: [dhis2.storage.IndexedDBAdapter, dhis2.storage.DomSessionStorageAdapter, dhis2.storage.InMemoryAdapter],
-    objectStores: ['dataElements', 'dataElementGroups', 'dataElementGroupSets', 'dataSets', 'optionSets', 'categoryCombos', 'attributes', 'ouLevels', 'programs']
+    objectStores: ['dataElements', 'dataElementGroups', 'dataElementGroupSets', 'dataSets', 'optionSets', 'categoryCombos', 'attributes', 'ouLevels', 'programs', 'legendSets']
 });
 
 (function($) {
@@ -182,12 +182,12 @@ dhis2.ndp.downloadMetaData = function()
         //fetch programs
         .then( getMetaPrograms )
         .then( filterMissingPrograms )
-        .then( getPrograms );
+        .then( getPrograms )
 
-        //fetch tracked entity attributes
-        /*.then( getMetaTrackedEntityAttributes )
-        .then( filterMissingTrackedEntityAttributes )
-        .then( getTrackedEntityAttributes );*/
+        //fetch legendSets
+        .then( getMetaLegendSets )
+        .then( filterMissingLegendSets )
+        .then( getLegendSets );
 };
 
 function getUserAccessibleDataSets(){
@@ -232,7 +232,7 @@ function filterMissingDataElements( objs ){
 }
 
 function getDataElements( ids ){
-    return dhis2.metadata.getBatches( ids, dhis2.ndp.batchSize, 'dataElements', 'dataElements', dhis2.ndp.apiUrl + '/dataElements.json', 'paging=false&fields=id,code,displayName,shortName,description,formName,valueType,optionSetValue,optionSet[id],attributeValues[value,attribute[id,name,valueType,code]],categoryCombo[id]', 'idb', dhis2.ndp.store);
+    return dhis2.metadata.getBatches( ids, dhis2.ndp.batchSize, 'dataElements', 'dataElements', dhis2.ndp.apiUrl + '/dataElements.json', 'paging=false&fields=id,code,displayName,shortName,description,formName,valueType,optionSetValue,optionSet[id],legendSets[id],attributeValues[value,attribute[id,name,valueType,code]],categoryCombo[id]', 'idb', dhis2.ndp.store);
 }
 
 function getMetaDataElementGroups(){
@@ -319,14 +319,14 @@ function getPrograms( ids ){
     return dhis2.metadata.getBatches( ids, dhis2.ndp.batchSize, 'programs', 'programs', dhis2.ndp.apiUrl + '/programs.json', 'paging=false&fields=*,programSections[sortOrder,displayName,trackedEntityAttributes],programTrackedEntityAttributes[*,trackedEntityAttribute[*,attributeValues[value,attribute[id,name,valueType,code]]]],categoryCombo[id],attributeValues[value,attribute[id,name,valueType,code]],organisationUnits[id,level],programIndicators[id,displayName,analyticsType,expression],programStages[*,programStageDataElements[id,dataElement[*,attributeValues[value,attribute[id,name,valueType,code]]]]]', 'idb', dhis2.ndp.store, dhis2.metadata.processObject);
 }
 
-function getMetaTrackedEntityAttributes(){
-    return dhis2.metadata.getMetaObjectIds('trackedEntityAttributes', dhis2.ndp.apiUrl + '/trackedEntityAttributes.json', 'paging=false&fields=id,version');
+function getMetaLegendSets(){
+    return dhis2.metadata.getMetaObjectIds('legendSets', dhis2.ndp.apiUrl + '/legendSets.json', 'paging=false&fields=id,version');
 }
 
-function filterMissingTrackedEntityAttributes( objs ){
-    return dhis2.metadata.filterMissingObjIds('trackedEntityAttributes', dhis2.ndp.store, objs);
+function filterMissingLegendSets( objs ){
+    return dhis2.metadata.filterMissingObjIds('legendSets', dhis2.ndp.store, objs);
 }
 
-function getTrackedEntityAttributes( ids ){
-    return dhis2.metadata.getBatches( ids, dhis2.ndp.batchSize, 'trackedEntityAttributes', 'trackedEntityAttributes', dhis2.ndp.apiUrl + '/trackedEntityAttributes.json', 'paging=false&fields=*,attributeValues[value,attribute[id,name,valueType,code]]', 'idb', dhis2.ndp.store, dhis2.metadata.processObject);
+function getLegendSets( ids ){
+    return dhis2.metadata.getBatches( ids, dhis2.ndp.batchSize, 'legendSets', 'legendSets', dhis2.ndp.apiUrl + '/legendSets.json', 'paging=false&fields=id,code,displayName,attributeValues[value,attribute[id,name,valueType,code]],legends[id,name,startValue,endValue,color]', 'idb', dhis2.ndp.store, dhis2.metadata.processObject);
 }

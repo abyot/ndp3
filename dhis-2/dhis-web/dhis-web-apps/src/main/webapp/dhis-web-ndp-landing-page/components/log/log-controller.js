@@ -26,6 +26,8 @@ ndpFramework.controller('LOGController',
         dataHeaders: [],
         optionSetsById: [],
         optionSets: [],
+        legendSetsById: [],
+        defaultLegendSet: null,
         sectors: [],
         selectedVote: null,
         selectedSector: null,
@@ -142,82 +144,91 @@ ndpFramework.controller('LOGController',
         OrgUnitGroupSetService.getByGroup('lg').then(function(lgs){
             $scope.model.lgs = lgs;
 
-            MetaDataFactory.getAll('optionSets').then(function(optionSets){
+            MetaDataFactory.getAll('legendSets').then(function(legendSets){
 
-                $scope.model.optionSets = optionSets;
-
-                angular.forEach(optionSets, function(optionSet){
-                    $scope.model.optionSetsById[optionSet.id] = optionSet;
-                });
-
-                $scope.model.ndp = $filter('getFirst')($scope.model.optionSets, {code: 'ndp'});
-
-                if( !$scope.model.ndp || !$scope.model.ndp.code ){
-                    NotificationService.showNotifcationDialog($translate.instant("error"), $translate.instant("missing_ndp_configuration"));
-                    return;
+            angular.forEach(legendSets, function(legendSet){
+                if ( legendSet.isTrafficLight ){
+                    $scope.model.defaultLegendSet = legendSet;
                 }
+                $scope.model.legendSetsById[legendSet.id] = legendSet;
+            });
 
-                OptionComboService.getBtaDimensions().then(function( bta ){
+                MetaDataFactory.getAll('optionSets').then(function(optionSets){
 
-                    if( !bta || !bta.category || !bta.options || bta.options.length !== 3 ){
-                        NotificationService.showNotifcationDialog($translate.instant("error"), $translate.instant("invalid_bta_dimensions"));
+                    $scope.model.optionSets = optionSets;
+
+                    angular.forEach(optionSets, function(optionSet){
+                        $scope.model.optionSetsById[optionSet.id] = optionSet;
+                    });
+
+                    $scope.model.ndp = $filter('getFirst')($scope.model.optionSets, {code: 'ndp'});
+
+                    if( !$scope.model.ndp || !$scope.model.ndp.code ){
+                        NotificationService.showNotifcationDialog($translate.instant("error"), $translate.instant("missing_ndp_configuration"));
                         return;
                     }
 
-                    $scope.model.bta = bta;
-                    $scope.model.baseLineTargetActualDimensions = $.map($scope.model.bta.options, function(d){return d.id;});
-                    $scope.model.actualDimension = null;
-                    $scope.model.targetDimension = null;
-                    $scope.model.baselineDimension = null;
-                    angular.forEach(bta.options, function(op){
-                        if ( op.btaDimensionType === 'actual' ){
-                            $scope.model.actualDimension = op;
+                    OptionComboService.getBtaDimensions().then(function( bta ){
+
+                        if( !bta || !bta.category || !bta.options || bta.options.length !== 3 ){
+                            NotificationService.showNotifcationDialog($translate.instant("error"), $translate.instant("invalid_bta_dimensions"));
+                            return;
                         }
-                        if ( op.btaDimensionType === 'target' ){
-                            $scope.model.targetDimension = op;
-                        }
-                        if ( op.btaDimensionType === 'baseline' ){
-                            $scope.model.baselineDimension = op;
-                        }
-                    });
 
-                    MetaDataFactory.getAll('dataElements').then(function(dataElements){
+                        $scope.model.bta = bta;
+                        $scope.model.baseLineTargetActualDimensions = $.map($scope.model.bta.options, function(d){return d.id;});
+                        $scope.model.actualDimension = null;
+                        $scope.model.targetDimension = null;
+                        $scope.model.baselineDimension = null;
+                        angular.forEach(bta.options, function(op){
+                            if ( op.btaDimensionType === 'actual' ){
+                                $scope.model.actualDimension = op;
+                            }
+                            if ( op.btaDimensionType === 'target' ){
+                                $scope.model.targetDimension = op;
+                            }
+                            if ( op.btaDimensionType === 'baseline' ){
+                                $scope.model.baselineDimension = op;
+                            }
+                        });
 
-                        $scope.model.dataElementsById = dataElements.reduce( function(map, obj){
-                            map[obj.id] = obj;
-                            return map;
-                        }, {});
+                        MetaDataFactory.getAll('dataElements').then(function(dataElements){
+
+                            $scope.model.dataElementsById = dataElements.reduce( function(map, obj){
+                                map[obj.id] = obj;
+                                return map;
+                            }, {});
 
 
-                        MetaDataFactory.getDataElementGroups().then(function(dataElementGroups){
+                            MetaDataFactory.getDataElementGroups().then(function(dataElementGroups){
 
-                            $scope.model.dataElementGroups = dataElementGroups;
+                                $scope.model.dataElementGroups = dataElementGroups;
 
-                            MetaDataFactory.getAll('dataElementGroupSets').then(function(dataElementGroupSets){
+                                MetaDataFactory.getAll('dataElementGroupSets').then(function(dataElementGroupSets){
 
-                                $scope.model.dataElementGroupSets = dataElementGroupSets;
+                                    $scope.model.dataElementGroupSets = dataElementGroupSets;
 
-                                $scope.model.selectedMenu = SelectedMenuService.getSelectedMenu();
+                                    $scope.model.selectedMenu = SelectedMenuService.getSelectedMenu();
 
-                                var periods = PeriodService.getPeriods($scope.model.selectedPeriodType, $scope.model.periodOffset, $scope.model.openFuturePeriods);
-                                $scope.model.allPeriods = angular.copy( periods );
-                                $scope.model.periods = periods;
+                                    var periods = PeriodService.getPeriods($scope.model.selectedPeriodType, $scope.model.periodOffset, $scope.model.openFuturePeriods);
+                                    $scope.model.allPeriods = angular.copy( periods );
+                                    $scope.model.periods = periods;
 
-                                var selectedPeriodNames = ['2020/21', '2021/22', '2022/23', '2023/24', '2024/25'];
+                                    var selectedPeriodNames = ['2020/21', '2021/22', '2022/23', '2023/24', '2024/25'];
 
-                                angular.forEach($scope.model.periods, function(pe){
-                                    if(selectedPeriodNames.indexOf(pe.displayName) > -1 ){
-                                       $scope.model.selectedPeriods.push(pe);
-                                    }
+                                    angular.forEach($scope.model.periods, function(pe){
+                                        if(selectedPeriodNames.indexOf(pe.displayName) > -1 ){
+                                           $scope.model.selectedPeriods.push(pe);
+                                        }
+                                    });
+
+                                    $scope.model.metaDataCached = true;
                                 });
-
-                                $scope.model.metaDataCached = true;
                             });
                         });
                     });
                 });
             });
-
         });
     });
 
@@ -384,7 +395,9 @@ ndpFramework.controller('LOGController',
                         maxPeriod: $scope.model.selectedPeriods.slice(-1)[0],
                         allPeriods: $scope.model.allPeriods,
                         dataElementsById: $scope.model.dataElementsById,
-                        cost: $scope.model.cost
+                        cost: $scope.model.cost,
+                        legendSetsById: $scope.model.legendSetsById,
+                        defaultLegendSet: $scope.model.defaultLegendSet
                     };
 
                     var processedData = Analytics.processData( dataParams );

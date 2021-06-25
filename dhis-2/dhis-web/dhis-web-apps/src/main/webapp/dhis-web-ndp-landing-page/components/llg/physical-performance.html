@@ -105,7 +105,7 @@
                 </thead>
                 <tbody>
                     <tr ng-repeat="row in model.physicalPerformanceData">
-                        <td class="vertical-center" ng-repeat="col in row" rowspan="{{col.span}}" ng-class="col.trafficLight">
+                        <td class="vertical-center" ng-repeat="col in row" rowspan="{{col.span}}" ng-style="col.trafficLight">
                             <span ng-if="col.details" ng-click="getDataValueExplanation(col)" title="{{'click_here_for_details'| translate}}" class="link-text">
                                 {{col.val}}
                             </span>

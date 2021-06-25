@@ -10,7 +10,7 @@ var ndpFrameworkServices = angular.module('ndpFrameworkServices', ['ngResource']
     var store = new dhis2.storage.Store({
         name: "dhis2ndp",
         adapters: [dhis2.storage.IndexedDBAdapter, dhis2.storage.DomSessionStorageAdapter, dhis2.storage.InMemoryAdapter],
-        objectStores: ['dataElements', 'dataElementGroups', 'dataElementGroupSets', 'dataSets', 'optionSets', 'categoryCombos', 'attributes', 'ouLevels', 'programs']
+        objectStores: ['dataElements', 'dataElementGroups', 'dataElementGroupSets', 'dataSets', 'optionSets', 'categoryCombos', 'attributes', 'ouLevels', 'programs', 'legendSets']
     });
     return{
         currentStore: store
@@ -750,50 +750,84 @@ var ndpFrameworkServices = angular.module('ndpFrameworkServices', ['ngResource']
                 return res && res.value ? res.value : '';
             };
 
+            var extractRange = function( l ){
+                var ranges = {
+                    red: null,
+                    redColor: null,
+                    yellowStart: null,
+                    yellowEnd: null,
+                    yellowColor: null,
+                    green: null,
+                    greenColor: null,
+                    isValid: false
+                } ;
+
+                if( l && l.isTrafficLight && l.legends && l.legends.length === 3 ){
+                    for(var j=0; j<l.legends.length; j++){
+                        if ( l.legends[j].name.toLocaleLowerCase() === 'red'){
+                            ranges.red = l.legends[j].startValue;
+                            ranges.redColor = l.legends[j].color;
+                        }
+                        else if( l.legends[j].name.toLocaleLowerCase() === 'yellow' ){
+                            ranges.yellowStart = l.legends[j].startValue;
+                            ranges.yellowEnd = l.legends[j].endValue;
+                            ranges.yellowColor = l.legends[j].color;
+                        }
+                        else if( l.legends[j].name.toLocaleLowerCase() === 'green' ){
+                            ranges.green = l.legends[j].endValue;
+                            ranges.greenColor = l.legends[j].color;
+                        }
+                    }
+                    ranges.isValid = true;
+                }
+                return ranges;
+            };
+
             var getTrafficLight = function( actual, target, deId, aoc ) {
                 var color = "";
-                /*var de = dataParams.dataElementsById[deId];
-                if ( de && de.yellowRange && de.greenRange && de.redRange && dataParams.actualDimension && dataParams.actualDimension.id === aoc){
-
-                    var y1 = de.yellowRange.substring(0, de.yellowRange.indexOf('-'));
-                    var y2 = de.yellowRange.substring(de.yellowRange.indexOf('-') + 1, de.yellowRange.length);
-                    var r = de.redRange.substring(1, de.redRange.length);
-                    var g = de.greenRange.substring(1, de.greenRange.length);
-
-                    if ( actual <= r ){
-                        color = 'red';
-                        redCells++;
-                        hasPhysicalPerformanceData = true;
-                    }
-                    else if( actual >= y1 && actual <= y2 ){
-                        color = 'yellow';
-                        yellowCells++;
-                        hasPhysicalPerformanceData = true;
-                    }
-                    else if( actual >= g){
-                        color = 'green';
-                        greenCells++;
-                        hasPhysicalPerformanceData = true;
-                    }
-                    else {
-                        color = "";
-                    }
-                }*/
-
-                if ( dhis2.validation.isNumber( actual ) && dhis2.validation.isNumber( target ) ){
-                    var t = CommonUtils.getPercent( Math.abs(actual - target), target, true)*100;
-                    if ( t <= 15 ){
-                        color = 'green-traffic-light';
-                    }
-                    else if( t > 15 && t <= 30 ){
-                        color = 'yellow-traffic-light';
-                    }
-                    else if ( t > 30 ){
-                        color = 'red-traffic-light';
+                var de = dataParams.dataElementsById[deId];
+                var ranges = {};
+                if ( de && de.legendSets && de.legendSets.length > 0 ){
+                    for( var i=0; i<de.legendSets.length; i++){
+                        var l = dataParams.legendSetsById[de.legendSets[i].id];
+                        ranges = extractRange( l );
+                        if ( ranges.isValid ){
+                            break;
+                        }
                     }
                 }
 
-                return color;
+                if ( !ranges.green || !ranges.yellowStart || !ranges.yellowEnd || !ranges.red ){
+                    var l = dataParams.defaultLegendSet;
+                    ranges = extractRange( l );
+                }
+
+                if ( !ranges.green || !ranges.yellowStart || !ranges.yellowEnd || !ranges.red ){
+                    ranges = {
+                        green: 15,
+                        greenColor: '#339D73',
+                        yellowStart: 15,
+                        yellowEnd: 30,
+                        yellowColor: '#F4CD4D',
+                        red: 30,
+                        redColor: '#CD615A'
+                    };
+                }
+
+                if ( dhis2.validation.isNumber( actual ) && dhis2.validation.isNumber( target ) ){
+                    var t = CommonUtils.getPercent( Math.abs(actual - target), target, true);
+                    if ( t <= ranges.green ){
+                        color = ranges.greenColor;
+                    }
+                    else if( t > ranges.yellowStart && t <= ranges.yellowEnd ){
+                        color = ranges.yellowColor;
+                    }
+                    else if ( t > ranges.red ){
+                        color = ranges.redColor;
+                    }
+                }
+
+                return {"background-color": color};
             };
 
             var getPerforAndCostData = function(header, dataElement, oc, data, reportParams){
