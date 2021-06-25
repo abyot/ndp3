@@ -56,7 +56,7 @@ ndpFramework.controller('DictionaryController',
         $scope.model.selectedDataElementGroupSets = angular.copy( $scope.model.dataElementGroupSets );
         if( angular.isObject($scope.model.selectedNDP) && $scope.model.selectedNDP.code){
             $scope.model.selectedDataElementGroupSets = $filter('filter')($scope.model.dataElementGroupSets, {ndp: $scope.model.selectedNDP.code}, true);
-            $scope.model.ndpProgram = $filter('filter')($scope.model.optionSets, {ndp: $scope.model.selectedNDP.code, code: 'program'}, true)[0];
+            $scope.model.ndpProgram = $filter('filter')($scope.model.optionSets, {ndp: $scope.model.selectedNDP.code, isNDPProgramme: true}, true)[0];
         }
 
         $scope.model.selectedDataElementGroups = [];
@@ -281,7 +281,7 @@ ndpFramework.controller('DictionaryController',
         }
 
         if( isGreen ){
-            item.completeness = 'green';
+            item.completeness = 'green-traffic-light';
             return item;
         }
 
@@ -294,11 +294,11 @@ ndpFramework.controller('DictionaryController',
         }
 
         if( isYellow ){
-            item.completeness = 'yellow';
+            item.completeness = 'yellow-traffic-light';
             return item;
         }
 
-        item.completeness = 'red';
+        item.completeness = 'red-traffic-light';
         return item;
 
     };
