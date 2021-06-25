@@ -710,7 +710,7 @@ var ndpFrameworkServices = angular.module('ndpFrameworkServices', ['ngResource']
                 return periodData;
             };
 
-            var filterResultData = function(header, dataElement, oc, data, reportParams){
+            var filterResultData = function(header, dataElement, oc, data ){
                 if(!header || !data || !header.periodId || !header.dimensionId || !dataElement) return;
 
                 var filterParams = {
@@ -719,7 +719,20 @@ var ndpFrameworkServices = angular.module('ndpFrameworkServices', ['ngResource']
                     co: oc
                 };
 
-                filterParams[reportParams.bta.category] = header.dimensionId;
+                filterParams[dataParams.bta.category] = header.dimensionId;
+                var res = $filter('dataFilter')(data, filterParams)[0];
+                return res && res.value ? res.value : '';
+            };
+
+            var filterTargetData = function(header, dataElement, oc, data ){
+                if(!header || !header.periodId || !dataElement || !oc || !data) return;
+                var filterParams = {
+                    dx: dataElement,
+                    pe: header.periodId,
+                    co: oc
+                };
+                filterParams[dataParams.bta.category] = dataParams.targetDimension.id;
+
                 var res = $filter('dataFilter')(data, filterParams)[0];
                 return res && res.value ? res.value : '';
             };
@@ -737,26 +750,27 @@ var ndpFrameworkServices = angular.module('ndpFrameworkServices', ['ngResource']
                 return res && res.value ? res.value : '';
             };
 
-            var getTrafficLight = function( val, deId, aoc ) {
+            var getTrafficLight = function( actual, target, deId, aoc ) {
                 var color = "";
-                var de = dataParams.dataElementsById[deId];
+                /*var de = dataParams.dataElementsById[deId];
                 if ( de && de.yellowRange && de.greenRange && de.redRange && dataParams.actualDimension && dataParams.actualDimension.id === aoc){
+
                     var y1 = de.yellowRange.substring(0, de.yellowRange.indexOf('-'));
                     var y2 = de.yellowRange.substring(de.yellowRange.indexOf('-') + 1, de.yellowRange.length);
                     var r = de.redRange.substring(1, de.redRange.length);
                     var g = de.greenRange.substring(1, de.greenRange.length);
 
-                    if ( val <= r ){
+                    if ( actual <= r ){
                         color = 'red';
                         redCells++;
                         hasPhysicalPerformanceData = true;
                     }
-                    else if( val >= y1 && val <= y2 ){
+                    else if( actual >= y1 && actual <= y2 ){
                         color = 'yellow';
                         yellowCells++;
                         hasPhysicalPerformanceData = true;
                     }
-                    else if( val >= g){
+                    else if( actual >= g){
                         color = 'green';
                         greenCells++;
                         hasPhysicalPerformanceData = true;
@@ -764,7 +778,21 @@ var ndpFrameworkServices = angular.module('ndpFrameworkServices', ['ngResource']
                     else {
                         color = "";
                     }
+                }*/
+
+                if ( dhis2.validation.isNumber( actual ) && dhis2.validation.isNumber( target ) ){
+                    var t = CommonUtils.getPercent( Math.abs(actual - target), target, true)*100;
+                    if ( t <= 15 ){
+                        color = 'green-traffic-light';
+                    }
+                    else if( t > 15 && t <= 30 ){
+                        color = 'yellow-traffic-light';
+                    }
+                    else if ( t > 30 ){
+                        color = 'red-traffic-light';
+                    }
                 }
+
                 return color;
             };
 
@@ -943,12 +971,17 @@ var ndpFrameworkServices = angular.module('ndpFrameworkServices', ['ngResource']
                                             return;
                                         }
 
-                                        var val = filterResultData(dh, de.id, oc.id, data, dataParams);
-                                        var trafficLight = getTrafficLight(val, de.id, dh.dimensionId);
-
+                                        var val = filterResultData(dh, de.id, oc.id, data);
                                         if ( dh.dimensionId === dataParams.targetDimension.id ){
                                             dh.hasResultData = true;
                                             resultRow.push({val: val, span: 1, details: de.id, period: period, coc: oc, aoc: dh.dimensionId});
+                                        }
+
+                                        var trafficLight = "";
+
+                                        if( dh.dimensionId === dataParams.actualDimension.id ){
+                                            var targetValue = filterTargetData(dh, de.id, oc.id, data);
+                                            trafficLight = getTrafficLight(val, targetValue, de.id, dh.dimensionId);
                                         }
 
                                         physicalPerformanceRow.push({val: val, span: 1, trafficLight: trafficLight, details: de.id, period: period, coc: oc, aoc: dh.dimensionId});
@@ -1021,7 +1054,7 @@ var ndpFrameworkServices = angular.module('ndpFrameworkServices', ['ngResource']
                                                             return;
                                                         }
 
-                                                        var val = filterResultData(dh, de.id, oc.id, data, dataParams);
+                                                        var val = filterResultData(dh, de.id, oc.id, data);
                                                         val = CommonUtils.getProduct(val, unitCost);
                                                         if( !actionCost[action.id][dh.periodId] ){
                                                             actionCost[action.id][dh.periodId] = 0;

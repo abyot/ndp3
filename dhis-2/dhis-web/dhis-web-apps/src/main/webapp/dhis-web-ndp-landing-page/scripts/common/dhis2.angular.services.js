@@ -1,5 +1,5 @@
 /* Pagination service */
-/* global angular, dhis2, moment, Intl */
+/* global angular, dhis2, moment, Intl, parseFloat */
 
 var d2Services = angular.module('d2Services', ['ngResource'])
 
@@ -398,15 +398,14 @@ var d2Services = angular.module('d2Services', ['ngResource'])
             op1 = dhis2.validation.isNumber(op1) ? parseInt(op1) : 0;
             op2 = dhis2.validation.isNumber(op2) ? parseInt(op2) : 0;
             if( op1 === 0){
-                return "0%";
+                return turnOffPercent ? 0 : '0%';
             }
             if( op2 === 0 ){
                 return $translate.instant('missing_target');
             }
-            if ( turnOffPercent ){
-                return parseFloat((op1 / op2)).toFixed(2);
-            }
-            return parseFloat((op1 / op2)*100).toFixed(2) + '%';
+            var res = (parseFloat(op1 / op2)*100).toFixed(2);
+            console.log('res:  ', res);
+            return turnOffPercent ? res : res + '%';
         },
         getRoleHeaders: function(){
             var headers = [];
