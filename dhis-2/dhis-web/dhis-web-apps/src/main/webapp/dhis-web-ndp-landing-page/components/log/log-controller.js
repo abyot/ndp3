@@ -51,6 +51,7 @@ ndpFramework.controller('LOGController',
     ];
 
     $scope.$watch('selectedOrgUnit', function(){
+        $scope.resetDataView();
         if( angular.isObject($scope.selectedOrgUnit) && $scope.selectedOrgUnit.id){
             OrgUnitGroupSetService.getByVote( $scope.selectedOrgUnit.id ).then(function(data){
                 $scope.model.selectedVote = data;
@@ -66,7 +67,7 @@ ndpFramework.controller('LOGController',
         $scope.model.subPrograms = [];
         $scope.model.selectedSubProgramme = null;
         $scope.model.selectedDataElementGroupSets = [];
-
+        $scope.resetDataView();
         if( angular.isObject($scope.model.selectedNDP) && $scope.model.selectedNDP.id && $scope.model.selectedNDP.code){
             $scope.model.ndpProgram = $filter('getFirst')($scope.model.optionSets, {ndp: $scope.model.selectedNDP.code, isNDPProgramme: true}, true);
 

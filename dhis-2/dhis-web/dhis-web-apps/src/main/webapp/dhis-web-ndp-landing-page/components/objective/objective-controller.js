@@ -221,6 +221,7 @@ ndpFramework.controller('ObjectiveController',
         $scope.model.selectedKra = null;
         $scope.model.objectives = [];
         $scope.model.selectedDataElementGroupSets = [];
+        $scope.resetDataView();
 
         if( $scope.model.selectedMenu && $scope.model.selectedMenu.ndp && $scope.model.selectedMenu.code ){
             $scope.model.objectives = $filter('filter')($scope.model.dataElementGroupSets, {ndp: $scope.model.selectedMenu.ndp, indicatorGroupSetType: $scope.model.selectedMenu.code}, true);

@@ -81,11 +81,15 @@ ndpFramework.controller('SubProgrammeOutcomeController',
         });
     };
 
+    $scope.$on('MENU', function(){
+        $scope.populateMenu();
+    });
+
     $scope.$watch('model.selectedNDP', function(){
         $scope.resetDataView();
         $scope.model.selectedDataElementGroupSets = [];
         $scope.model.dataElementGroup = [];
-        $scope.model.selectedProgram = null;
+        $scope.model.selectedNdpProgram = null;
         $scope.model.objectives = [];
         $scope.model.ndpProgram = null;
         if( angular.isObject($scope.model.selectedNDP) && $scope.model.selectedNDP.id && $scope.model.selectedNDP.code){
@@ -205,17 +209,7 @@ ndpFramework.controller('SubProgrammeOutcomeController',
                                 }
                             });
 
-                            $scope.model.selectedMenu = SelectedMenuService.getSelectedMenu();
-
-                            if( $scope.model.selectedMenu && $scope.model.selectedMenu.ndp && $scope.model.selectedMenu.code ){
-                                $scope.model.ndpProgram = $filter('getFirst')($scope.model.optionSets, {ndp: $scope.model.selectedMenu.ndp, isNDPProgramme: true}, true);
-                                $scope.model.ndpObjectives = $filter('filter')($scope.model.dataElementGroupSets, {ndp: $scope.model.selectedMenu.ndp, indicatorGroupSetType: 'resultsFrameworkObjective'}, true);
-                                $scope.model.ndpProgrammes = $filter('filter')($scope.model.dataElementGroupSets, {ndp: $scope.model.selectedMenu.ndp, indicatorGroupSetType: 'programme'}, true);
-
-                                $scope.model.ndpObjectives = $scope.model.ndpObjectives.filter(function(obj){
-                                    return !obj.ndpProgramme;
-                                });
-                            }
+                            $scope.populateMenu();
 
                             $scope.model.dashboardName = 'Sub-Programme Outcomes';
                             DashboardService.getByName( $scope.model.dashboardName ).then(function( result ){
@@ -232,6 +226,26 @@ ndpFramework.controller('SubProgrammeOutcomeController',
             });
         });
     });
+
+    $scope.populateMenu = function(){
+        $scope.model.selectedMenu = SelectedMenuService.getSelectedMenu();
+        $scope.resetDataView();
+        $scope.model.selectedDataElementGroupSets = [];
+        $scope.model.dataElementGroup = [];
+        $scope.model.selectedNdpProgram = null;
+        $scope.model.objectives = [];
+        $scope.model.ndpProgram = null;
+
+        if( $scope.model.selectedMenu && $scope.model.selectedMenu.ndp && $scope.model.selectedMenu.code ){
+            $scope.model.ndpProgram = $filter('getFirst')($scope.model.optionSets, {ndp: $scope.model.selectedMenu.ndp, isNDPProgramme: true}, true);
+            $scope.model.ndpObjectives = $filter('filter')($scope.model.dataElementGroupSets, {ndp: $scope.model.selectedMenu.ndp, indicatorGroupSetType: 'resultsFrameworkObjective'}, true);
+            $scope.model.ndpProgrammes = $filter('filter')($scope.model.dataElementGroupSets, {ndp: $scope.model.selectedMenu.ndp, indicatorGroupSetType: 'programme'}, true);
+
+            $scope.model.ndpObjectives = $scope.model.ndpObjectives.filter(function(obj){
+                return !obj.ndpProgramme;
+            });
+        }
+    };
 
     $scope.resetDataView = function(){
         $scope.model.data = null;
@@ -413,12 +427,4 @@ ndpFramework.controller('SubProgrammeOutcomeController',
 
         });
     };
-
-    $scope.resetDataView = function(){
-        $scope.model.data = null;
-        $scope.model.reportReady = false;
-        $scope.model.dataExists = false;
-        $scope.model.dataHeaders = [];
-    };
-
 });

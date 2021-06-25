@@ -82,6 +82,10 @@ ndpFramework.controller('ProgrammeOutcomeController',
         });
     };
 
+    $scope.$on('MENU', function(){
+        $scope.populateMenu();
+    });
+
     $scope.$watch('model.selectedNdpProgram', function(){
         $scope.resetDataView();
         $scope.model.objectives = [];
@@ -191,12 +195,7 @@ ndpFramework.controller('ProgrammeOutcomeController',
                                 }
                             });
 
-                            $scope.model.selectedMenu = SelectedMenuService.getSelectedMenu();
-
-                            if( $scope.model.selectedMenu && $scope.model.selectedMenu.ndp && $scope.model.selectedMenu.code ){
-                                $scope.model.ndpProgram = $filter('getFirst')($scope.model.optionSets, {ndp: $scope.model.selectedMenu.ndp, isNDPProgramme: true}, true);
-                                $scope.model.ndpProgrammes = $filter('filter')($scope.model.dataElementGroupSets, {ndp: $scope.model.selectedMenu.ndp, indicatorGroupSetType: 'programme'}, true);
-                            }
+                            $scope.populateMenu();
 
                             $scope.model.dashboardName = 'Programme Outcomes';
                             DashboardService.getByName( $scope.model.dashboardName ).then(function( result ){
@@ -213,6 +212,19 @@ ndpFramework.controller('ProgrammeOutcomeController',
             });
         });
     });
+
+    $scope.populateMenu = function(){
+
+        $scope.model.selectedNdpProgram = null;
+        $scope.resetDataView();
+        $scope.model.selectedMenu = SelectedMenuService.getSelectedMenu();
+
+        if( $scope.model.selectedMenu && $scope.model.selectedMenu.ndp && $scope.model.selectedMenu.code ){
+            $scope.model.ndpProgram = $filter('getFirst')($scope.model.optionSets, {ndp: $scope.model.selectedMenu.ndp, isNDPProgramme: true}, true);
+            $scope.model.ndpProgrammes = $filter('filter')($scope.model.dataElementGroupSets, {ndp: $scope.model.selectedMenu.ndp, indicatorGroupSetType: 'programme'}, true);
+        }
+    };
+
     $scope.resetDataView = function(){
         $scope.model.data = null;
         $scope.model.reportReady = false;
@@ -399,12 +411,4 @@ ndpFramework.controller('ProgrammeOutcomeController',
 
         });
     };
-
-    $scope.resetDataView = function(){
-        $scope.model.data = null;
-        $scope.model.reportReady = false;
-        $scope.model.dataExists = false;
-        $scope.model.dataHeaders = [];
-    };
-
 });

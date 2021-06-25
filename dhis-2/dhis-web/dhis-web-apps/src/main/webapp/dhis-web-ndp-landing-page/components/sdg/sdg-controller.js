@@ -57,6 +57,7 @@ ndpFramework.controller('SDGController',
     ];
 
     $scope.$watch('model.selectedNDP', function(){
+        $scope.resetDataView();
         $scope.model.selectedGoal = null;
         $scope.model.selectedTarget = null;
         $scope.model.sdgs = [];
@@ -106,7 +107,6 @@ ndpFramework.controller('SDGController',
             });
         });
     };
-
 
     MetaDataFactory.getAll('optionSets').then(function(optionSets){
 
@@ -349,9 +349,6 @@ ndpFramework.controller('SDGController',
     };
 
     $scope.getRFInformation = function( item ){
-
-        console.log('item:  ', item);
-
         NotificationService.showNotifcationDialog($translate.instant("info"), $translate.instant("Need to display NDP program source here ..."));
     };
 

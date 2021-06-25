@@ -44,6 +44,10 @@ ndpFramework.controller('Vision2040Controller',
         {id: 'result', title: 'results', order: 1, view: 'components/vision2040/results.html', active: true, class: 'main-horizontal-menu'}
     ];
 
+    $scope.$on('MENU', function(){
+        $scope.populateMenu();
+    });
+    
     OptionComboService.getBtaDimensions().then(function( bta ){
 
         if( !bta || !bta.category || !bta.options || bta.options.length !== 3 ){

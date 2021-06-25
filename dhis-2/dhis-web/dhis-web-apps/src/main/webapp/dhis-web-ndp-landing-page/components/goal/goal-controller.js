@@ -218,6 +218,7 @@ ndpFramework.controller('GoalController',
 
     $scope.populateMenu = function(){
 
+        $scope.resetDataView();
         $scope.model.selectedMenu = SelectedMenuService.getSelectedMenu();
         $scope.model.selectedGoal = null;
         $scope.model.selectedKra = null;

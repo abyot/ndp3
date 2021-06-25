@@ -80,6 +80,10 @@ ndpFramework.controller('SubProgrammeOutputController',
         });
     };
 
+    $scope.$on('MENU', function(){
+        $scope.populateMenu();
+    });
+
     $scope.$watch('model.selectedNdpProgram', function(){
         $scope.resetDataView();
         $scope.model.interventions = [];
@@ -191,17 +195,7 @@ ndpFramework.controller('SubProgrammeOutputController',
                                 }
                             });
 
-                            $scope.model.selectedMenu = SelectedMenuService.getSelectedMenu();
-
-                            if( $scope.model.selectedMenu && $scope.model.selectedMenu.ndp && $scope.model.selectedMenu.code ){
-                                $scope.model.ndpProgram = $filter('getFirst')($scope.model.optionSets, {ndp: $scope.model.selectedMenu.ndp, isNDPProgramme: true}, true);
-                                $scope.model.ndpObjectives = $filter('filter')($scope.model.dataElementGroupSets, {ndp: $scope.model.selectedMenu.ndp, indicatorGroupSetType: 'resultsFrameworkObjective'}, true);
-                                $scope.model.ndpProgrammes = $filter('filter')($scope.model.dataElementGroupSets, {ndp: $scope.model.selectedMenu.ndp, indicatorGroupSetType: 'programme'}, true);
-
-                                $scope.model.ndpObjectives = $scope.model.ndpObjectives.filter(function(obj){
-                                    return !obj.ndpProgramme;
-                                });
-                            }
+                            $scope.populateMenu();
 
                             $scope.model.dashboardName = 'Sub-Programme Outputs';
                             DashboardService.getByName( $scope.model.dashboardName ).then(function( result ){
@@ -218,6 +212,26 @@ ndpFramework.controller('SubProgrammeOutputController',
             });
         });
     });
+
+    $scope.populateMenu = function(){
+        $scope.resetDataView();
+        $scope.model.interventions = [];
+        $scope.model.selectedDataElementGroupSets = [];
+        $scope.model.subPrograms = [];
+        $scope.model.selectedNdpProgram = null;
+        $scope.model.selectedSubProgramme = null;
+        $scope.model.selectedMenu = SelectedMenuService.getSelectedMenu();
+
+        if( $scope.model.selectedMenu && $scope.model.selectedMenu.ndp && $scope.model.selectedMenu.code ){
+            $scope.model.ndpProgram = $filter('getFirst')($scope.model.optionSets, {ndp: $scope.model.selectedMenu.ndp, isNDPProgramme: true}, true);
+            $scope.model.ndpObjectives = $filter('filter')($scope.model.dataElementGroupSets, {ndp: $scope.model.selectedMenu.ndp, indicatorGroupSetType: 'resultsFrameworkObjective'}, true);
+            $scope.model.ndpProgrammes = $filter('filter')($scope.model.dataElementGroupSets, {ndp: $scope.model.selectedMenu.ndp, indicatorGroupSetType: 'programme'}, true);
+
+            $scope.model.ndpObjectives = $scope.model.ndpObjectives.filter(function(obj){
+                return !obj.ndpProgramme;
+            });
+        }
+    };
 
     $scope.resetDataView = function(){
         $scope.model.data = null;
@@ -398,13 +412,6 @@ ndpFramework.controller('SubProgrammeOutputController',
         modalInstance.result.then(function () {
 
         });
-    };
-
-    $scope.resetDataView = function(){
-        $scope.model.data = null;
-        $scope.model.reportReady = false;
-        $scope.model.dataExists = false;
-        $scope.model.dataHeaders = [];
     };
 
 });
