@@ -332,16 +332,16 @@ ndpFramework.controller('GoalController',
                             displayVision2040: true
                         };
 
-                        var processedData = Analytics.processData( dataParams ) || {};
+                        var processedData = Analytics.processData( dataParams );
 
-                        $scope.model.dataHeaders = processedData.dataHeaders || [];
-                        $scope.model.reportPeriods = processedData.reportPeriods || [];
-                        $scope.model.dataExists = processedData.dataExists || false;
-                        $scope.model.resultData = processedData.resultData || [];
-                        $scope.model.performanceData = processedData.performanceData || [];
-                        $scope.model.cumulativeData = processedData.cumulativeData || [];
-                        $scope.model.costData = processedData.costData || [];
-                        $scope.model.costEffData = processedData.costEffData || [];
+                        $scope.model.dataHeaders = processedData.dataHeaders;
+                        $scope.model.reportPeriods = processedData.reportPeriods;
+                        $scope.model.dataExists = processedData.dataExists;
+                        $scope.model.resultData = processedData.resultData;
+                        $scope.model.performanceData = processedData.performanceData;
+                        $scope.model.cumulativeData = processedData.cumulativeData;
+                        $scope.model.costData = processedData.costData;
+                        $scope.model.costEffData = processedData.costEffData;
                     }
                 });
             });

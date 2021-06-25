@@ -656,7 +656,7 @@ var ndpFrameworkServices = angular.module('ndpFrameworkServices', ['ngResource']
             var costData = [];
             var costEffData = [];
             var redCells = 0, yellowCells = 0, greenCells = 0, totalRows = 0;
-            var hasPhysicalPerformanceData = true;
+            var hasPhysicalPerformanceData = false;
 
             var mergeBtaData = function( _data ){
                 var data = angular.copy( _data );
@@ -815,6 +815,7 @@ var ndpFrameworkServices = angular.module('ndpFrameworkServices', ['ngResource']
                 }
 
                 if ( dhis2.validation.isNumber( actual ) && dhis2.validation.isNumber( target ) ){
+                    hasPhysicalPerformanceData = true;
                     var t = CommonUtils.getPercent( Math.abs(actual - target), target, true);
                     if ( t <= ranges.green ){
                         color = ranges.greenColor;
@@ -948,7 +949,6 @@ var ndpFrameworkServices = angular.module('ndpFrameworkServices', ['ngResource']
 
             if( Object.keys( data ).length === 0 ){
                 dataExists = false;
-                return;
             }
             else{
                 dataExists = true;

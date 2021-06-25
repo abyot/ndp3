@@ -319,10 +319,10 @@ ndpFramework.controller('ProgrammeOutcomeController',
                         $scope.model.dataHeaders = processedData.dataHeaders;
                         $scope.model.reportPeriods = processedData.reportPeriods;
                         $scope.model.dataExists = processedData.dataExists;
-                        $scope.model.resultData = processedData.resultData || [];
-                        $scope.model.physicalPerformanceData = processedData.physicalPerformanceData || [];
-                        $scope.model.performanceData = processedData.performanceData || [];
-                        $scope.model.cumulativeData = processedData.cumulativeData || [];
+                        $scope.model.resultData = processedData.resultData;
+                        $scope.model.physicalPerformanceData = processedData.physicalPerformanceData;
+                        $scope.model.performanceData = processedData.performanceData;
+                        $scope.model.cumulativeData = processedData.cumulativeData;
                         $scope.model.hasPhysicalPerformanceData = processedData.hasPhysicalPerformanceData;
                     }
                 });
