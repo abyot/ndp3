@@ -909,23 +909,28 @@ var ndpFrameworkServices = angular.module('ndpFrameworkServices', ['ngResource']
 
                 if (dataParams.displayActionData)
                 {
-                    colSpan++;
-                    dataHeaders.push({
-                        periodId: pe.id,
-                        periodStart: pe.startDate,
-                        periodEnd: pe.endDate,
-                        dimensionId: 'unitCost',
-                        name: $translate.instant("target_unit_cost"),
-                        dimension: 'unitCost'});
+                    if ( pe.hasTargetData ){
+                        colSpan++;
+                        dataHeaders.push({
+                            hasResultData: true,
+                            periodId: pe.id,
+                            periodStart: pe.startDate,
+                            periodEnd: pe.endDate,
+                            dimensionId: 'unitCost',
+                            name: $translate.instant("target_unit_cost"),
+                            dimension: 'unitCost'});
 
-                    colSpan++;
-                    dataHeaders.push({
-                        periodId: pe.id,
-                        periodStart: pe.startDate,
-                        periodEnd: pe.endDate,
-                        name: $translate.instant("target_cost"),
-                        dimensionId: dataParams.targetDimension.id,
-                        dimension: dataParams.bta.category});
+                        colSpan++;
+                        dataHeaders.push({
+                            hasResultData: true,
+                            periodId: pe.id,
+                            periodStart: pe.startDate,
+                            periodEnd: pe.endDate,
+                            name: $translate.instant("target_cost"),
+                            dimensionId: dataParams.targetDimension.id,
+                            dimension: dataParams.bta.category});
+                    }
+
                 }
                 else{
                     angular.forEach(baseLineTargetActualDimensions, function(dm){

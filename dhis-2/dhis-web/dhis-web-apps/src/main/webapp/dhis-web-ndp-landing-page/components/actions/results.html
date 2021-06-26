@@ -61,13 +61,21 @@
             </span>
         </span>
         <div id="exportTable" class="table-scroll">
+            <table>
+                <tr>
+                    <td class="alert alert-warning" ng-repeat="period in model.reportPeriods" ng-if="!period.hasTargetData">
+                        {{period.displayName}} - {{'has_no_target_data' | translate}}
+                    </td>
+                </tr>
+            </table>
             <table class="table table-bordered table-striped table-responsive result-table">
                 <thead>
                     <tr>
-                        <th class="sticky"></th>
-                        <th class="sticky"></th>
-                        <th class="sticky"></th>
-                        <th class="center sticky" colspan="{{period.colSpan}}" ng-repeat="period in model.reportPeriods" ng-if="period.hasData">
+                        <th class="sticky" colspan="3">
+                            <span class="pull-left">**TCU={{'tcu_ugs' | translate}}</span>
+                            <span class="pull-right">**TC={{'tc_ugs' | translate}}</span>
+                        </th>
+                        <th class="center sticky" colspan="2" ng-repeat="period in model.reportPeriods" ng-if="period.hasTargetData">
                             {{period.displayName}}
                         </th>
                     </tr>
@@ -75,7 +83,7 @@
                         <th class="sticky">{{'interventions'| translate}}</th>
                         <th class="sticky">{{'outputs'| translate}}</th>
                         <th class="sticky">{{'indicator'| translate}}</th>
-                        <th class="center sticky" ng-repeat="header in model.dataHeaders">
+                        <th class="center sticky" ng-repeat="header in model.dataHeaders" ng-if="header.hasResultData">
                             {{header.name}}
                         </th>
                     </tr>
