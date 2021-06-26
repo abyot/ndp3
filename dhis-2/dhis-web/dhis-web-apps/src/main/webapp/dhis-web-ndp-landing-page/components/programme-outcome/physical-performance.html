@@ -47,6 +47,13 @@
             </span>
         </span>
         <div id="exportTable" class="table-scroll">
+            <table>
+                <tr>
+                    <td class="alert alert-warning" ng-repeat="period in model.reportPeriods" ng-if="!period.hasData">
+                        {{period.displayName}} - {{'has_no_data' | translate}}
+                    </td>
+                </tr>
+            </table>
             <table class="table table-bordered table-striped">
                 <thead>
                     <tr>

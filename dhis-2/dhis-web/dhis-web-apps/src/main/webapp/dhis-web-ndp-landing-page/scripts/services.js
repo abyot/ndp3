@@ -900,7 +900,12 @@ var ndpFrameworkServices = angular.module('ndpFrameworkServices', ['ngResource']
             angular.forEach(reportPeriods, function(pe){
                 var colSpan = 0;
                 var d = $filter('filter')(data, {pe: pe.id});
+                var targetFilter = {pe: pe.id};
+                targetFilter[dataParams.bta.category] = dataParams.targetDimension.id;
+                var targetData = $filter('filter')(data, targetFilter);
+
                 pe.hasData = d && d.length > 0;
+                pe.hasTargetData = targetData && targetData.length > 0;
 
                 if (dataParams.displayActionData)
                 {
