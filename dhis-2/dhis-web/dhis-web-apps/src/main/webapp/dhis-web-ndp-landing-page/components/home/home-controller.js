@@ -170,8 +170,8 @@ ndpFramework.controller('HomeController',
                                             domain: 'NOUT',
                                             code: 'resultsFrameworkObjective',
                                             ndp: op.code,
-                                            order: 3,
-                                            displayName: $translate.instant('objective_level'),
+                                            order: 4,
+                                            displayName: $translate.instant('objective_outcomes'),
                                             children: [],
                                             view: 'components/objective/objective-status.html',
                                             color: 'ndp-menu'
@@ -181,7 +181,7 @@ ndpFramework.controller('HomeController',
 
                                 if( programs.length > 0 ){
 
-                                    var pl = {
+                                    /*var pl = {
                                         id: op.code + '-PROGREAMME',
                                         order: 3,
                                         displayName: $translate.instant('programme_results'),
@@ -191,23 +191,23 @@ ndpFramework.controller('HomeController',
                                         hasChildren: true,
                                         children: [],
                                         color: 'ndp-menu'
-                                    };
+                                    };*/
 
-                                    pl.hasChildren = true;
-                                    pl.show = true;
-                                    pl.children.push( {
+                                    hl.hasChildren = true;
+                                    hl.show = true;
+                                    hl.children.push( {
                                         id: op.code + '-PRG',
                                         domain: 'PRGO',
                                         code: 'objective',
                                         ndp: op.code,
-                                        order: 1,
-                                        displayName: $translate.instant('outcome_level'),
+                                        order: 5,
+                                        displayName: $translate.instant('intermediate_outcomes'),
                                         children: [],
                                         view: 'components/programme-outcome/programme-status.html',
                                         color: 'ndp-menu'
                                     } );
 
-                                    op.children.push(pl);
+                                    //op.children.push(hl);
 
                                     var sp = {
                                         id: op.code + '-SUB',
