@@ -24,22 +24,19 @@
     </div>
 
     <div ng-show="model.metaDataCached">
-
         <form name="outerForm" novalidate>
             <div ng-if="model.selectedMenu" ng-switch="model.selectedMenu.domain">
                 <div ng-include="model.selectedMenu.view"></div>
             </div>
-            <div ng-if="!model.selectedMenu">
-                <carousel carousel-controls interval="5000" no-wrap="false">
-                    <slide ng-repeat="slide in model.slides">
-                        <div class="row col-sm-12">
-                            <img ng-src="{{slide.path}}" alt="{{slide.path}}">
-                        </div>
-                    </slide>
-                </carousel>
-            </div>
+            <carousel carousel-controls interval="5000" no-wrap="false" ng-if="!model.selectedMenu">
+                <slide ng-repeat="slide in model.slides">
+                    <img class="col-lg-12 col-md-12 col-sm-12 col-xs-12 cursor-pointer slider-container"
+                        ng-src="{{slide.path}}"
+                        alt="{{slide.path}}"
+                        ng-click='goToMenu("../dhis-web-dashboard")'>
+                </slide>
+            </carousel>
         </form>
-
     </div>
 
 </div>
