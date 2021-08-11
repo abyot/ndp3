@@ -16,7 +16,7 @@
                     <div class="panel panel-default">
                         <div class="panel-heading">{{'select_file' | translate}}</div>
                         <div class="panel-body">
-                            <input multiple type="file" file-upload="model.fileInput"/>
+                            <input type="file" file-upload="model.fileInput"/>
                             <table class="table table-bordered table-striped" ng-if="model.fileInput.length > 0">
                                 <thead>
                                     <tr>
@@ -81,21 +81,25 @@
                                             </ng-form>
                                         </td>
                                     </tr>
-                                </tbody>                                
+                                </tbody>
                             </table>
                             <div class="row col-sm-12 vertical-spacing">
-
                                 <button type="button"
                                         class="btn btn-danger"
+                                        ng-disabled="model.fileUploadFinished || model.fileUpdloadStarted"
                                         ng-click="cancelFileUpload()">
                                     {{'cancel' | translate}}
                                 </button>
                                 <button type="button"
                                         class="btn btn-primary"
+                                        ng-disabled="model.fileUpdloadStarted"
                                         ng-click="uploadFile(option)">
                                     {{'upload' | translate}}
                                 </button>
-
+                                <div class="alert alert-warning" ng-if='model.fileUpdloadStarted'>
+                                    <img src="../images/ajax-loader-bar.gif" alt="{{'in_progress'| translate}}"/><br>
+                                    {{'file_upload_in_progress' | translate}}
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -139,13 +143,13 @@
                                                 ng-click="deleteFile(document, $event)">
                                             <i class="fa fa-trash-o" aria-hidden="true"></i>
                                         </button>
-                                        
+
                                     </span>
                                 </td>
                             </tr>
                         </tbody>
                     </table>
-                    <div class="alert alert-warning" ng-if="(model.documents | filter : {folder: option.code}).length === 0">
+                    <div class="alert alert-warning" ng-if="(model.documents | filter : {folder: option.code}).length === 0 && !model.showFileUpload">
                         {{'no_files_available' | translate}}
                     </div>
                 </div>

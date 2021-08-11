@@ -161,6 +161,8 @@ docLibrary.controller('HomeController',
         $scope.model.fileInput = null;
         $scope.outerForm.submitted = false;
         $scope.outerForm.$setPristine();
+        $scope.model.fileUpdloadStarted = false;
+        $scope.model.fileUploadFinished = true;
     };
 
     $scope.showFileUpload = function(){
@@ -197,11 +199,12 @@ docLibrary.controller('HomeController',
 
         var today = DateUtils.getToday();
         var username = CommonUtils.getUsername();
+        $scope.model.fileUpdloadStarted = true;
+        $scope.model.fileUploadFinished = false;
 
-        angular.forEach($scope.model.fileInput, function(f){
-
+        //angular.forEach($scope.model.fileInput, function(f){
+            var f = $scope.model.fileInput[0];
             FileService.upload(f).then(function(fileRes){
-
                 if(fileRes && fileRes.status === 'OK' && fileRes.response && fileRes.response.fileResource && fileRes.response.fileResource.id && fileRes.response.fileResource.name){
                     var dataValues = [{
                         dataElement: $scope.model.typeDataElement.id,
@@ -275,12 +278,10 @@ docLibrary.controller('HomeController',
                     NotificationService.showNotifcationDialog($translate.instant("error"), $translate.instant("file_upload_failed") + f.name );
                     return;
                 }
-
                 $scope.resetFileUploadForm();
-
             });
 
-        });
+        //});
     };
 
     $scope.interacted = function(field) {
