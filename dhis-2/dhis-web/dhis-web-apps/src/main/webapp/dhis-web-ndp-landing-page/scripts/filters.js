@@ -51,9 +51,11 @@ var ndpFrameworkFilters = angular.module('ndpFrameworkFilters', [])
             return data.filter(function(item){
                 var match = true;
                 for( var k in obj ){
-                    match = match && item[k] === obj[k];
-                    if( !match ){
-                        return match;
+                    if ( obj[k] ){
+                        match = match && item[k] === obj[k];
+                        if( !match ){
+                            return match;
+                        }
                     }
                 }
                 return match;
@@ -85,6 +87,31 @@ var ndpFrameworkFilters = angular.module('ndpFrameworkFilters', [])
                 return res[0];
             }
             return null;
+        }
+    };
+})
+
+.filter('startsWith', function(){
+    return function(data, obj){
+        if(!data ){
+            return;
+        }
+        if(!obj){
+            return data;
+        }
+        else{
+            return data.filter(function(item){
+                var match = true;
+                for( var k in obj ){
+                    if ( item[k] && obj && obj[k] ){
+                        match = match && item[k].toLowerCase().indexOf(obj[k].toLowerCase()) === 0;
+                    }
+                    if( !match ){
+                        return match;
+                    }
+                }
+                return match;
+            });
         }
     };
 });

@@ -30,7 +30,7 @@ if( dhis2.ndp.memoryOnly ) {
 dhis2.ndp.store = new dhis2.storage.Store({
     name: 'dhis2ndp',
     adapters: [dhis2.storage.IndexedDBAdapter, dhis2.storage.DomSessionStorageAdapter, dhis2.storage.InMemoryAdapter],
-    objectStores: ['dataElements', 'dataElementGroups', 'dataElementGroupSets', 'dataSets', 'optionSets', 'categoryCombos', 'attributes', 'ouLevels', 'programs', 'legendSets']
+    objectStores: ['dataElements', 'dataElementGroups', 'dataElementGroupSets', 'dataSets', 'optionSets', 'categoryCombos', 'attributes', 'ouLevels', 'programs', 'legendSets', 'categoryOptionGroupSets']
 });
 
 (function($) {
@@ -187,7 +187,12 @@ dhis2.ndp.downloadMetaData = function()
         //fetch legendSets
         .then( getMetaLegendSets )
         .then( filterMissingLegendSets )
-        .then( getLegendSets );
+        .then( getLegendSets )
+
+        //fetch categoryOptionGroupSets
+        .then( getMetaCategoryOptionGroupSets )
+        .then( filterMissingCategoryOptionGroupSets )
+        .then( getCategoryOptionGroupSets );
 };
 
 function getUserAccessibleDataSets(){
@@ -329,4 +334,16 @@ function filterMissingLegendSets( objs ){
 
 function getLegendSets( ids ){
     return dhis2.metadata.getBatches( ids, dhis2.ndp.batchSize, 'legendSets', 'legendSets', dhis2.ndp.apiUrl + '/legendSets.json', 'paging=false&fields=id,code,displayName,attributeValues[value,attribute[id,name,valueType,code]],legends[id,name,startValue,endValue,color]', 'idb', dhis2.ndp.store, dhis2.metadata.processObject);
+}
+
+function getMetaCategoryOptionGroupSets(){
+    return dhis2.metadata.getMetaObjectIds('categoryOptionGroupSets', dhis2.ndp.apiUrl + '/categoryOptionGroupSets.json', 'paging=false&fields=id,version');
+}
+
+function filterMissingCategoryOptionGroupSets( objs ){
+    return dhis2.metadata.filterMissingObjIds('categoryOptionGroupSets', dhis2.ndp.store, objs);
+}
+
+function getCategoryOptionGroupSets( ids ){
+    return dhis2.metadata.getBatches( ids, dhis2.ndp.batchSize, 'categoryOptionGroupSets', 'categoryOptionGroupSets', dhis2.ndp.apiUrl + '/categoryOptionGroupSets.json', 'paging=false&fields=id,code,displayName,attributeValues[value,attribute[id,name,valueType,code]],categoryOptionGroups[id,displayName,code,categoryOptions[id,displayName,code]]', 'idb', dhis2.ndp.store, dhis2.metadata.processObject);
 }

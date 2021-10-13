@@ -10,7 +10,7 @@ var ndpFrameworkServices = angular.module('ndpFrameworkServices', ['ngResource']
     var store = new dhis2.storage.Store({
         name: "dhis2ndp",
         adapters: [dhis2.storage.IndexedDBAdapter, dhis2.storage.DomSessionStorageAdapter, dhis2.storage.InMemoryAdapter],
-        objectStores: ['dataElements', 'dataElementGroups', 'dataElementGroupSets', 'dataSets', 'optionSets', 'categoryCombos', 'attributes', 'ouLevels', 'programs', 'legendSets']
+        objectStores: ['dataElements', 'dataElementGroups', 'dataElementGroupSets', 'dataSets', 'optionSets', 'categoryCombos', 'attributes', 'ouLevels', 'programs', 'legendSets', 'categoryOptionGroupSets']
     });
     return{
         currentStore: store
@@ -114,6 +114,34 @@ var ndpFrameworkServices = angular.module('ndpFrameworkServices', ['ngResource']
         });
 
         return d2Periods;
+    };
+
+    this.getQuarters = function( pe ){
+        if ( !pe || !pe._startDate || !pe._startDate._year || !pe._endDate || !pe._endDate._year ){
+            return [];
+        }
+        return [
+            {
+                id: pe._startDate._year+'Q3',
+                iso: pe._startDate._year+'Q3',
+                name: 'Q1',
+                sortName: 'firstQuarter'
+            },{
+                id: pe._startDate._year+'Q4',
+                iso: pe._startDate._year+'Q4',
+                name: 'Q2',
+                sortName: 'secondQuarter'
+            },{
+                id: pe._endDate._year+'Q1',
+                iso: pe._endDate._year+'Q1',
+                name: 'Q3',
+                sortName: 'thirdQuarter'
+            },{
+                id: pe._endDate._year+'Q2',
+                iso: pe._endDate._year+'Q2',
+                name: 'Q4',
+                sortName: 'fourthQuarter'
+        }];
     };
 })
 
@@ -225,6 +253,55 @@ var ndpFrameworkServices = angular.module('ndpFrameworkServices', ['ngResource']
                                 break;
                             }
                         }
+                    }
+                    $rootScope.$apply(function(){
+                        def.resolve(dimension);
+                    });
+                });
+            });
+            return def.promise;
+        },
+        getLlgFinanceDimensions: function(uid, sectors){
+            var def = $q.defer();
+            var dimension = {sectors: [], workPlans: [], programmes: [], outputs: [], fundTypes: [], optionCombos: [], programmeInfo: {}, workPlanInfo: {}};
+            angular.forEach(sectors, function(cogs){
+                angular.forEach(cogs.categoryOptionGroups, function(cog){
+                    dimension.workPlans.push( cog );
+                    dimension.workPlanInfo[cog.displayName] = {
+                        sector: cogs,
+                        programme: $.map(cog.categoryOptions, function(cog){return cog;})
+                    };
+                    angular.forEach(cog.categoryOptions, function(co){
+                        dimension.programmeInfo[co.displayName] = {
+                            sector: cogs,
+                            workPlan: cog,
+                            programme: co
+                        };
+                    });
+                });
+            });
+
+            DDStorageService.currentStore.open().done(function(){
+                DDStorageService.currentStore.get('categoryCombos', uid).done(function(categoryCombo){
+                    if ( categoryCombo && categoryCombo.categories && categoryCombo.categories.length > 0 ){
+                        for( var j=0; j<categoryCombo.categories.length;j++){
+                            if( categoryCombo.categories[j].code === 'LLG_FIN_FT' ){
+                                dimension.fundTypes = categoryCombo.categories[j].categoryOptions;
+                            }
+                            else if( categoryCombo.categories[j].code === 'LLG_FIN_OU' ){
+                                dimension.outputs = categoryCombo.categories[j].categoryOptions;
+                            }
+                            else if( categoryCombo.categories[j].code === 'LLG_FIN_PR' ){
+                                dimension.programmes = categoryCombo.categories[j].categoryOptions;
+                            }
+                        }
+                        angular.forEach(categoryCombo.categoryOptionCombos, function(oco){
+                            oco.categories = [];
+                            angular.forEach(categoryCombo.categories, function(c){
+                                oco.categories.push({id: c.id, displayName: c.displayName, categoryCode: c.code});
+                            });
+                            dimension.optionCombos[oco.id] = oco;
+                        });
                     }
                     $rootScope.$apply(function(){
                         def.resolve(dimension);
@@ -565,6 +642,37 @@ var ndpFrameworkServices = angular.module('ndpFrameworkServices', ['ngResource']
             });
             return promise;
         },
+        getByGroupOrgUnitOnly: function( group ){
+            if ( !group ){
+                return CommonUtils.dummyPromise([]);
+            }
+            var filter = '?paging=false&fields=id,displayName,organisationUnitGroups[id,displayName,code,attributeValues[value,attribute[id,code,valueType]],organisationUnits[id,displayName,code,level,parent[code,displayName]]],attributeValues[value,attribute[id,code,valueType]]';
+            var url = dhis2.ndp.apiUrl + '/organisationUnitGroupSets.json' + encodeURI( filter );
+            var promise = $http.get( url ).then(function(response){
+                var groups = [];
+                if( response && response.data && response.data.organisationUnitGroupSets){
+                    var ogss = response.data.organisationUnitGroupSets;
+                    angular.forEach(ogss, function(ogs){
+                        ogs = dhis2.metadata.processMetaDataAttribute( ogs );
+                        if( ogs.orgUnitGroupSetType && ogs.orgUnitGroupSetType === 'mdalg' && ogs.organisationUnitGroups.length > 0 ){
+                            angular.forEach(ogs.organisationUnitGroups, function(og){
+                                og = dhis2.metadata.processMetaDataAttribute( og );
+                                if( og.orgUnitGroupType && og.orgUnitGroupType === group && og.organisationUnits){
+                                    angular.forEach(og.organisationUnits, function(ou){
+                                        groups[ou.id] = ou;
+                                    });
+                                }
+                            });
+                        }
+                    });
+                }
+                return groups;
+            }, function(response){
+                CommonUtils.errorNotifier(response);
+                return response.data;
+            });
+            return promise;
+        },
         getByVote: function( id ){
             var filter = '?paging=false&fields=id,displayName,code,dataSets[dataSetElements[dataElement[dataElementGroups[groupSets[id]]]]],attributeValues[value,attribute[id,code,valueType]]';
             var url = dhis2.ndp.apiUrl + '/organisationUnits/' + id + '.json' + encodeURI( filter );
@@ -581,6 +689,69 @@ var ndpFrameworkServices = angular.module('ndpFrameworkServices', ['ngResource']
 
 .service('Analytics', function($q, $http, $filter, $translate, PeriodService, orderByFilter, CommonUtils, NotificationService){
     return {
+        getFinancialData: function( url, metadata ){
+            if( url ){
+                url = dhis2.ndp.apiUrl + '/dataValueSets.json?' + encodeURI( url );
+                var promise = $http.get( url ).then(function(response){
+                    var data = [], processed = [];
+                    if ( response.data && response.data.dataValues && response.data.dataValues.length > 0 ){
+                        angular.forEach(response.data.dataValues, function(dv){
+                            var v = {
+                                dataElement: dv.dataElement,
+                                orgUnit: dv.orgUnit,
+                                categoryOptionCombo: dv.categoryOptionCombo,
+                                attributeOptionCombo: dv.attributeOptionCombo
+                            };
+
+                            var key = dv.dataElement + '_' + dv.orgUnit + '_' + dv.categoryOptionCombo + '_' + dv.attributeOptionCombo;
+                            if ( processed.indexOf( key ) === -1 ){
+                                processed.push( key );
+                                var dataElement = metadata.dataElements[dv.dataElement];
+                                var oco = metadata.optionCombos[v.attributeOptionCombo];
+                                var lg = metadata.llgInfo[dv.orgUnit];
+                                if ( oco && oco.displayName ){
+                                    var pr = oco.displayName.split(',');
+                                    var prInfo = metadata.programmeInfo[pr[1]];
+                                    if ( prInfo ){
+                                        var res = $filter('dataFilter')(response.data.dataValues, angular.copy(v));
+                                        v.sector = prInfo.sector.displayName;
+                                        v.parentLgCode = lg && lg.parent && lg.parent.code ? lg.parent.code : '';
+                                        v.parentLgName = lg && lg.parent && lg.parent.displayName ? lg.parent.displayName : '';
+                                        v.subCounty = lg && lg.displayName ? lg.displayName : '';
+                                        v.workPlan = prInfo.workPlan.displayName;
+                                        v.fundType = pr[0];
+                                        v.programme = pr[1];
+                                        v.output = pr[2];
+                                        v.item = dataElement && dataElement.displayName || '';
+                                        v.cumFinancialYear = 0;
+
+                                        angular.forEach(metadata.periods, function(p){
+                                            v[p.sortName] = '';
+                                        });
+                                        angular.forEach(res, function(r){
+                                            v[metadata.periodsBySortName[r.period].sortName] = r.value;
+                                            v.cumFinancialYear = CommonUtils.getSum(v.cumFinancialYear, r.value);
+                                        });
+                                        data.push(v);
+                                    }
+                                }
+                            }
+                        });
+                    }
+                    return data;
+                }, function(response){
+                    CommonUtils.errorNotifier(response);
+                    return response.data;
+                });
+                return promise;
+            }
+            else{
+                var def = $q.defer();
+                def.resolve();
+                return def.promise;
+            }
+
+        },
         getData: function( url ){
             if ( url ){
                 url = dhis2.ndp.apiUrl + '/analytics?' + encodeURI( url );
