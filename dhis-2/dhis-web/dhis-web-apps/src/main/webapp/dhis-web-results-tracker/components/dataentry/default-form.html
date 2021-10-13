@@ -11,7 +11,7 @@
                         <th class="active col-sm-2">
                             {{'value' | translate}}
                         </th>
-                        <th class="col-sm-6">
+                        <th class="col-sm-6" ng-if="model.selectedDataSet.dataSetType === 'resultstracker'">
                             {{'project_name' | translate}}
                         </th>
                     </tr>
@@ -186,7 +186,7 @@
                                 </span>
                             </ng-form>
                         </td>
-                        <td>
+                        <td ng-if="model.selectedDataSet.dataSetType === 'resultstracker'">
                             <div class="cursor-pointer">
                                 <textarea rows="2"
                                         name="foo"

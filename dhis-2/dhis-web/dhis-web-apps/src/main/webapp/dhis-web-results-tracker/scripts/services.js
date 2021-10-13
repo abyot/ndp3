@@ -162,7 +162,8 @@ var actionMappingServices = angular.module('actionMappingServices', ['ngResource
                     angular.forEach(dss, function(ds){
                         ds[key] = ds[key] ? ds[key] : key;
                         ds[key] = ds[key].toLocaleLowerCase();
-                        if( ds.id && CommonUtils.userHasWriteAccess(ds.id) && ds.organisationUnits.hasOwnProperty( ou.id ) && ds[key] === "resultstracker" ){
+                        if( ds.id && CommonUtils.userHasWriteAccess(ds.id) && ds.organisationUnits.hasOwnProperty( ou.id ) &&
+                                (ds[key] === 'resultstracker' || ds[key] === 'llgfinance') ){
                             dataSets.push(ds);
                         }
                     });
