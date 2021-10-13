@@ -1,3 +1,5 @@
 node_modules/
 node/
 package-lock.json
+/.apt_generated/
+/.apt_generated_tests/

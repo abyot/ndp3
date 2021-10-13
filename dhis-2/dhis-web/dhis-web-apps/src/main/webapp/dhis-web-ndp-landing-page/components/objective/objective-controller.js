@@ -295,9 +295,10 @@ ndpFramework.controller('ObjectiveController',
 
             var des = [];
             angular.forEach($scope.model.dataElementGroup, function(deg){
-                angular.forEach(deg.dataElements, function(de){
+                des.push('DE_GROUP-' + deg.id);
+                /*angular.forEach(deg.dataElements, function(de){
                     des.push( de.id );
-                });
+                });*/
             });
 
             analyticsUrl += '&dimension=dx:' + des.join(';');
@@ -377,7 +378,7 @@ ndpFramework.controller('ObjectiveController',
             type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=utf-8"
         });
 
-        var reportName =$scope.model.selectedMenu.displayName + ".xls";
+        var reportName = $scope.model.selectedMenu.displayName + ".xls";
 
         if( name ){
             reportName = name + ' performance.xls';

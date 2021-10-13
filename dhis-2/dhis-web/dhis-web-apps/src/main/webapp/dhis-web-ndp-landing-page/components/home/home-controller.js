@@ -261,6 +261,19 @@ ndpFramework.controller('HomeController',
                                         color: 'ndp-menu'
                                     } );
 
+                                    sp.children.push( {
+                                        id: op.code + '-PIAP',
+                                        domain: 'PIAP',
+                                        code: 'piap',
+                                        ndp: op.code,
+                                        order: 3,
+                                        displayName: $translate.instant('piap_level'),
+                                        show: true,
+                                        view: 'components/piap/piap-status.html',
+                                        children: [],
+                                        color: 'ndp-menu'
+                                    } );
+
                                     op.children.push(sp);
 
                                     var pr = {
@@ -327,32 +340,49 @@ ndpFramework.controller('HomeController',
                                             show: true,
                                             color: 'il-menu',
                                             children: [
-                                            {
-                                                id: 'MDA',
-                                                domain: 'MDA',
-                                                displayName: $translate.instant('mdas'),
-                                                order: 1,
-                                                children: [],
-                                                view: 'components/mda/mda-status.html',
-                                                color: 'il-menu'
-                                            },
-                                            {
-                                                id: 'LOG',
-                                                domain: 'LOG',
-                                                displayName: $translate.instant('lgs'),
-                                                order: 2,
-                                                children: [],
-                                                view: 'components/log/log-status.html',
-                                                color: 'il-menu'
-                                            },{
-                                                id: 'LLG',
-                                                domain: 'LLG',
-                                                displayName: $translate.instant('llgs'),
-                                                order: 3,
-                                                children: [],
-                                                view: 'components/llg/llg-status.html',
-                                                color: 'il-menu'
-                                            }
+                                                {
+                                                    id: 'MDA',
+                                                    domain: 'MDA',
+                                                    displayName: $translate.instant('mdas'),
+                                                    order: 1,
+                                                    children: [],
+                                                    view: 'components/mda/mda-status.html',
+                                                    color: 'il-menu'
+                                                },
+                                                {
+                                                    id: 'LOG',
+                                                    domain: 'LOG',
+                                                    displayName: $translate.instant('lgs'),
+                                                    order: 2,
+                                                    children: [],
+                                                    view: 'components/log/log-status.html',
+                                                    color: 'il-menu'
+                                                },{
+                                                    id: 'LLG',
+                                                    domain: 'LLG',
+                                                    displayName: $translate.instant('llgs'),
+                                                    order: 3,
+                                                    color: 'il-menu',
+                                                    children: [
+                                                        {
+                                                            id: 'LLG-NDP',
+                                                            domain: 'LLG-NDP',
+                                                            displayName: $translate.instant('ndp'),
+                                                            order: 1,
+                                                            children: [],
+                                                            view: 'components/llg/llg-status.html',
+                                                            color: 'il-menu'
+                                                        },{
+                                                            id: 'LLG-FIN',
+                                                            domain: 'LLG-FIN',
+                                                            displayName: $translate.instant('finance'),
+                                                            order: 2,
+                                                            children: [],
+                                                            view: 'components/llg/llg-finance-status.html',
+                                                            color: 'il-menu'
+                                                        }
+                                                    ],
+                                                }
                                             ]
                                         },
                                         {
