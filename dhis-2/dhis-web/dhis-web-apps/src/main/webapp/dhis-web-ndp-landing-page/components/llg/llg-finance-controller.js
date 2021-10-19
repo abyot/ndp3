@@ -3,7 +3,7 @@
 /* global ndpFramework */
 
 
-ndpFramework.controller('LLFinanceGController',
+ndpFramework.controller('LLGFinanceController',
         function($scope,
         $translate,
         $modal,
@@ -216,7 +216,7 @@ ndpFramework.controller('LLFinanceGController',
         $scope.sortHeader = $scope.model.dataHeaders[0];
 
         $scope.model.sortHeader = 'fundType';
-        
+
         angular.forEach($scope.model.selectedQuarters, function(q){
             dataValueSetUrl += '&period=' + q.id;
             $scope.model.dataHeaders.push({id: q.sortName, name: q.name});

@@ -46,7 +46,8 @@ ndpFramework.controller('LLGController',
 
     $scope.model.horizontalMenus = [
         {id: 'physicalPerformance', title: 'physical_performance', order: 1, view: 'components/llg/physical-performance.html', active: true, class: 'main-horizontal-menu'},
-        {id: 'budgetPerformance', title: 'budget_performance', order: 2, view: 'components/llg/budget-performance.html', class: 'main-horizontal-menu'},
+        //{id: 'budgetPerformance', title: 'budget_performance', order: 2, view: 'components/llg/budget-performance.html', class: 'main-horizontal-menu'},
+        {id: 'financialPerformance', title: 'financial_performance', order: 2, view: 'components/llg/finance-performance.html', class: 'main-horizontal-menu'},
         {id: 'dashboard', title: 'dashboard', order: 3, view: 'components/llg/dashboard.html', class: 'main-horizontal-menu'}
     ];
 
