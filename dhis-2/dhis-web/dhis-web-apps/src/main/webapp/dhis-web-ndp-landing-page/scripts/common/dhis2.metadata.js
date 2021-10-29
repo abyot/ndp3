@@ -161,7 +161,7 @@ dhis2.metadata.getMetaObjectIds = function( objNames, url, filter )
         def.resolve( objs );
 
     }).fail(function(){
-        def.resolve( null );
+        def.resolve( [] );
     });
 
     return def.promise();
@@ -169,28 +169,24 @@ dhis2.metadata.getMetaObjectIds = function( objNames, url, filter )
 
 dhis2.metadata.filterMissingObjIds  = function( store, db, objs )
 {
-    if( !objs || !objs.length || objs.length < 1){
-        return;
-    }
     var def = $.Deferred();
 
-    var objIds = [];
-
-    _.each( _.values( objs ), function ( obj ) {
-        objIds.push( obj.id );
-    });
-
-    def.resolve( objIds );
+    if( !objs || !objs.length || objs.length < 1){
+        def.resolve( [] );
+    }
+    else{
+        var objIds = [];
+        _.each( _.values( objs ), function ( obj ) {
+            objIds.push( obj.id );
+        });
+        def.resolve( objIds );
+    }
 
     return def.promise();
 };
 
 dhis2.metadata.filterMissingObjIdsWithCheck  = function( store, db, objs )
 {
-    if( !objs || !objs.length || objs.length < 1){
-        return;
-    }
-
     var mainDef = $.Deferred();
     var mainPromise = mainDef.promise();
 
@@ -200,49 +196,48 @@ dhis2.metadata.filterMissingObjIdsWithCheck  = function( store, db, objs )
     var builder = $.Deferred();
     var build = builder.promise();
 
-    var missingObjIds = [];
-    _.each( _.values( objs ), function ( obj ) {
-        build = build.then(function() {
-            var d = $.Deferred();
-            var p = d.promise();
-            db.get(store, obj.id).done(function(o) {
-                if( !o ) {
-                    missingObjIds.push( obj.id );
-                }
-                else{
-                    if( obj.version && o.version != obj.version ){
-                    	missingObjIds.push( obj.id );
+    if( !objs || !objs.length || objs.length < 1){
+        mainDef.resolve( [] );
+    }
+    else{
+        var missingObjIds = [];
+        _.each( _.values( objs ), function ( obj ) {
+            build = build.then(function() {
+                var d = $.Deferred();
+                var p = d.promise();
+                db.get(store, obj.id).done(function(o) {
+                    if( !o ) {
+                        missingObjIds.push( obj.id );
                     }
-                }
-                d.resolve();
+                    else{
+                        if( obj.version && o.version != obj.version ){
+                            missingObjIds.push( obj.id );
+                        }
+                    }
+                    d.resolve();
+                });
+
+                return p;
             });
-
-            return p;
         });
-    });
 
-    build.done(function() {
-        def.resolve();
-        promise = promise.done( function () {
-            mainDef.resolve( missingObjIds );
+        build.done(function() {
+            def.resolve();
+            promise = promise.done( function () {
+                mainDef.resolve( missingObjIds );
+            });
+        }).fail(function(){
+            mainDef.resolve( [] );
         });
-    }).fail(function(){
-        mainDef.resolve( null );
-    });
 
-    builder.resolve();
+        builder.resolve();
+    }
 
     return mainPromise;
 };
 
 dhis2.metadata.getBatches = function( ids, batchSize, store, objs, url, filter, storage, db, func )
 {
-    if( !ids || !ids.length || ids.length < 1){
-        return;
-    }
-
-    var batches = dhis2.metadata.chunk( ids, batchSize );
-
     var mainDef = $.Deferred();
     var mainPromise = mainDef.promise();
 
@@ -252,23 +247,30 @@ dhis2.metadata.getBatches = function( ids, batchSize, store, objs, url, filter, 
     var builder = $.Deferred();
     var build = builder.promise();
 
-    _.each( _.values( batches ), function ( batch ) {
-        promise = promise.then(function(){
-            return dhis2.metadata.fetchBatchItems( batch, store, objs, url, filter, storage, db, func );
+    if( !ids || !ids.length || ids.length < 1){
+        mainDef.resolve( [] );
+    }
+    else{
+        var batches = dhis2.metadata.chunk( ids, batchSize );
+
+        _.each( _.values( batches ), function ( batch ) {
+            promise = promise.then(function(){
+                return dhis2.metadata.fetchBatchItems( batch, store, objs, url, filter, storage, db, func );
+            });
         });
-    });
 
-    build.done(function() {
-        def.resolve();
-        promise = promise.done( function () {
-            mainDef.resolve();
-        } );
+        build.done(function() {
+            def.resolve();
+            promise = promise.done( function ( _objs ) {
+                mainDef.resolve( _objs );
+            } );
 
-    }).fail(function(){
-        mainDef.resolve( null );
-    });
+        }).fail(function(){
+            mainDef.resolve( [] );
+        });
 
-    builder.resolve();
+        builder.resolve();
+    }
 
     return mainPromise;
 };
@@ -426,7 +428,30 @@ dhis2.metadata.getMetaObjects = function( store, objs, url, filter, storage, db,
             def.resolve(response[objs] ? response[objs] : []);
         }
         else{
-            def.resolve();
+
+            if ( store === 'dataElementGroupSets' ){
+                var dataElementGroups = [];
+                if ( response[objs] ){
+                    _.each( _.values( response[objs] ), function ( obj ) {
+                        var _degs = $.map(obj.dataElementGroups, function(deg){ return deg.id; });
+                        dataElementGroups = dataElementGroups.concat( _degs );
+                    });
+                }
+                def.resolve( dataElementGroups );
+            }
+            else if ( store === 'dataElementGroups' ){
+                var dataElements = [];
+                if ( response[objs] ){
+                    _.each( _.values( response[objs] ), function ( obj ) {
+                        var _des = $.map(obj.dataElements, function(de){ return de.id; });
+                        dataElements = dataElements.concat( _des );
+                    });
+                }
+                def.resolve( dataElements );
+            }
+            else{
+                def.resolve();
+            }
         }
     }).fail(function(){
         def.resolve( null );

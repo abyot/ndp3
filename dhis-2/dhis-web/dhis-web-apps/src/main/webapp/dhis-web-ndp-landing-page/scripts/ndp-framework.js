@@ -1,5 +1,5 @@
 
-/* global dhis2, angular, selection, i18n_ajax_login_failed, _ */
+/* global dhis2, angular, selection, i18n_ajax_login_failed, _, Promise, await */
 
 dhis2.util.namespace('dhis2.ndp');
 
@@ -128,6 +128,25 @@ function ajax_login()
 // Metadata downloading
 // -----------------------------------------------------------------------------
 
+dhis2.ndp.downloadGroupSets = function( groupSetType )
+{
+    var def = $.Deferred();
+    dhis2.ndp.store.open().then(function(){
+        getMetaDataElementGroupSetsByType( groupSetType ).then(function( metaDegs ){
+            filterMissingDataElementGroupSets(metaDegs).then(function( missingDegs ){
+                getDataElementGroupSets(missingDegs).then(function( degs ){
+                    getDataElementGroups(degs).then(function( des ){
+                        getDataElements(des).then(function(){
+                            def.resolve();
+                        });
+                    });
+                });
+            });
+        });
+    });
+    return def.promise();
+};
+
 dhis2.ndp.downloadMetaData = function()
 {
     var metadataCached = JSON.parse(sessionStorage.getItem('METADATA_CACHED'));
@@ -139,6 +158,56 @@ dhis2.ndp.downloadMetaData = function()
     console.log('Loading required meta-data');
 
     return dhis2.ndp.store.open()
+
+        //fetch data sets
+        .then( getMetaDataSets )
+        .then( filterMissingDataSets )
+        .then( getDataSets )
+
+        //fetch option sets
+        .then( getMetaOptionSets )
+        .then( filterMissingOptionSets )
+        .then( getOptionSets )
+
+        //fetch category combos
+        .then( getMetaCategoryCombos )
+        .then( filterMissingCategoryCombos )
+        .then( getCategoryCombos )
+
+        //fetch custom attributes
+        .then( getMetaAttributes )
+        .then( filterMissingAttributes )
+        .then( getAttributes )
+
+        //fetch programs
+        .then( getMetaPrograms )
+        .then( filterMissingPrograms )
+        .then( getPrograms )
+
+        //fetch legendSets
+        .then( getMetaLegendSets )
+        .then( filterMissingLegendSets )
+        .then( getLegendSets )
+
+        //fetch categoryOptionGroupSets
+        .then( getMetaCategoryOptionGroupSets )
+        .then( filterMissingCategoryOptionGroupSets )
+        .then( getCategoryOptionGroupSets );
+};
+
+
+dhis2.ndp.downloadAllMetaData = function()
+{
+    var metadataCached = JSON.parse(sessionStorage.getItem('ALL_METADATA_CACHED'));
+
+    if ( metadataCached ){
+        return Promise.resolve();
+    }
+
+    console.log('Loading required meta-data');
+
+    return dhis2.ndp.store.open()
+
 
         .then( getUserAccessibleDataSets )
         .then( getOrgUnitLevels )
@@ -228,6 +297,10 @@ function getCategoryCombos( ids ){
     return dhis2.metadata.getBatches( ids, dhis2.ndp.batchSize, 'categoryCombos', 'categoryCombos', dhis2.ndp.apiUrl + '/categoryCombos.json', 'paging=false&fields=id,displayName,code,skipTotal,isDefault,categoryOptionCombos[id,displayName,categoryOptions[displayName,id]],categories[id,displayName,code,dimension,dataDimensionType,attributeValues[value,attribute[id,name,valueType,code]],categoryOptions[id,displayName,code,attributeValues[value,attribute[id,code,valueType]]]]', 'idb', dhis2.ndp.store);
 }
 
+function getLinkedMetaDataElements( dataElements ){
+    return dhis2.metadata.getMetaObjectIds('dataElements', dhis2.ndp.apiUrl + '/dataElements.json', 'paging=false&fields=id,version');
+}
+
 function getMetaDataElements(){
     return dhis2.metadata.getMetaObjectIds('dataElements', dhis2.ndp.apiUrl + '/dataElements.json', 'paging=false&fields=id,version');
 }
@@ -244,12 +317,20 @@ function getMetaDataElementGroups(){
     return dhis2.metadata.getMetaObjectIds('dataElementGroups', dhis2.ndp.apiUrl + '/dataElementGroups.json', 'paging=false&fields=id,version');
 }
 
+function getLinkedMetaDataElementGroups( groups ){
+    return dhis2.metadata.getMetaObjectIds('dataElementGroups', dhis2.ndp.apiUrl + '/dataElementGroups.json', 'paging=false&fields=id,version');
+}
+
 function filterMissingDataElementGroups( objs ){
     return dhis2.metadata.filterMissingObjIds('dataElementGroups', dhis2.ndp.store, objs);
 }
 
 function getDataElementGroups( ids ){
     return dhis2.metadata.getBatches( ids, dhis2.ndp.batchSize, 'dataElementGroups', 'dataElementGroups', dhis2.ndp.apiUrl + '/dataElementGroups.json', 'paging=false&fields=id,displayName,code,description,dataElements[id],attributeValues[value,attribute[id,name,valueType,code]]', 'idb', dhis2.ndp.store);
+}
+
+function getMetaDataElementGroupSetsByType( type ){
+    return dhis2.metadata.getMetaObjectIds('dataElementGroupSets', dhis2.ndp.apiUrl + '/dataElementGroupSets.json', 'paging=false&fields=id,version&filter=attributeValues.value:eq:' + type );
 }
 
 function getMetaDataElementGroupSets(){
@@ -273,7 +354,7 @@ function filterMissingDataSets( objs ){
 }
 
 function getDataSets( ids ){
-    return dhis2.metadata.getBatches( ids, dhis2.ndp.batchSize, 'dataSets', 'dataSets', dhis2.ndp.apiUrl + '/dataSets.json', 'paging=false&fields=id,periodType,openFuturePeriods,displayName,version,categoryCombo[id],attributeValues[value,attribute[id,name,valueType,code]],organisationUnits[code,id],dataSetElements[id,dataElement[id]]', 'idb', dhis2.ndp.store, '');
+    return dhis2.metadata.getBatches( ids, dhis2.ndp.batchSize, 'dataSets', 'dataSets', dhis2.ndp.apiUrl + '/dataSets.json', 'paging=false&fields=id,periodType,displayName,version,categoryCombo[id],attributeValues[value,attribute[id,name,valueType,code]],organisationUnits[code,id],dataSetElements[id,dataElement[id]]', 'idb', dhis2.ndp.store, '');
 }
 
 function getMetaOptionSets(){
