@@ -361,7 +361,6 @@ html, body {
 
 .select2-container .select2-choice {
     padding: 5px !important;
-    color: #555 !important;
 }
 
 .form-control{
@@ -658,6 +657,9 @@ thead th.sticky {
 
 .table-scroll thead tr:nth-child(2) th {
     top: 30px;
+}
+.selected-ndp-menu {
+    color: red !important;
 }
 
 .ndp-menu {
