@@ -209,8 +209,6 @@ ndpFramework.controller('LOGController',
 
                                     $scope.model.dataElementGroupSets = dataElementGroupSets;
 
-                                    $scope.model.selectedMenu = SelectedMenuService.getSelectedMenu();
-
                                     var periods = PeriodService.getPeriods($scope.model.selectedPeriodType, $scope.model.periodOffset, $scope.model.openFuturePeriods);
                                     $scope.model.allPeriods = angular.copy( periods );
                                     $scope.model.periods = periods;
@@ -224,6 +222,7 @@ ndpFramework.controller('LOGController',
                                     });
 
                                     $scope.model.metaDataCached = true;
+                                    $scope.populateMenu();
                                 });
                             });
                         });
@@ -232,6 +231,13 @@ ndpFramework.controller('LOGController',
             });
         });
     });
+
+    $scope.populateMenu = function(){
+        $scope.model.selectedMenu = SelectedMenuService.getSelectedMenu();
+        if( $scope.model.selectedMenu && $scope.model.selectedMenu.ndp ){
+            $scope.model.selectedNDP = $filter('getFirst')($scope.model.ndp.options, {code: $scope.model.selectedMenu.ndp});
+        }
+    };
 
     $scope.getObjectives = function(){
         $scope.model.objectives = [];
