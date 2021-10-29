@@ -373,11 +373,8 @@ ndpFramework.controller('MDAController',
 
             var des = [];
             angular.forEach($scope.model.dataElementGroup, function(deg){
-                angular.forEach(deg.dataElements, function(de){
-                    des.push( de.id );
-                });
+                des.push('DE_GROUP-' + deg.id);
             });
-
             analyticsUrl += '&dimension=dx:' + des.join(';');
 
             Analytics.getData( analyticsUrl ).then(function(data){

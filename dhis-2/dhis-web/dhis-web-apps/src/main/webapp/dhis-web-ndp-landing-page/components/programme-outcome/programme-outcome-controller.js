@@ -285,11 +285,8 @@ ndpFramework.controller('ProgrammeOutcomeController',
 
             var des = [];
             angular.forEach($scope.model.dataElementGroup, function(deg){
-                angular.forEach(deg.dataElements, function(de){
-                    des.push( de.id );
-                });
+                des.push('DE_GROUP-' + deg.id);
             });
-
             analyticsUrl += '&dimension=dx:' + des.join(';');
 
             FinancialDataService.getLocalData('data/cost.json').then(function(cost){

@@ -183,14 +183,15 @@ ndpFramework.controller('Vision2040Controller',
             analyticsUrl += '&dimension=pe:' + $.map($scope.model.selectedPeriods, function(pe){return pe.id;}).join(';');
 
             $scope.model.dataElements = [];
+            var des = [];
             angular.forEach($scope.model.dataElementGroup, function(deg){
+                des.push('DE_GROUP-' + deg.id);
                 angular.forEach(deg.dataElements, function(de){
                     var _de = $scope.model.dataElementsById[de.id];
                     $scope.model.dataElements.push( _de );
                 });
             });
-
-            analyticsUrl += '&dimension=dx:' + $.map($scope.model.dataElements, function(de){return de.id;}).join(';');
+            analyticsUrl += '&dimension=dx:' + des.join(';');
 
             FinancialDataService.getLocalData('data/cost.json').then(function(cost){
                 $scope.model.cost = cost;
