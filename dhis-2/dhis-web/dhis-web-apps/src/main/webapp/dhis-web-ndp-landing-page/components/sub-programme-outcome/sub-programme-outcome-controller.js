@@ -209,16 +209,17 @@ ndpFramework.controller('SubProgrammeOutcomeController',
                                 }
                             });
 
+                            $scope.model.dashboardFetched = true;
                             $scope.populateMenu();
 
-                            $scope.model.dashboardName = 'Sub-Programme Outcomes';
+                            /*$scope.model.dashboardName = 'Sub-Programme Outcomes';
                             DashboardService.getByName( $scope.model.dashboardName ).then(function( result ){
                                 $scope.model.dashboardItems = result.dashboardItems;
                                 $scope.model.charts = result.charts;
                                 $scope.model.tables = result.tables;
                                 $scope.model.maps = result.maps;
                                 $scope.model.dashboardFetched = true;
-                            });
+                            });*/
                         });
                     });
                 });

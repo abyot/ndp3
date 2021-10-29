@@ -29,8 +29,6 @@ ndpFramework.controller('ProgrammeOutcomeController',
         optionSets: [],
         legendSetsById: [],
         defaultLegendSet: null,
-        objectives: [],
-        ndpObjectives: [],
         ndpProgrammes: [],
         dataElementGroup: [],
         selectedDataElementGroupSets: [],
@@ -66,11 +64,6 @@ ndpFramework.controller('ProgrammeOutcomeController',
     });
 
     $scope.getOutcomes = function(){
-
-        $scope.model.selectedDataElementGroupSets = $scope.model.selectedDataElementGroupSets.filter(function(obj){
-            return obj.dataElementGroups && obj.dataElementGroups.length && obj.dataElementGroups.length > 0;
-        });
-
         $scope.model.dataElementGroup = [];
         angular.forEach($scope.model.selectedDataElementGroupSets, function(degs){
             angular.forEach(degs.dataElementGroups, function(deg){
@@ -90,10 +83,9 @@ ndpFramework.controller('ProgrammeOutcomeController',
         $scope.resetDataView();
         $scope.model.objectives = [];
         $scope.model.selectedDataElementGroupSets = [];
-        $scope.model.selectedSubProgramme = null;
         if( angular.isObject($scope.model.selectedNdpProgram) ){
             if( $scope.model.selectedNdpProgram && $scope.model.selectedNdpProgram.code ){
-                var filter = {ndp: $scope.model.selectedMenu.ndp, indicatorGroupSetType: $scope.model.selectedMenu.code, ndpProgramme: $scope.model.selectedNdpProgram.code};
+                var filter = {ndpProgramme: $scope.model.selectedNdpProgram.code};
                 $scope.model.selectedDataElementGroupSets = $filter('filter')($scope.model.dataElementGroupSets, filter, true);
                 $scope.getOutcomes();
             }
@@ -120,108 +112,113 @@ ndpFramework.controller('ProgrammeOutcomeController',
         }
     };
 
-    MetaDataFactory.getAll('legendSets').then(function(legendSets){
+    dhis2.ndp.downloadGroupSets( 'objective' ).then(function(){
 
-        angular.forEach(legendSets, function(legendSet){
-            if ( legendSet.isTrafficLight ){
-                $scope.model.defaultLegendSet = legendSet;
-            }
-            $scope.model.legendSetsById[legendSet.id] = legendSet;
-        });
 
-        MetaDataFactory.getAll('optionSets').then(function(optionSets){
+        MetaDataFactory.getAll('legendSets').then(function(legendSets){
 
-            $scope.model.optionSets = optionSets;
-
-            angular.forEach(optionSets, function(optionSet){
-                $scope.model.optionSetsById[optionSet.id] = optionSet;
+            angular.forEach(legendSets, function(legendSet){
+                if ( legendSet.isTrafficLight ){
+                    $scope.model.defaultLegendSet = legendSet;
+                }
+                $scope.model.legendSetsById[legendSet.id] = legendSet;
             });
 
-            $scope.model.ndp = $filter('getFirst')($scope.model.optionSets, {code: 'ndp'});
+            MetaDataFactory.getAll('optionSets').then(function(optionSets){
 
-            if( !$scope.model.ndp || !$scope.model.ndp.code ){
-                NotificationService.showNotifcationDialog($translate.instant("error"), $translate.instant("missing_ndp_configuration"));
-                return;
-            }
+                $scope.model.optionSets = optionSets;
 
-            OptionComboService.getBtaDimensions().then(function( bta ){
+                angular.forEach(optionSets, function(optionSet){
+                    $scope.model.optionSetsById[optionSet.id] = optionSet;
+                });
 
-                if( !bta || !bta.category || !bta.options || bta.options.length !== 3 ){
-                    NotificationService.showNotifcationDialog($translate.instant("error"), $translate.instant("invalid_bta_dimensions"));
+                $scope.model.ndp = $filter('getFirst')($scope.model.optionSets, {code: 'ndp'});
+
+                if( !$scope.model.ndp || !$scope.model.ndp.code ){
+                    NotificationService.showNotifcationDialog($translate.instant("error"), $translate.instant("missing_ndp_configuration"));
                     return;
                 }
 
-                $scope.model.bta = bta;
-                $scope.model.baseLineTargetActualDimensions = $.map($scope.model.bta.options, function(d){return d.id;});
-                $scope.model.actualDimension = null;
-                $scope.model.targetDimension = null;
-                $scope.model.baselineDimension = null;
-                angular.forEach(bta.options, function(op){
-                    if ( op.btaDimensionType === 'actual' ){
-                        $scope.model.actualDimension = op;
+                OptionComboService.getBtaDimensions().then(function( bta ){
+
+                    if( !bta || !bta.category || !bta.options || bta.options.length !== 3 ){
+                        NotificationService.showNotifcationDialog($translate.instant("error"), $translate.instant("invalid_bta_dimensions"));
+                        return;
                     }
-                    if ( op.btaDimensionType === 'target' ){
-                        $scope.model.targetDimension = op;
-                    }
-                    if ( op.btaDimensionType === 'baseline' ){
-                        $scope.model.baselineDimension = op;
-                    }
-                });
 
-                MetaDataFactory.getAll('dataElements').then(function(dataElements){
+                    $scope.model.bta = bta;
+                    $scope.model.baseLineTargetActualDimensions = $.map($scope.model.bta.options, function(d){return d.id;});
+                    $scope.model.actualDimension = null;
+                    $scope.model.targetDimension = null;
+                    $scope.model.baselineDimension = null;
+                    angular.forEach(bta.options, function(op){
+                        if ( op.btaDimensionType === 'actual' ){
+                            $scope.model.actualDimension = op;
+                        }
+                        if ( op.btaDimensionType === 'target' ){
+                            $scope.model.targetDimension = op;
+                        }
+                        if ( op.btaDimensionType === 'baseline' ){
+                            $scope.model.baselineDimension = op;
+                        }
+                    });
 
-                    $scope.model.dataElementsById = dataElements.reduce( function(map, obj){
-                        map[obj.id] = obj;
-                        return map;
-                    }, {});
+                    MetaDataFactory.getAll('dataElements').then(function(dataElements){
 
-                    MetaDataFactory.getDataElementGroups().then(function(dataElementGroups){
+                        $scope.model.dataElementsById = dataElements.reduce( function(map, obj){
+                            map[obj.id] = obj;
+                            return map;
+                        }, {});
 
-                        $scope.model.dataElementGroups = dataElementGroups;
+                        MetaDataFactory.getDataElementGroups().then(function(dataElementGroups){
 
-                        MetaDataFactory.getAll('dataElementGroupSets').then(function(dataElementGroupSets){
+                            $scope.model.dataElementGroups = dataElementGroups;
 
-                            $scope.model.dataElementGroupSets = dataElementGroupSets;
+                            MetaDataFactory.getAllByProperty('dataElementGroupSets', 'indicatorGroupSetType', 'objective').then(function(dataElementGroupSets){
+                                $scope.model.dataElementGroupSets = dataElementGroupSets;
+                                $scope.model.dataElementGroupSets = orderByFilter( $scope.model.dataElementGroupSets, '-displayName').reverse();
 
-                            var periods = PeriodService.getPeriods($scope.model.selectedPeriodType, $scope.model.periodOffset, $scope.model.openFuturePeriods);
-                            $scope.model.allPeriods = angular.copy( periods );
-                            $scope.model.periods = periods;
+                                var periods = PeriodService.getPeriods($scope.model.selectedPeriodType, $scope.model.periodOffset, $scope.model.openFuturePeriods);
+                                $scope.model.allPeriods = angular.copy( periods );
+                                $scope.model.periods = periods;
 
-                            var selectedPeriodNames = ['2020/21', '2021/22', '2022/23', '2023/24', '2024/25'];
+                                var selectedPeriodNames = ['2020/21', '2021/22', '2022/23', '2023/24', '2024/25'];
 
-                            angular.forEach($scope.model.periods, function(pe){
-                                if(selectedPeriodNames.indexOf(pe.displayName) > -1 ){
-                                   $scope.model.selectedPeriods.push(pe);
-                                }
-                            });
+                                angular.forEach($scope.model.periods, function(pe){
+                                    if(selectedPeriodNames.indexOf(pe.displayName) > -1 ){
+                                       $scope.model.selectedPeriods.push(pe);
+                                    }
+                                });
 
-                            $scope.populateMenu();
+                                $scope.model.metaDataCached = true;
+                                $scope.populateMenu();
 
-                            $scope.model.dashboardName = 'Programme Outcomes';
-                            DashboardService.getByName( $scope.model.dashboardName ).then(function( result ){
-                                $scope.model.dashboardItems = result.dashboardItems;
-                                $scope.model.charts = result.charts;
-                                $scope.model.tables = result.tables;
-                                $scope.model.maps = result.maps;
-                                $scope.model.dashboardFetched = true;
+                                /*$scope.model.dashboardName = 'Programme Outcomes';
+                                DashboardService.getByName( $scope.model.dashboardName ).then(function( result ){
+                                    $scope.model.dashboardItems = result.dashboardItems;
+                                    $scope.model.charts = result.charts;
+                                    $scope.model.tables = result.tables;
+                                    $scope.model.maps = result.maps;
+                                    $scope.model.dashboardFetched = true;
+                                });*/
                             });
                         });
                     });
-                });
 
+                });
             });
         });
     });
 
     $scope.populateMenu = function(){
 
-        $scope.model.selectedNdpProgram = null;
         $scope.resetDataView();
         $scope.model.selectedMenu = SelectedMenuService.getSelectedMenu();
+        $scope.model.selectedNdpProgram = null;
 
         if( $scope.model.selectedMenu && $scope.model.selectedMenu.ndp && $scope.model.selectedMenu.code ){
+            $scope.model.dataElementGroupSets = $filter('filter')($scope.model.dataElementGroupSets, {ndp: $scope.model.selectedMenu.ndp}, true);
             $scope.model.ndpProgram = $filter('getFirst')($scope.model.optionSets, {ndp: $scope.model.selectedMenu.ndp, isNDPProgramme: true}, true);
-            $scope.model.ndpProgrammes = $filter('filter')($scope.model.dataElementGroupSets, {ndp: $scope.model.selectedMenu.ndp, indicatorGroupSetType: 'programme'}, true);
         }
     };
 
