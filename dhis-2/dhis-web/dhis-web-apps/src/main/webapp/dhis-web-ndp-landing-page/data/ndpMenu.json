@@ -80,17 +80,6 @@
         "color": "ndp-menu"
       },
       {
-        "id": "SUB-ACTION",
-        "domain": "SUB",
-        "code": "intervention",
-        "order": 3,
-        "displayName": "action_level",
-        "show": true,
-        "view": "components/actions/actions-status.html",
-        "children": [],
-        "color": "ndp-menu"
-      },
-      {
         "id": "PIAP",
         "domain": "PIAP",
         "code": "piap",
