@@ -28,14 +28,16 @@
             <div ng-if="model.selectedMenu" ng-switch="model.selectedMenu.domain">
                 <div ng-include="model.selectedMenu.view"></div>
             </div>
-            <carousel carousel-controls interval="5000" no-wrap="false" ng-if="!model.selectedMenu">
-                <slide ng-repeat="slide in model.slides">
-                    <img class="col-lg-12 col-md-12 col-sm-12 col-xs-12 cursor-pointer slider-container"
-                        ng-src="{{slide.path}}"
-                        alt="{{slide.path}}"
-                        ng-click='goToMenu("../dhis-web-dashboard")'>
-                </slide>
-            </carousel>
+            <div ng-if="!model.selectedMenu">
+                <carousel carousel-controls interval="5000" no-wrap="false">
+                    <slide ng-repeat="slide in model.slides">
+                        <img class="col-lg-12 col-md-12 col-sm-12 col-xs-12 cursor-pointer slider-container"
+                            ng-src="{{slide.path}}"
+                            alt="{{slide.path}}"
+                            ng-click='goToMenu("../dhis-web-dashboard")'>
+                    </slide>
+                </carousel>
+            </div>
         </form>
     </div>
 

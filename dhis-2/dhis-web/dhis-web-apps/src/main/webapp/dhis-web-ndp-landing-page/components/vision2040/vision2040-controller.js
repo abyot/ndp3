@@ -47,73 +47,92 @@ ndpFramework.controller('Vision2040Controller',
     $scope.$on('MENU', function(){
         $scope.populateMenu();
     });
-    
-    OptionComboService.getBtaDimensions().then(function( bta ){
 
-        if( !bta || !bta.category || !bta.options || bta.options.length !== 3 ){
-            NotificationService.showNotifcationDialog($translate.instant("error"), $translate.instant("invalid_bta_dimensions"));
-            return;
+    $scope.$watch('model.selectedNDP', function(){
+        $scope.model.selectedNdpProgram = null;
+        $scope.model.ndpProgram = null;
+        $scope.model.objectives = [];
+        $scope.model.subPrograms = [];
+        $scope.model.selectedSubProgramme = null;
+        $scope.model.selectedDataElementGroupSets = [];
+        $scope.resetDataView();
+        if( angular.isObject($scope.model.selectedNDP) && $scope.model.selectedNDP.id && $scope.model.selectedNDP.code){
+            $scope.model.ndpProgram = $filter('getFirst')($scope.model.optionSets, {ndp: $scope.model.selectedNDP.code, isNDPProgramme: true}, true);
+
+            $scope.getInterventions();
         }
+    });
 
-        $scope.model.bta = bta;
-        $scope.model.targetDimension = $.map($scope.model.bta.options, function(d){
-            if( d.btaDimensionType === 'target' ){
-                return d;
+    dhis2.ndp.downloadGroupSets( 'vision2040' ).then(function(){
+
+        OptionComboService.getBtaDimensions().then(function( bta ){
+
+            if( !bta || !bta.category || !bta.options || bta.options.length !== 3 ){
+                NotificationService.showNotifcationDialog($translate.instant("error"), $translate.instant("invalid_bta_dimensions"));
+                return;
             }
-        });
 
-        MetaDataFactory.getAll('categoryCombos').then(function(ccs){
-            angular.forEach(ccs, function(cc){
-                $scope.model.categoryCombosById[cc.id] = cc;
+            $scope.model.bta = bta;
+            $scope.model.targetDimension = $.map($scope.model.bta.options, function(d){
+                if( d.btaDimensionType === 'target' ){
+                    return d;
+                }
             });
 
-            MetaDataFactory.getAll('dataElements').then(function(dataElements){
+            MetaDataFactory.getAll('categoryCombos').then(function(ccs){
+                angular.forEach(ccs, function(cc){
+                    $scope.model.categoryCombosById[cc.id] = cc;
+                });
 
-                $scope.model.dataElementsById = dataElements.reduce( function(map, obj){
-                    map[obj.id] = obj;
-                    return map;
-                }, {});
+                MetaDataFactory.getAll('dataElements').then(function(dataElements){
 
-                MetaDataFactory.getDataElementGroups().then(function(dataElementGroups){
+                    $scope.model.dataElementsById = dataElements.reduce( function(map, obj){
+                        map[obj.id] = obj;
+                        return map;
+                    }, {});
 
-                    $scope.model.downloadLabel = $translate.instant('download_visualization');
-                    $scope.model.metaDataCached = true;
+                    MetaDataFactory.getDataElementGroups().then(function(dataElementGroups){
 
-                    $scope.model.dataElementGroups = dataElementGroups;
+                        $scope.model.downloadLabel = $translate.instant('download_visualization');
+                        $scope.model.metaDataCached = true;
 
-                    MetaDataFactory.getAll('dataElementGroupSets').then(function(dataElementGroupSets){
-                        $scope.model.dataElementGroupSets = dataElementGroupSets;
+                        $scope.model.dataElementGroups = dataElementGroups;
 
-                        var periods = PeriodService.getPeriods($scope.model.selectedPeriodType, $scope.model.periodOffset, $scope.model.openFuturePeriods);
-                        $scope.model.allPeriods = angular.copy( periods );
-                        $scope.model.periods = periods;
+                        MetaDataFactory.getAllByProperty('dataElementGroupSets', 'indicatorGroupSetType', 'vision2040').then(function(dataElementGroupSets){
+                            $scope.model.dataElementGroupSets = dataElementGroupSets;
+                            $scope.model.dataElementGroupSets = orderByFilter( $scope.model.dataElementGroupSets, '-displayName').reverse();
 
-                        var selectedPeriodNames = ['2024/25'];
+                            var periods = PeriodService.getPeriods($scope.model.selectedPeriodType, $scope.model.periodOffset, $scope.model.openFuturePeriods);
+                            $scope.model.allPeriods = angular.copy( periods );
+                            $scope.model.periods = periods;
 
-                        $scope.model.selectedPeriods.push( {displayName: '2009/10', id: '2009July'} );
-                        angular.forEach($scope.model.periods, function(pe){
-                            if(selectedPeriodNames.indexOf(pe.displayName) > -1 ){
-                               $scope.model.selectedPeriods.push(pe);
-                            }
-                        });
+                            var selectedPeriodNames = ['2024/25'];
 
-                        $scope.model.selectedPeriods.push( {displayName: '2039/40', id: '2039July'} );
-
-                        //Get orgunits for the logged in user
-                        OrgUnitFactory.getViewTreeRoot().then(function(response) {
-                            $scope.orgUnits = response.organisationUnits;
-                            angular.forEach($scope.orgUnits, function(ou){
-                                ou.show = true;
-                                angular.forEach(ou.children, function(o){
-                                    o.hasChildren = o.children && o.children.length > 0 ? true : false;
-                                });
+                            $scope.model.selectedPeriods.push( {displayName: '2009/10', id: '2009July'} );
+                            angular.forEach($scope.model.periods, function(pe){
+                                if(selectedPeriodNames.indexOf(pe.displayName) > -1 ){
+                                   $scope.model.selectedPeriods.push(pe);
+                                }
                             });
-                            $scope.selectedOrgUnit = $scope.orgUnits[0] ? $scope.orgUnits[0] : null;
 
-                            $scope.populateMenu();
+                            $scope.model.selectedPeriods.push( {displayName: '2039/40', id: '2039July'} );
 
-                            $scope.getAnalyticsData();
+                            //Get orgunits for the logged in user
+                            OrgUnitFactory.getViewTreeRoot().then(function(response) {
+                                $scope.orgUnits = response.organisationUnits;
+                                angular.forEach($scope.orgUnits, function(ou){
+                                    ou.show = true;
+                                    angular.forEach(ou.children, function(o){
+                                        o.hasChildren = o.children && o.children.length > 0 ? true : false;
+                                    });
+                                });
+                                $scope.selectedOrgUnit = $scope.orgUnits[0] ? $scope.orgUnits[0] : null;
 
+                                $scope.populateMenu();
+
+                                $scope.getAnalyticsData();
+
+                            });
                         });
                     });
                 });
@@ -130,8 +149,8 @@ ndpFramework.controller('Vision2040Controller',
         $scope.model.dataElementGroup = [];
 
         if( $scope.model.selectedMenu && $scope.model.selectedMenu.ndp && $scope.model.selectedMenu.code ){
-            var vision2040Targets = $filter('filter')($scope.model.dataElementGroupSets, {ndp: $scope.model.selectedMenu.ndp, indicatorGroupSetType: 'vision2040'}, true);
-            $scope.model.selectedDataElementGroupSets = angular.copy( vision2040Targets );
+            $scope.model.dataElementGroupSets = $filter('filter')($scope.model.dataElementGroupSets, {ndp: $scope.model.selectedMenu.ndp}, true);
+            $scope.model.selectedDataElementGroupSets = angular.copy( $scope.model.dataElementGroupSets );
             angular.forEach($scope.model.selectedDataElementGroupSets, function(degs){
                 angular.forEach(degs.dataElementGroups, function(deg){
                     var _deg = $filter('filter')($scope.model.dataElementGroups, {id: deg.id});

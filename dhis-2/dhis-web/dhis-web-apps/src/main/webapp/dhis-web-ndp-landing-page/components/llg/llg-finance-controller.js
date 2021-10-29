@@ -104,42 +104,46 @@ ndpFramework.controller('LLGFinanceController',
                     NotificationService.showNotifcationDialog($translate.instant("error"), $translate.instant("missing_llg_sector_config"));
                     return;
                 }
+                dhis2.ndp.downloadGroupSets( 'llgFinancialPerformance' ).then(function(){
 
-                MetaDataFactory.getAll('dataSets').then(function(dss){
-                    for(var i=0; i<dss.length; i++){
-                        if( dss[i].dataSetType && dss[i].dataSetType === 'llgFinance' ){
-                            $scope.model.llgFinanceDataSet = dss[i];
-                        }
-                    }
+                    MetaDataFactory.getAllByProperty('dataElementGroupSets', 'indicatorGroupSetType', 'llgFinancialPerformance').then(function(){
+                        MetaDataFactory.getAll('dataSets').then(function(dss){
+                            for(var i=0; i<dss.length; i++){
+                                if( dss[i].dataSetType && dss[i].dataSetType === 'llgFinance' ){
+                                    $scope.model.llgFinanceDataSet = dss[i];
+                                }
+                            }
 
-                    if ( !$scope.model.llgFinanceDataSet ){
-                        NotificationService.showNotifcationDialog($translate.instant("error"), $translate.instant("missing_llg_finance_dataset"));
-                        return;
-                    }
+                            if ( !$scope.model.llgFinanceDataSet ){
+                                NotificationService.showNotifcationDialog($translate.instant("error"), $translate.instant("missing_llg_finance_dataset"));
+                                return;
+                            }
 
-                    OptionComboService.getLlgFinanceDimensions($scope.model.llgFinanceDataSet.categoryCombo.id, $scope.model.llgFinanceSectors).then(function( dim ){
-                        $scope.model.llgFinanceFundTypes = dim.fundTypes;
-                        $scope.model.llgFinanceworkPlans = dim.workPlans;
-                        $scope.model.workPlanInfo = dim.workPlanInfo;
-                        $scope.model.llgFinanceProgrammes = dim.programmes;
-                        $scope.model.llgFinanceOutputs = dim.outputs;
-                        $scope.model.mappedOptionCombos = dim.optionCombos;
-                        $scope.model.programmeInfo = dim.programmeInfo;
+                            OptionComboService.getLlgFinanceDimensions($scope.model.llgFinanceDataSet.categoryCombo.id, $scope.model.llgFinanceSectors).then(function( dim ){
+                                $scope.model.llgFinanceFundTypes = dim.fundTypes;
+                                $scope.model.llgFinanceworkPlans = dim.workPlans;
+                                $scope.model.workPlanInfo = dim.workPlanInfo;
+                                $scope.model.llgFinanceProgrammes = dim.programmes;
+                                $scope.model.llgFinanceOutputs = dim.outputs;
+                                $scope.model.mappedOptionCombos = dim.optionCombos;
+                                $scope.model.programmeInfo = dim.programmeInfo;
 
-                        $scope.model.sectors = angular.copy( $scope.model.llgFinanceSectors );
-                        $scope.model.workPlans = angular.copy( $scope.model.llgFinanceworkPlans );
-                        $scope.model.programmes = angular.copy( $scope.model.llgFinanceProgrammes );
+                                $scope.model.sectors = angular.copy( $scope.model.llgFinanceSectors );
+                                $scope.model.workPlans = angular.copy( $scope.model.llgFinanceworkPlans );
+                                $scope.model.programmes = angular.copy( $scope.model.llgFinanceProgrammes );
 
-                        MetaDataFactory.getAll('dataElements').then(function(dataElements){
+                                MetaDataFactory.getAll('dataElements').then(function(dataElements){
 
-                            $scope.model.dataElementsById = dataElements.reduce( function(map, obj){
-                                map[obj.id] = obj;
-                                return map;
-                            }, {});
+                                    $scope.model.dataElementsById = dataElements.reduce( function(map, obj){
+                                        map[obj.id] = obj;
+                                        return map;
+                                    }, {});
 
-                            $scope.model.selectedMenu = SelectedMenuService.getSelectedMenu();
-                            $scope.model.periods = PeriodService.getPeriods($scope.model.selectedPeriodType, $scope.model.periodOffset, $scope.model.openFuturePeriods);
-                            $scope.model.metaDataCached = true;
+                                    $scope.model.selectedMenu = SelectedMenuService.getSelectedMenu();
+                                    $scope.model.periods = PeriodService.getPeriods($scope.model.selectedPeriodType, $scope.model.periodOffset, $scope.model.openFuturePeriods);
+                                    $scope.model.metaDataCached = true;
+                                });
+                            });
                         });
                     });
                 });
