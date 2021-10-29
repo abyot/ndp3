@@ -42,6 +42,20 @@ var ndpFrameworkServices = angular.module('ndpFrameworkServices', ['ngResource']
     };
 })
 
+.service('NDPMenuService', function($http, CommonUtils){
+    return {
+        getMenu: function(){
+            var promise = $http.get('data/ndpMenu.json').then(function(response){
+                return response.data;
+            }, function(response){
+                CommonUtils.errorNotifier(response);
+                return response.data;
+            });
+            return promise;
+        }
+    };
+})
+
 .service('PeriodService', function(CalendarService, DateUtils, orderByFilter){
 
     this.getPeriods = function(periodType, periodOffset, futurePeriods){

@@ -1,0 +1,126 @@
+[
+  {
+    "id": "HGH",
+    "order": 1,
+    "displayName": "high_level",
+    "show": true,
+    "domain": "HGH",
+    "hasChildren": true,
+    "children": [
+      {
+        "id": "VSN",
+        "domain": "VSN",
+        "code": "vision2040",
+        "order": 2,
+        "displayName": "vision_2040_targets",
+        "children": [],
+        "view": "components/vision2040/vision2040-status.html",
+        "color": "ndp-menu"
+      },
+      {
+        "id": "GOL",
+        "domain": "NOUT",
+        "code": "goal",
+        "order": 3,
+        "displayName": "goal_impact",
+        "children": [],
+        "view": "components/goal/goal-status.html",
+        "color": "ndp-menu"
+      },
+      {
+        "id": "OBJ",
+        "domain": "NOUT",
+        "code": "resultsFrameworkObjective",
+        "order": 4,
+        "displayName": "objective_outcomes",
+        "children": [],
+        "view": "components/objective/objective-status.html",
+        "color": "ndp-menu"
+      },
+      {
+        "id": "PRG",
+        "domain": "PRGO",
+        "code": "objective",
+        "order": 5,
+        "displayName": "outcome_level",
+        "children": [],
+        "view": "components/programme-outcome/programme-status.html",
+        "color": "ndp-menu"
+      }
+    ],
+    "color": "ndp-menu"
+  },
+  {
+    "id": "SUB",
+    "order": 2,
+    "displayName": "sub_programme_results",
+    "show": true,
+    "domain": "PRG",
+    "hasChildren": true,
+    "children": [
+      {
+        "id": "SUB-OUTCOME",
+        "domain": "SUB-OUTCOME",
+        "code": "subProgrammeObjective",
+        "order": 1,
+        "displayName": "intermediate_outcomes",
+        "children": [],
+        "view": "components/sub-programme-outcome/sub-programme-outcome-status.html",
+        "color": "ndp-menu"
+      },
+      {
+        "id": "SUB-OUTPUT",
+        "domain": "SUB",
+        "code": "intervention",
+        "order": 2,
+        "displayName": "output_level",
+        "show": true,
+        "view": "components/sub-programme-output/sub-programme-output-status.html",
+        "children": [],
+        "color": "ndp-menu"
+      },
+      {
+        "id": "SUB-ACTION",
+        "domain": "SUB",
+        "code": "intervention",
+        "order": 3,
+        "displayName": "action_level",
+        "show": true,
+        "view": "components/actions/actions-status.html",
+        "children": [],
+        "color": "ndp-menu"
+      },
+      {
+        "id": "PIAP",
+        "domain": "PIAP",
+        "code": "piap",
+        "order": 4,
+        "displayName": "piap_level",
+        "show": true,
+        "view": "components/piap/piap-status.html",
+        "children": [],
+        "color": "ndp-menu"
+      }
+    ],
+    "color": "ndp-menu"
+  },
+  {
+    "id": "PJ",
+    "order": 3,
+    "displayName": "project_tracker",
+    "show": true,
+    "domain": "PJ",
+    "hasChildren": true,
+    "children": [
+      {
+        "id": "PRJP",
+        "domain": "PRJP",
+        "code": "project",
+        "displayName": "project_performance",
+        "order": 1,
+        "children": [],
+        "view": "components/project/performance.html"
+      }
+    ]
+  }
+]
