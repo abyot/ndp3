@@ -169,7 +169,8 @@ dhis2.metadata.getMetaObjectIds = function( objNames, url, filter )
 
 dhis2.metadata.filterMissingObjIds  = function( store, db, objs )
 {
-    var def = $.Deferred();
+    return dhis2.metadata.filterMissingObjIdsWithCheck(store, db, objs);
+    /*var def = $.Deferred();
 
     if( !objs || !objs.length || objs.length < 1){
         def.resolve( [] );
@@ -182,7 +183,7 @@ dhis2.metadata.filterMissingObjIds  = function( store, db, objs )
         def.resolve( objIds );
     }
 
-    return def.promise();
+    return def.promise();*/
 };
 
 dhis2.metadata.filterMissingObjIdsWithCheck  = function( store, db, objs )
@@ -252,17 +253,23 @@ dhis2.metadata.getBatches = function( ids, batchSize, store, objs, url, filter, 
     }
     else{
         var batches = dhis2.metadata.chunk( ids, batchSize );
-
+        var results = [];
         _.each( _.values( batches ), function ( batch ) {
-            promise = promise.then(function(){
+            promise = promise.then(function( result ){
+                if ( result && result.length ){
+                    results = results.concat( result );
+                }
                 return dhis2.metadata.fetchBatchItems( batch, store, objs, url, filter, storage, db, func );
             });
         });
 
         build.done(function() {
             def.resolve();
-            promise = promise.done( function ( _objs ) {
-                mainDef.resolve( _objs );
+            promise = promise.done( function ( result ) {
+                if ( result && result.length ){
+                    results = results.concat( result );
+                }
+                mainDef.resolve( results );
             } );
 
         }).fail(function(){

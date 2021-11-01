@@ -127,6 +127,20 @@ function ajax_login()
 // -----------------------------------------------------------------------------
 // Metadata downloading
 // -----------------------------------------------------------------------------
+dhis2.ndp.downloadDataElements = function( dataElementType )
+{
+    var def = $.Deferred();
+    dhis2.ndp.store.open().then(function(){
+        getMetaDataElementsByType( dataElementType ).then(function( metaDes ){
+            filterMissingDataElements(metaDes).then(function( missingDes ){
+                getDataElements(missingDes).then(function(){
+                    def.resolve();
+                });
+            });
+        });
+    });
+    return def.promise();
+};
 
 dhis2.ndp.downloadGroupSets = function( groupSetType )
 {
@@ -299,6 +313,10 @@ function getCategoryCombos( ids ){
 
 function getLinkedMetaDataElements( dataElements ){
     return dhis2.metadata.getMetaObjectIds('dataElements', dhis2.ndp.apiUrl + '/dataElements.json', 'paging=false&fields=id,version');
+}
+
+function getMetaDataElementsByType( type ){
+    return dhis2.metadata.getMetaObjectIds('dataElements', dhis2.ndp.apiUrl + '/dataElements.json', 'paging=false&fields=id,version&filter=attributeValues.value:eq:' + type );
 }
 
 function getMetaDataElements(){
