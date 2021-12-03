@@ -16,7 +16,7 @@
                     </ui-select>
                 </div>
             </div>
-            <div class="row small-vertical-spacing">
+            <div class="row small-vertical-spacing" ng-if="model.selectedNdpProgram">
                 <div class="col-sm-2">
                     {{'sub-programme'| translate}}
                 </div>
@@ -31,7 +31,7 @@
                     </ui-select>
                 </div>
             </div>
-            <div class="row small-vertical-spacing">
+            <div class="row small-vertical-spacing" ng-if="model.selectedSubProgramme">
                 <div class="col-sm-2">
                     {{'objective'| translate}}
                 </div>
@@ -46,7 +46,7 @@
                     </ui-select>
                 </div>
             </div>
-            <div class="row small-vertical-spacing">
+            <div class="row small-vertical-spacing" ng-if="model.selectedObjective">
                 <div class="col-sm-2">
                     {{'intervention'| translate}}
                 </div>

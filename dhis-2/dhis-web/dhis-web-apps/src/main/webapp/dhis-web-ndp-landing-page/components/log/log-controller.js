@@ -209,7 +209,7 @@ ndpFramework.controller('LOGController',
                                 MetaDataFactory.getDataElementGroups().then(function(dataElementGroups){
                                     $scope.model.dataElementGroups = dataElementGroups;
 
-                                    MetaDataFactory.getAll('dataElementGroupSets').then(function(dataElementGroupSets){
+                                    MetaDataFactory.getAllByProperty('dataElementGroupSets', 'indicatorGroupSetType', 'intervention').then(function(dataElementGroupSets){
                                         $scope.model.dataElementGroupSets = dataElementGroupSets;
                                         $scope.model.dataElementGroupSets = orderByFilter( $scope.model.dataElementGroupSets, '-displayName').reverse();
 
