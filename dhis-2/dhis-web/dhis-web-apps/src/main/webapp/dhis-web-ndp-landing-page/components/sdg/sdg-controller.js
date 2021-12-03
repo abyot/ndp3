@@ -204,7 +204,6 @@ ndpFramework.controller('SDGController',
         $scope.model.selectedSdg = null;
         if( $scope.model.selectedMenu && $scope.model.selectedMenu.ndp && $scope.model.selectedMenu.code ){
             $scope.model.dataElementGroupSets = $filter('filter')($scope.model.dataElementGroupSets, {ndp: $scope.model.selectedMenu.ndp}, true);
-            console.log('dataElementGroupSets:  ', $scope.model.dataElementGroupSets);
             $scope.model.sdgGoals = angular.copy( $scope.model.dataElementGroupSets );
             if( $scope.model.sdgGoals && $scope.model.sdgGoals.length === 1 ){
                 $scope.model.selectedSdg = $scope.model.sdgGoals[0];
