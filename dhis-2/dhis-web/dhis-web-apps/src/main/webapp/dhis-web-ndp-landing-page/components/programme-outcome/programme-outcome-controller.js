@@ -176,7 +176,7 @@ ndpFramework.controller('ProgrammeOutcomeController',
 
                             MetaDataFactory.getAllByProperty('dataElementGroupSets', 'indicatorGroupSetType', 'objective').then(function(dataElementGroupSets){
                                 $scope.model.dataElementGroupSets = dataElementGroupSets;
-                                $scope.model.dataElementGroupSets = orderByFilter( $scope.model.dataElementGroupSets, '-displayName').reverse();
+                                $scope.model.dataElementGroupSets = orderByFilter( $scope.model.dataElementGroupSets, ['-code', '-displayName']).reverse();
 
                                 var periods = PeriodService.getPeriods($scope.model.selectedPeriodType, $scope.model.periodOffset, $scope.model.openFuturePeriods);
                                 $scope.model.allPeriods = angular.copy( periods );
@@ -218,7 +218,14 @@ ndpFramework.controller('ProgrammeOutcomeController',
 
         if( $scope.model.selectedMenu && $scope.model.selectedMenu.ndp && $scope.model.selectedMenu.code ){
             $scope.model.dataElementGroupSets = $filter('filter')($scope.model.dataElementGroupSets, {ndp: $scope.model.selectedMenu.ndp}, true);
-            $scope.model.ndpProgram = $filter('getFirst')($scope.model.optionSets, {ndp: $scope.model.selectedMenu.ndp, isNDPProgramme: true}, true);
+            var prs = $filter('filter')($scope.model.optionSets, {ndp: $scope.model.selectedMenu.ndp, isNDPProgramme: true}, true);
+            if ( !prs || prs.length !== 1 ){
+                NotificationService.showNotifcationDialog($translate.instant("error"), $translate.instant("invalid_program_config") + ' - ' + $scope.model.selectedMenu.ndp );
+                return;
+            }
+            else{
+                $scope.model.ndpProgram = prs[0];
+            }
         }
     };
 

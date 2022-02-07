@@ -70,7 +70,7 @@
           {
             "id": "SUB-OUTCOME",
             "domain": "SUB-OUTCOME",
-            "code": "subProgrammeObjective",
+            "code": "sub-programme",
             "order": 1,
             "displayName": "intermediate_outcomes",
             "children": [],
@@ -79,8 +79,8 @@
           },
           {
             "id": "SUB-OUTPUT",
-            "domain": "SUB",
-            "code": "intervention",
+            "domain": "OUTPUT",
+            "code": "sub-intervention",
             "order": 2,
             "displayName": "output_level",
             "show": true,
@@ -89,13 +89,13 @@
             "color": "ndp-menu"
           },
           {
-            "id": "PIAP",
-            "domain": "PIAP",
-            "code": "piap",
+            "id": "ACT",
+            "domain": "ACT",
+            "code": "sub-intervention4action",
             "order": 4,
-            "displayName": "piap_level",
+            "displayName": "activity_level",
             "show": true,
-            "view": "components/piap/piap-status.html",
+            "view": "components/activity/activity-output-status.html",
             "children": [],
             "color": "ndp-menu"
           }

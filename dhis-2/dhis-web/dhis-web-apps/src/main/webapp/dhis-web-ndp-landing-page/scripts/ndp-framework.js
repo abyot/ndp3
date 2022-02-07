@@ -30,7 +30,7 @@ if( dhis2.ndp.memoryOnly ) {
 dhis2.ndp.store = new dhis2.storage.Store({
     name: 'dhis2ndp',
     adapters: [dhis2.storage.IndexedDBAdapter, dhis2.storage.DomSessionStorageAdapter, dhis2.storage.InMemoryAdapter],
-    objectStores: ['dataElements', 'dataElementGroups', 'dataElementGroupSets', 'dataSets', 'optionSets', 'categoryCombos', 'attributes', 'ouLevels', 'programs', 'legendSets', 'categoryOptionGroupSets']
+    objectStores: ['dataElements', 'dataElementGroups', 'dataElementGroupSets', 'dataSets', 'optionSets', 'categoryCombos', 'attributes', 'ouLevels', 'programs', 'legendSets', 'categoryOptionGroupSets', 'optionGroups']
 });
 
 (function($) {
@@ -206,7 +206,12 @@ dhis2.ndp.downloadMetaData = function()
         //fetch categoryOptionGroupSets
         .then( getMetaCategoryOptionGroupSets )
         .then( filterMissingCategoryOptionGroupSets )
-        .then( getCategoryOptionGroupSets );
+        .then( getCategoryOptionGroupSets )
+
+        //fetch optionGroups
+        .then( getMetaOptionGroups )
+        .then( filterMissingOptionGroups )
+        .then( getOptionGroups );
 };
 
 
@@ -275,7 +280,12 @@ dhis2.ndp.downloadAllMetaData = function()
         //fetch categoryOptionGroupSets
         .then( getMetaCategoryOptionGroupSets )
         .then( filterMissingCategoryOptionGroupSets )
-        .then( getCategoryOptionGroupSets );
+        .then( getCategoryOptionGroupSets )
+
+        //fetch optionGroups
+        .then( getMetaOptionGroups )
+        .then( filterMissingOptionGroups )
+        .then( getOptionGroups );
 };
 
 function getUserAccessibleDataSets(){
@@ -445,4 +455,16 @@ function filterMissingCategoryOptionGroupSets( objs ){
 
 function getCategoryOptionGroupSets( ids ){
     return dhis2.metadata.getBatches( ids, dhis2.ndp.batchSize, 'categoryOptionGroupSets', 'categoryOptionGroupSets', dhis2.ndp.apiUrl + '/categoryOptionGroupSets.json', 'paging=false&fields=id,code,displayName,attributeValues[value,attribute[id,name,valueType,code]],categoryOptionGroups[id,displayName,code,categoryOptions[id,displayName,code]]', 'idb', dhis2.ndp.store, dhis2.metadata.processObject);
+}
+
+function getMetaOptionGroups(){
+    return dhis2.metadata.getMetaObjectIds('optionGroups', dhis2.ndp.apiUrl + '/optionGroups.json', 'paging=false&fields=id,version');
+}
+
+function filterMissingOptionGroups( objs ){
+    return dhis2.metadata.filterMissingObjIds('optionGroups', dhis2.ndp.store, objs);
+}
+
+function getOptionGroups( ids ){
+    return dhis2.metadata.getBatches( ids, dhis2.ndp.batchSize, 'optionGroups', 'optionGroups', dhis2.ndp.apiUrl + '/optionGroups.json', 'fields=id,displayName,code,optionSet[id],options[id,displayName,code]', 'idb', dhis2.ndp.store, dhis2.metadata.processObject);
 }

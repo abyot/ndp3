@@ -10,7 +10,7 @@ var ndpFrameworkServices = angular.module('ndpFrameworkServices', ['ngResource']
     var store = new dhis2.storage.Store({
         name: "dhis2ndp",
         adapters: [dhis2.storage.IndexedDBAdapter, dhis2.storage.DomSessionStorageAdapter, dhis2.storage.InMemoryAdapter],
-        objectStores: ['dataElements', 'dataElementGroups', 'dataElementGroupSets', 'dataSets', 'optionSets', 'categoryCombos', 'attributes', 'ouLevels', 'programs', 'legendSets', 'categoryOptionGroupSets']
+        objectStores: ['dataElements', 'dataElementGroups', 'dataElementGroupSets', 'dataSets', 'optionSets', 'categoryCombos', 'attributes', 'ouLevels', 'programs', 'legendSets', 'categoryOptionGroupSets', 'optionGroups']
     });
     return{
         currentStore: store
@@ -505,7 +505,7 @@ var ndpFrameworkServices = angular.module('ndpFrameworkServices', ['ngResource']
             var def = $q.defer();
             DDStorageService.currentStore.open().done(function(){
                 DDStorageService.currentStore.getAll(store).done(function(objs){
-                    objs = orderByFilter(objs, '-displayName').reverse();
+                    objs = orderByFilter(objs, ['-code', '-displayName']).reverse();
                     $rootScope.$apply(function(){
                         def.resolve(objs);
                     });
@@ -529,6 +529,7 @@ var ndpFrameworkServices = angular.module('ndpFrameworkServices', ['ngResource']
                     }
 
                     $rootScope.$apply(function(){
+                        selectedObjects = orderByFilter(selectedObjects, ['-code', '-displayName']).reverse();
                         def.resolve(selectedObjects);
                     });
                 });
@@ -585,7 +586,7 @@ var ndpFrameworkServices = angular.module('ndpFrameworkServices', ['ngResource']
                                     }
                                 });
 
-                                deg.dataElements = orderByFilter(deg.dataElements, '-displayName').reverse();
+                                deg.dataElements = orderByFilter(deg.dataElements, ['-code', '-displayName']).reverse();
                             });
                             $rootScope.$apply(function(){
                                def.resolve(dataElementGroups);
@@ -594,6 +595,42 @@ var ndpFrameworkServices = angular.module('ndpFrameworkServices', ['ngResource']
                     });
                 });
 
+            });
+            return def.promise;
+        }
+    };
+})
+
+.service('ResulstChainService', function($q, $rootScope, $filter, DDStorageService, orderByFilter){
+
+    return {
+        getByOptionSet: function( optionSetId ){
+            var def = $q.defer();
+            DDStorageService.currentStore.open().done(function(){
+                DDStorageService.currentStore.getAll('optionGroups').done(function(objs){
+                    var optionGroups = $filter('filter')(objs, {optionSet:{id: optionSetId}});
+                    if( !optionGroups ){
+                        console.log('need to do something here ...');
+                    }
+                    $rootScope.$apply(function(){
+                        var chain = {};
+                        angular.forEach(optionGroups, function(og){
+                            if ( og.code === 'PR' ){
+                                chain.programs = og.options;
+                            }
+                            if( og.code === 'SP' ){
+                                chain.subPrograms = og.options;
+                            }
+                            if( og.code === 'OJ' ){
+                                chain.objectives = og.options;
+                            }
+                            if( og.code === 'IN' ){
+                                chain.interventions = og.options;
+                            }
+                        });
+                        def.resolve(chain);
+                    });
+                });
             });
             return def.promise;
         }

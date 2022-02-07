@@ -9,8 +9,8 @@
                     <ui-select ng-model="model.selectedNdpProgram"
                                theme="select2"
                                style="width:100%;">
-                        <ui-select-match allow-clear="true" class="form-control-ui-select" placeholder="{{model.ndpProgrammes && model.ndpProgrammes.length > 0 ? 'please_select_program' : 'empty'| translate}}">{{($select.selected.code + ' - ' + $select.selected.displayName) || $select.selected}}</ui-select-match>
-                        <ui-select-choices repeat="obj in model.ndpProgrammes | filter: $select.search | limitTo:maxOptionSize | orderBy: ['code']">
+                        <ui-select-match allow-clear="true" class="form-control-ui-select" placeholder="{{model.ndpProgrammes && model.ndpProgrammes.length > 0 ? 'please_select_program' : 'empty'| translate}}">{{($select.selected.code) + ' - ' +($select.selected.displayName) || $select.selected}}</ui-select-match>
+                        <ui-select-choices repeat="obj in model.ndpProgrammes | filter: $select.search | limitTo:maxOptionSize | orderBy: ['code', 'displayName']">
                             <span ng-bind-html="(obj.code) + ' - ' +(obj.displayName) | highlight: $select.search"></span>
                         </ui-select-choices>
                     </ui-select>
@@ -24,8 +24,8 @@
                     <ui-select ng-model="model.selectedSubProgramme"
                                theme="select2"
                                style="width:100%;">
-                        <ui-select-match allow-clear="true" class="form-control-ui-select" placeholder="{{model.subProgrammes && model.subProgrammes.length > 0 ? 'all' : 'empty'| translate}}">{{($select.selected.code + ' - ' + $select.selected.displayName) || $select.selected}}</ui-select-match>
-                        <ui-select-choices repeat="obj in model.subProgrammes | startsWith: {code: model.selectedNdpProgram.code} | filter: $select.search | limitTo:maxOptionSize | orderBy: ['code']">
+                        <ui-select-match allow-clear="true" class="form-control-ui-select" placeholder="{{model.subProgrammes && model.subProgrammes.length > 0 ? 'all' : 'empty'| translate}}">{{($select.selected.code) + ' - ' +($select.selected.displayName) || $select.selected}}</ui-select-match>
+                        <ui-select-choices repeat="obj in model.subProgrammes | filter: $select.search | limitTo:maxOptionSize | orderBy: ['code', 'displayName']">
                             <span ng-bind-html="(obj.code) + ' - ' +(obj.displayName) | highlight: $select.search"></span>
                         </ui-select-choices>
                     </ui-select>
@@ -101,18 +101,21 @@
             <table class="table table-bordered table-striped table-responsive result-table">
                 <thead>
                     <tr>
-                        <th class="sticky" colspan="3">
+                        <!--<th class="sticky" colspan="3">
                             <span class="pull-left">**TCU={{'tcu_ugs' | translate}}</span>
                             <span class="pull-right">**TC={{'tc_ugs' | translate}}</span>
-                        </th>
+                        </th>-->
+                        <th class="sticky"></th>
+                        <th class="sticky"></th>
+                        <th class="sticky"></th>
                         <th class="center sticky" colspan="2" ng-repeat="period in model.reportPeriods" ng-if="period.hasTargetData">
                             {{period.displayName}}
                         </th>
                     </tr>
                     <tr>
-                        <th class="sticky">{{'interventions'| translate}}</th>
+                        <th class="sticky">{{'sub_interventions'| translate}}</th>
                         <th class="sticky">{{'outputs'| translate}}</th>
-                        <th class="sticky">{{'indicator'| translate}}</th>
+                        <th class="sticky">{{'action'| translate}}</th>
                         <th class="center sticky" ng-repeat="header in model.dataHeaders" ng-if="header.hasResultData">
                             {{header.name}}
                         </th>

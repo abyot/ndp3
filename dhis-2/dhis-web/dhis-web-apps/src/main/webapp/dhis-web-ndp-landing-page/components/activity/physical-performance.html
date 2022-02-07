@@ -9,14 +9,14 @@
                     <ui-select ng-model="model.selectedNdpProgram"
                                theme="select2"
                                style="width:100%;">
-                        <ui-select-match allow-clear="true" class="form-control-ui-select" placeholder="{{model.ndpProgrammes && model.ndpProgrammes.length > 0 ? 'please_select_program' : 'empty'| translate}}">{{($select.selected.code) + ' - ' +($select.selected.displayName) || $select.selected}}</ui-select-match>
-                        <ui-select-choices repeat="obj in model.ndpProgrammes | filter: $select.search | limitTo:maxOptionSize | orderBy: ['code', 'displayName']">
-                            <span ng-bind-html="(obj.code) + ' - ' +(obj.displayName) | highlight: $select.search"></span>
+                        <ui-select-match allow-clear="true" class="form-control-ui-select" placeholder="{{model.ndpProgram && model.ndpProgram.options && model.ndpProgram.options.length > 0 ? 'please_select_program' : 'empty'| translate}}">{{$select.selected.displayName|| $select.selected}}</ui-select-match>
+                        <ui-select-choices repeat="option in model.ndpProgram.options | filter: $select.search | limitTo:maxOptionSize | orderBy: ['code']">
+                            <span ng-bind-html="option.displayName | highlight: $select.search"></span>
                         </ui-select-choices>
                     </ui-select>
                 </div>
             </div>
-            <div class="row small-vertical-spacing" ng-if="model.selectedNdpProgram">
+            <div class="row small-vertical-spacing">
                 <div class="col-sm-2">
                     {{'sub-programme'| translate}}
                 </div>
@@ -24,9 +24,9 @@
                     <ui-select ng-model="model.selectedSubProgramme"
                                theme="select2"
                                style="width:100%;">
-                        <ui-select-match allow-clear="true" class="form-control-ui-select" placeholder="{{model.subProgrammes && model.subProgrammes.length > 0 ? 'all' : 'empty'| translate}}">{{($select.selected.code) + ' - ' +($select.selected.displayName) || $select.selected}}</ui-select-match>
-                        <ui-select-choices repeat="obj in model.subProgrammes | filter: $select.search | limitTo:maxOptionSize | orderBy: ['code', 'displayName']">
-                            <span ng-bind-html="(obj.code) + ' - ' +(obj.displayName) | highlight: $select.search"></span>
+                        <ui-select-match allow-clear="true" class="form-control-ui-select" placeholder="{{model.subPrograms && model.subPrograms.length > 0 ? 'all' : 'empty'| translate}}">{{$select.selected.displayName|| $select.selected}}</ui-select-match>
+                        <ui-select-choices repeat="degs in model.subPrograms | filter: $select.search | limitTo:maxOptionSize | orderBy: ['displayName']">
+                            <span ng-bind-html="degs.displayName | highlight: $select.search"></span>
                         </ui-select-choices>
                     </ui-select>
                 </div>
@@ -35,7 +35,6 @@
                 <div class="col-sm-12">
                     <button type="button"
                             class="btn btn-primary"
-                            ng-disabled="!model.selectedNdpProgram"
                             ng-click="getAnalyticsData()">
                         {{'display_report'| translate}}
                     </button>
@@ -48,7 +47,7 @@
     </div>
 </div>
 <div class="row" ng-if="model.reportReady">
-    <div class="col-sm-12" ng-if="model.dataExists">
+    <div class="col-sm-12" ng-if="model.hasPhysicalPerformanceData">
         <span class=" hideInPrint">
             <span class="dropdown">
                 <label class="btn btn-default dropdown-toggle" data-toggle="dropdown" ng-attr-title="{{'download_as'| translate}}"><i class="fa fa-download"></i></label>
@@ -63,8 +62,8 @@
         <div id="exportTable" class="table-scroll">
             <table>
                 <tr>
-                    <td class="alert alert-warning" ng-repeat="period in model.reportPeriods" ng-if="!period.hasTargetData">
-                        {{period.displayName}} - {{'has_no_target_data' | translate}}
+                    <td class="alert alert-warning" ng-repeat="period in model.reportPeriods" ng-if="!period.hasData">
+                        {{period.displayName}} - {{'has_no_data' | translate}}
                     </td>
                 </tr>
             </table>
@@ -74,24 +73,39 @@
                         <th class="sticky"></th>
                         <th class="sticky"></th>
                         <th class="sticky"></th>
-                        <th class="center sticky" ng-repeat="period in model.reportPeriods" ng-if="period.hasTargetData">
+                        <th class="center sticky" colspan="{{period.colSpan}}" ng-repeat="period in model.reportPeriods" ng-if="period.hasData">
                             {{period.displayName}}
                         </th>
                     </tr>
                     <tr>
-                        <th class="sticky">{{'programme_objectives'| translate}}</th>
-                        <th class="sticky">{{'outcomes'| translate}}</th>
+                        <th class="sticky">{{'objectives'| translate}}</th>
+                        <th class="sticky">{{'outputs'| translate}}</th>
                         <th class="sticky">{{'indicator'| translate}}</th>
-                        <th class="center sticky" ng-repeat="header in model.dataHeaders" ng-if="header.hasResultData">
+                        <th class="center sticky" ng-repeat="header in model.dataHeaders">
                             {{model.metaData.items[header.dimensionId].name}}
                         </th>
                     </tr>
                 </thead>
-                <tbody ng-include="'views/report-data/result-body.html'"></tbody>
+                <tbody>
+                    <tr ng-repeat="row in model.physicalPerformanceData">
+                        <td class="vertical-center" ng-repeat="col in row" rowspan="{{col.span}}" ng-style="col.trafficLight">
+                            <span ng-if="col.details" ng-click="getDataValueExplanation(col)" title="{{'click_here_for_details'| translate}}" class="link-text">
+                                {{col.val}}
+                            </span>
+                            <span ng-if="!col.details && !col.info">
+                                {{col.val}}
+                            </span>
+                            <span ng-if="col.info" ng-click="getIndicatorDictionary(col.info)">
+                                {{col.val}}
+                                <i class="fa fa-info-circle info-icon cursor-pointer hideInPrint" aria-hidden="true" title="{{'indicator_dictionary'| translate}}"></i>
+                            </span>
+                        </td>
+                    </tr>
+                </tbody>
             </table>
         </div>
     </div>
-    <div class="col-sm-12" ng-if="!model.dataExists">
+    <div class="col-sm-12" ng-if="!model.hasPhysicalPerformanceData">
         <div class="alert alert-warning">
             {{'no_data_exists'| translate}}
         </div>
