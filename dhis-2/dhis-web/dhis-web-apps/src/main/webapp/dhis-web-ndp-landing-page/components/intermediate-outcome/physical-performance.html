@@ -9,14 +9,14 @@
                     <ui-select ng-model="model.selectedNdpProgram"
                                theme="select2"
                                style="width:100%;">
-                        <ui-select-match allow-clear="true" class="form-control-ui-select" placeholder="{{model.ndpProgram && model.ndpProgram.options && model.ndpProgram.options.length > 0 ? 'please_select_program' : 'empty'| translate}}">{{$select.selected.displayName|| $select.selected}}</ui-select-match>
-                        <ui-select-choices repeat="option in model.ndpProgram.options | filter: $select.search | limitTo:maxOptionSize | orderBy: ['code']">
-                            <span ng-bind-html="option.displayName | highlight: $select.search"></span>
+                        <ui-select-match allow-clear="true" class="form-control-ui-select" placeholder="{{model.ndpProgrammes && model.ndpProgrammes.length > 0 ? 'please_select_program' : 'empty'| translate}}">{{($select.selected.code) + ' - ' +($select.selected.displayName) || $select.selected}}</ui-select-match>
+                        <ui-select-choices repeat="obj in model.ndpProgrammes | filter: $select.search | limitTo:maxOptionSize | orderBy: ['code', 'displayName']">
+                            <span ng-bind-html="(obj.code) + ' - ' +(obj.displayName) | highlight: $select.search"></span>
                         </ui-select-choices>
                     </ui-select>
                 </div>
             </div>
-            <div class="row small-vertical-spacing">
+            <div class="row small-vertical-spacing" ng-if="model.selectedNdpProgram">
                 <div class="col-sm-2">
                     {{'sub-programme'| translate}}
                 </div>
@@ -24,9 +24,9 @@
                     <ui-select ng-model="model.selectedSubProgramme"
                                theme="select2"
                                style="width:100%;">
-                        <ui-select-match allow-clear="true" class="form-control-ui-select" placeholder="{{model.subPrograms && model.subPrograms.length > 0 ? 'all' : 'empty'| translate}}">{{$select.selected.displayName|| $select.selected}}</ui-select-match>
-                        <ui-select-choices repeat="degs in model.subPrograms | filter: $select.search | limitTo:maxOptionSize | orderBy: ['displayName']">
-                            <span ng-bind-html="degs.displayName | highlight: $select.search"></span>
+                        <ui-select-match allow-clear="true" class="form-control-ui-select" placeholder="{{model.subProgrammes && model.subProgrammes.length > 0 ? 'all' : 'empty'| translate}}">{{($select.selected.code) + ' - ' +($select.selected.displayName) || $select.selected}}</ui-select-match>
+                        <ui-select-choices repeat="obj in model.subProgrammes | filter: $select.search | limitTo:maxOptionSize | orderBy: ['code', 'displayName']">
+                            <span ng-bind-html="(obj.code) + ' - ' +(obj.displayName) | highlight: $select.search"></span>
                         </ui-select-choices>
                     </ui-select>
                 </div>
@@ -78,8 +78,8 @@
                         </th>
                     </tr>
                     <tr>
-                        <th class="sticky">{{'objectives'| translate}}</th>
-                        <th class="sticky">{{'outputs'| translate}}</th>
+                        <th class="sticky">{{'programme_objectives'| translate}}</th>
+                        <th class="sticky">{{'outcomes'| translate}}</th>
                         <th class="sticky">{{'indicator'| translate}}</th>
                         <th class="center sticky" ng-repeat="header in model.dataHeaders">
                             {{model.metaData.items[header.dimensionId].name}}
@@ -97,7 +97,7 @@
                             </span>
                             <span ng-if="col.info" ng-click="getIndicatorDictionary(col.info)">
                                 {{col.val}}
-                                <i class="fa fa-info-circle info-icon cursor-pointer hideInPrint" aria-hidden="true" title="{{'indicator_dictionary'| translate}}"></i>
+                                <i class="fa fa-info-circle info-icon cursor-pointer" aria-hidden="true" title="{{'indicator_dictionary'| translate}}"></i>
                             </span>
                         </td>
                     </tr>

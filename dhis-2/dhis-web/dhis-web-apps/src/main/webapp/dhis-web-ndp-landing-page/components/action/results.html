@@ -93,8 +93,8 @@
         <div id="exportTable" class="table-scroll">
             <table>
                 <tr>
-                    <td class="alert alert-warning" ng-repeat="period in model.reportPeriods" ng-if="!period.hasTargetData">
-                        {{period.displayName}} - {{'has_no_target_data' | translate}}
+                    <td class="alert alert-warning" ng-repeat="period in model.reportPeriods" ng-if="!period.hasData">
+                        {{period.displayName}} - {{'has_no_budget_data' | translate}}
                     </td>
                 </tr>
             </table>
@@ -104,16 +104,16 @@
                         <th class="sticky"></th>
                         <th class="sticky"></th>
                         <th class="sticky"></th>
-                        <th class="center sticky" ng-repeat="period in model.reportPeriods" ng-if="period.hasTargetData">
+                        <th class="center sticky" ng-repeat="period in model.reportPeriods" ng-if="period.hasData">
                             {{period.displayName}}
                         </th>
                     </tr>
                     <tr>
                         <th class="sticky">{{'sub_interventions'| translate}}</th>
                         <th class="sticky">{{'outputs'| translate}}</th>
-                        <th class="sticky">{{'indicator'| translate}}</th>
+                        <th class="sticky">{{'action'| translate}}</th>
                         <th class="center sticky" ng-repeat="header in model.dataHeaders" ng-if="header.hasResultData">
-                            {{model.metaData.items[header.dimensionId].name}}
+                            {{'budget' | translate}}
                         </th>
                     </tr>
                 </thead>

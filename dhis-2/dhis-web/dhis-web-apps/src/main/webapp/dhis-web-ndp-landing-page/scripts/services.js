@@ -45,7 +45,9 @@ var ndpFrameworkServices = angular.module('ndpFrameworkServices', ['ngResource']
 .service('NDPMenuService', function($http, CommonUtils){
     return {
         getMenu: function(){
-            var promise = $http.get('data/ndpMenu.json').then(function(response){
+            var menuFile = 'data/ndpMenu.json';
+            //var menuFile = 'data/ndpMenuSimplified.json';
+            var promise = $http.get( menuFile ).then(function(response){
                 return response.data;
             }, function(response){
                 CommonUtils.errorNotifier(response);
@@ -346,7 +348,7 @@ var ndpFrameworkServices = angular.module('ndpFrameworkServices', ['ngResource']
                     angular.forEach(dss, function(ds){
                         ds[key] = ds[key] ? ds[key] : key;
                         ds[key] = ds[key].toLocaleLowerCase();
-                        if( ds.id && CommonUtils.userHasWriteAccess(ds.id) && ds.organisationUnits.hasOwnProperty( ou.id ) && ds[key] === "action" ){
+                        if( ds.id && CommonUtils.userHasWriteAccess('ACCESSIBLE_DATASETS', 'dataSets', ds.id) && ds.organisationUnits.hasOwnProperty( ou.id ) && ds[key] === "action" ){
                             ds.entryMode = 'single';
                             dataSets.push(ds);
                         }
@@ -357,7 +359,7 @@ var ndpFrameworkServices = angular.module('ndpFrameworkServices', ['ngResource']
                         angular.forEach(multiDs, function(ds){
                             ds[key] = ds[key] ? ds[key] : key;
                             ds[key] = ds[key].toLocaleLowerCase();
-                            if( ds.id && CommonUtils.userHasWriteAccess(ds.id) ){
+                            if( ds.id && CommonUtils.userHasWriteAccess('ACCESSIBLE_DATASETS', 'dataSets', ds.id) ){
                                 angular.forEach(ou.c, function(c){
                                     if( ds.organisationUnits.hasOwnProperty( c ) && pushedDss.indexOf( ds.id ) === -1 && ds[key] === "action" ){
                                         ds.entryMode = 'multiple';
@@ -382,7 +384,7 @@ var ndpFrameworkServices = angular.module('ndpFrameworkServices', ['ngResource']
                 DDStorageService.currentStore.getAll('dataSets').done(function(dss){
                     var dataSets = [];
                     angular.forEach(dss, function(ds){
-                        if( ds.id && CommonUtils.userHasWriteAccess(ds.id) && ds.dataSetType && ds.dataSetType === 'targetGroup'){
+                        if( ds.id && CommonUtils.userHasWriteAccess('ACCESSIBLE_DATASETS', 'dataSets', ds.id) && ds.dataSetType && ds.dataSetType === 'targetGroup'){
                             dataSets.push(ds);
                         }
                     });
@@ -401,7 +403,7 @@ var ndpFrameworkServices = angular.module('ndpFrameworkServices', ['ngResource']
                 DDStorageService.currentStore.getAll('dataSets').done(function(dss){
                     var dataSets = [];
                     angular.forEach(dss, function(ds){
-                        if( ds.id && CommonUtils.userHasWriteAccess(ds.id) && ds.dataSetType && ( ds.dataSetType === 'targetGroup' || ds.dataSetType === 'action') ){
+                        if( ds.id && CommonUtils.userHasWriteAccess('ACCESSIBLE_DATASETS', 'dataSets', ds.id) && ds.dataSetType && ( ds.dataSetType === 'targetGroup' || ds.dataSetType === 'action') ){
                             dataSets.push(ds);
                         }
                     });
@@ -426,15 +428,25 @@ var ndpFrameworkServices = angular.module('ndpFrameworkServices', ['ngResource']
             });
             return def.promise;
         },
-        getByOu: function(ou, selectedDataSet){
+        getByOu: function(ou, selectedDataSet, prop, val){
             var def = $q.defer();
 
             DDStorageService.currentStore.open().done(function(){
                 DDStorageService.currentStore.getAll('dataSets').done(function(dss){
                     var dataSets = [];
                     angular.forEach(dss, function(ds){
-                        if(ds.organisationUnits.hasOwnProperty( ou.id ) && ds.id && CommonUtils.userHasWriteAccess(ds.id)){
-                            dataSets.push(ds);
+                        if(ds.organisationUnits.indexOf( ou.id ) !== -1 && ds.id && CommonUtils.userHasWriteAccess('ACCESSIBLE_DATASETS', 'dataSets', ds.id)){
+                            if ( prop ){
+                                if(ds[prop] ){
+                                    if( ds[prop] === val )
+                                    {
+                                        dataSets.push(ds);
+                                    }
+                                }
+                            }
+                            else{
+                                dataSets.push(ds);
+                            }
                         }
                     });
 
@@ -1131,28 +1143,32 @@ var ndpFrameworkServices = angular.module('ndpFrameworkServices', ['ngResource']
 
                 if (dataParams.displayActionData)
                 {
-                    if ( pe.hasTargetData ){
+                    if ( pe.hasData ){
                         colSpan++;
                         dataHeaders.push({
                             hasResultData: true,
                             periodId: pe.id,
                             periodStart: pe.startDate,
                             periodEnd: pe.endDate,
-                            dimensionId: 'unitCost',
-                            name: $translate.instant("target_unit_cost"),
-                            dimension: 'unitCost'});
-
-                        colSpan++;
-                        dataHeaders.push({
-                            hasResultData: true,
-                            periodId: pe.id,
-                            periodStart: pe.startDate,
-                            periodEnd: pe.endDate,
-                            name: $translate.instant("target_cost"),
-                            dimensionId: dataParams.targetDimension.id,
-                            dimension: dataParams.bta.category});
+                            dimensionId: 'budget',
+                            name: $translate.instant("budget"),
+                            dimension: 'budget'});
                     }
 
+                }
+                else if ( dataParams.displayActionBudgetData )
+                {
+                    if ( pe.hasData ){
+                        colSpan++;
+                        dataHeaders.push({
+                            hasResultData: true,
+                            periodId: pe.id,
+                            periodStart: pe.startDate,
+                            periodEnd: pe.endDate,
+                            dimensionId: 'budget',
+                            name: $translate.instant("budget"),
+                            dimension: 'budget'});
+                    }
                 }
                 else{
                     angular.forEach(baseLineTargetActualDimensions, function(dm){
@@ -1232,13 +1248,20 @@ var ndpFrameworkServices = angular.module('ndpFrameworkServices', ['ngResource']
                                             resultRow.push({val: '', span: 1, period: period, coc: oc, aoc: dh.dimensionId});
                                         }
 
+                                        if ( dh.dimensionId === 'budget' )
+                                        {
+                                            dh.hasResultData = true;
+                                            resultRow.push({val: filterCostData(dh, de.id, oc.id, data), span: 1, details: de.id, period: period, coc: oc, aoc: 'default'});
+                                        }
+
                                         if (dataParams.displayActionData && dataParams.targetDimension && dataParams.targetDimension.id !== dh.dimensionId )
                                         {
                                             return;
                                         }
 
                                         var val = filterResultData(dh, de.id, oc.id, data);
-                                        if ( dh.dimensionId === dataParams.targetDimension.id ){
+                                        if ( dh.dimensionId === dataParams.targetDimension.id )
+                                        {
                                             dh.hasResultData = true;
                                             resultRow.push({val: val, span: 1, details: de.id, period: period, coc: oc, aoc: dh.dimensionId});
                                         }
@@ -1286,6 +1309,11 @@ var ndpFrameworkServices = angular.module('ndpFrameworkServices', ['ngResource']
                                                     resultRow.push({val: '', span: 1, period: period, coc: oc, aoc: dh.dimensionId, style: 'green-background'});
                                                 }
 
+                                                if ( dh.dimensionId === 'budget' )
+                                                {
+                                                    resultRow.push({val: '', span: 1, period: period, coc: oc, aoc: dh.dimensionId, style: 'green-background'});
+                                                }
+
                                                 if (dataParams.displayActionData && dataParams.targetDimension && dataParams.targetDimension.id !== dh.dimensionId )
                                                 {
                                                     return;
@@ -1311,6 +1339,11 @@ var ndpFrameworkServices = angular.module('ndpFrameworkServices', ['ngResource']
                                                         var unitCost = filterCostData(dh, item.id, oc.id, dataParams.actionData, dataParams);
 
                                                         if ( dh.dimensionId === 'unitCost' )
+                                                        {
+                                                            resultRow.push({val: CommonUtils.formatNumber(unitCost), span: 1, period: period, coc: oc, aoc: dh.dimensionId, style: 'red-background'});
+                                                        }
+
+                                                        if ( dh.dimensionId === 'budget')
                                                         {
                                                             resultRow.push({val: CommonUtils.formatNumber(unitCost), span: 1, period: period, coc: oc, aoc: dh.dimensionId, style: 'red-background'});
                                                         }

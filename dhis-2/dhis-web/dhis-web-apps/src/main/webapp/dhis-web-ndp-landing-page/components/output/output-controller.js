@@ -2,7 +2,7 @@
 
 /* global ndpFramework */
 
-ndpFramework.controller('ActivityOutputController',
+ndpFramework.controller('OutputController',
     function($scope,
         $translate,
         $modal,
@@ -46,10 +46,10 @@ ndpFramework.controller('ActivityOutputController',
     };
 
     $scope.model.horizontalMenus = [
-        {id: 'result', title: 'results', order: 1, view: 'components/activity/results.html', active: true, class: 'main-horizontal-menu'},
-        {id: 'physicalPerformance', title: 'physical_performance', order: 2, view: 'components/activity/physical-performance.html', class: 'main-horizontal-menu'},
-        {id: 'budgetPerformance', title: 'budget_performance', order: 3, view: 'components/activity/budget-performance.html', class: 'main-horizontal-menu'},
-        {id: 'dashboard', title: 'dashboard', order: 6, view: 'views/dashboard.html', class: 'main-horizontal-menu'}
+        {id: 'result', title: 'results', order: 1, view: 'components/output/results.html', active: true, class: 'main-horizontal-menu'},
+        {id: 'physicalPerformance', title: 'physical_performance', order: 2, view: 'components/output/physical-performance.html', class: 'main-horizontal-menu'},
+        //{id: 'budgetPerformance', title: 'budget_performance', order: 3, view: 'components/output/budget-performance.html', class: 'main-horizontal-menu'},
+        //{id: 'dashboard', title: 'dashboard', order: 6, view: 'views/dashboard.html', class: 'main-horizontal-menu'}
     ];
 
     //Get orgunits for the logged in user
@@ -68,7 +68,7 @@ ndpFramework.controller('ActivityOutputController',
         $scope.model.dataElementGroup = [];
         angular.forEach($scope.model.selectedDataElementGroupSets, function(degs){
             angular.forEach(degs.dataElementGroups, function(deg){
-                var _deg = $filter('filter')($scope.model.dataElementGroups, {indicatorGroupType: 'output4action', id: deg.id}, true);
+                var _deg = $filter('filter')($scope.model.dataElementGroups, {indicatorGroupType: 'output', id: deg.id}, true);
                 if ( _deg.length > 0 ){
                     $scope.model.dataElementGroup.push( _deg[0] );
                 }
@@ -154,7 +154,7 @@ ndpFramework.controller('ActivityOutputController',
         }
     };
 
-    dhis2.ndp.downloadGroupSets( 'sub-intervention4action' ).then(function(){
+    dhis2.ndp.downloadGroupSets( 'sub-intervention' ).then(function(){
 
         MetaDataFactory.getAll('legendSets').then(function(legendSets){
 
@@ -228,7 +228,7 @@ ndpFramework.controller('ActivityOutputController',
 
                                 $scope.model.dataElementGroups = dataElementGroups;
 
-                                MetaDataFactory.getAllByProperty('dataElementGroupSets', 'indicatorGroupSetType', 'sub-intervention4action').then(function(dataElementGroupSets){
+                                MetaDataFactory.getAllByProperty('dataElementGroupSets', 'indicatorGroupSetType', 'sub-intervention').then(function(dataElementGroupSets){
                                     $scope.model.dataElementGroupSets = dataElementGroupSets;
 
                                     var periods = PeriodService.getPeriods($scope.model.selectedPeriodType, $scope.model.periodOffset, $scope.model.openFuturePeriods);
@@ -328,7 +328,7 @@ ndpFramework.controller('ActivityOutputController',
             selectedResultsLevel = $scope.model.selectedIntervention.code;
         }
 
-        $scope.model.selectedDataElementGroupSets = $filter('startsWith')($scope.model.dataElementGroupSets, {code: 'SA' + selectedResultsLevel});
+        $scope.model.selectedDataElementGroupSets = $filter('startsWith')($scope.model.dataElementGroupSets, {code: selectedResultsLevel});
         $scope.getOutputs();
 
         if( !$scope.selectedOrgUnit || !$scope.selectedOrgUnit.id ){

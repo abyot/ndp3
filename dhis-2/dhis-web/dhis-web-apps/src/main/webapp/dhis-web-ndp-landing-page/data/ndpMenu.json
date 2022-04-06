@@ -23,7 +23,7 @@
             "order": 2,
             "displayName": "vision_2040_targets",
             "children": [],
-            "view": "components/vision2040/vision2040-status.html",
+            "view": "components/vision/vision-status.html",
             "color": "ndp-menu"
           },
           {
@@ -53,7 +53,7 @@
             "order": 5,
             "displayName": "outcome_level",
             "children": [],
-            "view": "components/programme-outcome/programme-status.html",
+            "view": "components/outcome/outcome-status.html",
             "color": "ndp-menu"
           }
         ],
@@ -74,7 +74,7 @@
             "order": 1,
             "displayName": "intermediate_outcomes",
             "children": [],
-            "view": "components/sub-programme-outcome/sub-programme-outcome-status.html",
+            "view": "components/intermediate-outcome/intermdiate-outcome-status.html",
             "color": "ndp-menu"
           },
           {
@@ -84,7 +84,7 @@
             "order": 2,
             "displayName": "output_level",
             "show": true,
-            "view": "components/sub-programme-output/sub-programme-output-status.html",
+            "view": "components/output/output-status.html",
             "children": [],
             "color": "ndp-menu"
           },
@@ -93,9 +93,9 @@
             "domain": "ACT",
             "code": "sub-intervention4action",
             "order": 4,
-            "displayName": "activity_level",
+            "displayName": "action_level",
             "show": true,
-            "view": "components/activity/activity-output-status.html",
+            "view": "components/action/action-output-status.html",
             "children": [],
             "color": "ndp-menu"
           }

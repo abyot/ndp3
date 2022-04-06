@@ -14,6 +14,9 @@
                         {{'vote' | translate}}
                     </th>
                     <th>
+                        {{'period' | translate}}
+                    </th>
+                    <th>
                         {{'value' | translate}}
                     </th>
                     <th>
@@ -24,11 +27,14 @@
                     </th>
                 </tr>
             </thead>
-            <tbody ng-repeat="vote in dataVotes"
-                   ng-init="dv = (dataValues | filter: {orgUnit: vote.id})[0]">
-                <tr>
+            <tbody ng-repeat="vote in dataVotes">
+                <tr ng-repeat="period in dataPeriods | orderBy: 'id'"
+                    ng-init="dv = (dataValues | filter: {orgUnit: vote.id, period: period.id})[0]">
                     <td>
                         {{'vote' | translate}} - {{vote.code}}
+                    </td>
+                    <td>
+                        {{period.id}}
                     </td>
                     <td>
                         {{dv.value}}

@@ -1,8 +1,8 @@
 /* Controllers */
 
-/* global ndpFramework */
+/* global ndpFramework, dhis2 */
 
-ndpFramework.controller('SubProgrammeOutputController',
+ndpFramework.controller('IntermediateOutcomeController',
     function($scope,
         $translate,
         $modal,
@@ -36,20 +36,21 @@ ndpFramework.controller('SubProgrammeOutputController',
         selectedDataElementGroupSets: [],
         dataElementGroups: [],
         selectedNdpProgram: null,
-        selectedSubProgramme: null,
         selectedPeriods: [],
         periods: [],
         allPeriods: [],
         periodOffset: 0,
         openFuturePeriods: 10,
-        selectedPeriodType: 'FinancialJuly'
+        selectedPeriodType: 'FinancialJuly',
+        displayProjectOutputs: true,
+        displayDepartmentOutPuts: true
     };
 
     $scope.model.horizontalMenus = [
-        {id: 'result', title: 'results', order: 1, view: 'components/sub-programme-output/results.html', active: true, class: 'main-horizontal-menu'},
-        {id: 'physicalPerformance', title: 'physical_performance', order: 2, view: 'components/sub-programme-output/physical-performance.html', class: 'main-horizontal-menu'},
-        {id: 'budgetPerformance', title: 'budget_performance', order: 3, view: 'components/sub-programme-output/budget-performance.html', class: 'main-horizontal-menu'},
-        {id: 'dashboard', title: 'dashboard', order: 6, view: 'views/dashboard.html', class: 'main-horizontal-menu'}
+        {id: 'result', title: 'results', order: 1, view: 'components/intermediate-outcome/results.html', active: true, class: 'main-horizontal-menu'},
+        {id: 'physicalPerformance', title: 'physical_performance', order: 2, view: 'components/intermediate-outcome/physical-performance.html', class: 'main-horizontal-menu'},
+        //{id: 'budgetPerformance', title: 'budget_performance', order: 3, view: 'components/intermediate-outcome/budget-performance.html', class: 'main-horizontal-menu'},
+        //{id: 'dashboard', title: 'dashboard', order: 6, view: 'views/dashboard.html', class: 'main-horizontal-menu'}
     ];
 
     //Get orgunits for the logged in user
@@ -64,11 +65,11 @@ ndpFramework.controller('SubProgrammeOutputController',
         $scope.selectedOrgUnit = $scope.orgUnits[0] ? $scope.orgUnits[0] : null;
     });
 
-    $scope.getOutputs = function(){
+    $scope.getOutcomes = function(){
         $scope.model.dataElementGroup = [];
         angular.forEach($scope.model.selectedDataElementGroupSets, function(degs){
             angular.forEach(degs.dataElementGroups, function(deg){
-                var _deg = $filter('filter')($scope.model.dataElementGroups, {indicatorGroupType: 'output', id: deg.id}, true);
+                var _deg = $filter('filter')($scope.model.dataElementGroups, {indicatorGroupType: 'intermediateOutcome', id: deg.id}, true);
                 if ( _deg.length > 0 ){
                     $scope.model.dataElementGroup.push( _deg[0] );
                 }
@@ -83,55 +84,20 @@ ndpFramework.controller('SubProgrammeOutputController',
     $scope.$watch('model.selectedNdpProgram', function(){
         $scope.resetDataView();
 
-        if( $scope.model.piapResultsChain && $scope.model.piapResultsChain.code ){
+        if( $scope.model.resultsFrameworkChain && $scope.model.resultsFrameworkChain.subPrograms ){
             $scope.model.subProgrammes = $scope.model.resultsFrameworkChain.subPrograms;
-            $scope.model.piapObjectives = $scope.model.resultsFrameworkChain.objectives;
-            $scope.model.interventions = $scope.model.resultsFrameworkChain.interventions;
         }
 
         $scope.model.selectedSubProgramme = null;
-        $scope.model.selectedObjective = null;
-        $scope.model.selectedIntervention = null;
         if( angular.isObject($scope.model.selectedNdpProgram) ){
             if( $scope.model.selectedNdpProgram && $scope.model.selectedNdpProgram.code ){
                 $scope.model.subProgrammes = $filter('startsWith')($scope.model.subProgrammes, {code: $scope.model.selectedNdpProgram.code});
-                $scope.model.piapObjectives = $filter('startsWith')($scope.model.piapObjectives, {code: $scope.model.selectedNdpProgram.code});
-                $scope.model.interventions = $filter('startsWith')($scope.model.interventions, {code: $scope.model.selectedNdpProgram.code});
             }
         }
     });
 
     $scope.$watch('model.selectedSubProgramme', function(){
         $scope.resetDataView();
-
-        if( $scope.model.piapResultsChain && $scope.model.piapResultsChain.code ){
-            $scope.model.piapObjectives = $scope.model.resultsFrameworkChain.objectives;
-            $scope.model.interventions = $scope.model.resultsFrameworkChain.interventions;
-        }
-
-        $scope.model.selectedObjective = null;
-        $scope.model.selectedIntervention = null;
-        if( angular.isObject($scope.model.selectedSubProgramme) ){
-            if( $scope.model.selectedSubProgramme && $scope.model.selectedSubProgramme.code ){
-                $scope.model.piapObjectives = $filter('startsWith')($scope.model.piapObjectives, {code: $scope.model.selectedSubProgramme.code});
-                $scope.model.interventions = $filter('startsWith')($scope.model.interventions, {code: $scope.model.selectedSubProgramme.code});
-            }
-        }
-    });
-
-    $scope.$watch('model.selectedObjective', function(){
-        $scope.resetDataView();
-
-        if( $scope.model.piapResultsChain && $scope.model.piapResultsChain.code ){
-            $scope.model.interventions = $scope.model.resultsFrameworkChain.interventions;
-        }
-
-        $scope.model.selectedIntervention = null;
-        if( angular.isObject($scope.model.selectedObjective) ){
-            if( $scope.model.selectedObjective && $scope.model.selectedObjective.code ){
-                $scope.model.interventions = $filter('startsWith')($scope.model.interventions, {code: $scope.model.selectedObjective.code});
-            }
-        }
     });
 
     $scope.getBasePeriod = function(){
@@ -154,7 +120,7 @@ ndpFramework.controller('SubProgrammeOutputController',
         }
     };
 
-    dhis2.ndp.downloadGroupSets( 'sub-intervention' ).then(function(){
+    dhis2.ndp.downloadGroupSets( 'sub-programme' ).then(function(){
 
         MetaDataFactory.getAll('legendSets').then(function(legendSets){
 
@@ -190,8 +156,6 @@ ndpFramework.controller('SubProgrammeOutputController',
                     $scope.model.resultsFrameworkChain = chain;
                     $scope.model.ndpProgrammes = $scope.model.resultsFrameworkChain.programs;
                     $scope.model.subProgrammes = $scope.model.resultsFrameworkChain.subPrograms;
-                    $scope.model.piapObjectives = $scope.model.resultsFrameworkChain.objectives;
-                    $scope.model.interventions = $scope.model.resultsFrameworkChain.interventions;
 
                     OptionComboService.getBtaDimensions().then(function( bta ){
 
@@ -228,7 +192,7 @@ ndpFramework.controller('SubProgrammeOutputController',
 
                                 $scope.model.dataElementGroups = dataElementGroups;
 
-                                MetaDataFactory.getAllByProperty('dataElementGroupSets', 'indicatorGroupSetType', 'sub-intervention').then(function(dataElementGroupSets){
+                                MetaDataFactory.getAllByProperty('dataElementGroupSets', 'indicatorGroupSetType', 'sub-programme').then(function(dataElementGroupSets){
                                     $scope.model.dataElementGroupSets = dataElementGroupSets;
 
                                     var periods = PeriodService.getPeriods($scope.model.selectedPeriodType, $scope.model.periodOffset, $scope.model.openFuturePeriods);
@@ -246,7 +210,7 @@ ndpFramework.controller('SubProgrammeOutputController',
                                     $scope.model.metaDataCached = true;
                                     $scope.populateMenu();
 
-                                    /*$scope.model.dashboardName = 'Sub-Programme Outputs';
+                                    /*$scope.model.dashboardName = 'Sub-Programme Outcomes';
                                     DashboardService.getByName( $scope.model.dashboardName ).then(function( result ){
                                         $scope.model.dashboardItems = result.dashboardItems;
                                         $scope.model.charts = result.charts;
@@ -259,6 +223,7 @@ ndpFramework.controller('SubProgrammeOutputController',
                         });
 
                     });
+
                 });
             });
         });
@@ -312,6 +277,8 @@ ndpFramework.controller('SubProgrammeOutputController',
     $scope.getAnalyticsData = function(){
 
         $scope.model.data = null;
+        $scope.resetDataView();
+
         var analyticsUrl = '';
 
         var selectedResultsLevel = $scope.model.selectedNdpProgram.code;
@@ -320,16 +287,8 @@ ndpFramework.controller('SubProgrammeOutputController',
             selectedResultsLevel = $scope.model.selectedSubProgramme.code;
         }
 
-        if ( $scope.model.selectedObjective && $scope.model.selectedObjective.code ){
-            selectedResultsLevel = $scope.model.selectedObjective.code;
-        }
-
-        if ( $scope.model.selectedIntervention && $scope.model.selectedIntervention.code ){
-            selectedResultsLevel = $scope.model.selectedIntervention.code;
-        }
-
         $scope.model.selectedDataElementGroupSets = $filter('startsWith')($scope.model.dataElementGroupSets, {code: selectedResultsLevel});
-        $scope.getOutputs();
+        $scope.getOutcomes();
 
         if( !$scope.selectedOrgUnit || !$scope.selectedOrgUnit.id ){
             NotificationService.showNotifcationDialog($translate.instant("error"), $translate.instant("missing_vote"));
@@ -337,7 +296,7 @@ ndpFramework.controller('SubProgrammeOutputController',
         }
 
         if( $scope.model.dataElementGroup.length === 0 || !$scope.model.dataElementGroup ){
-            NotificationService.showNotifcationDialog($translate.instant("error"), $translate.instant("missing_output"));
+            NotificationService.showNotifcationDialog($translate.instant("error"), $translate.instant("missing_outcome_output"));
             return;
         }
 
@@ -469,5 +428,4 @@ ndpFramework.controller('SubProgrammeOutputController',
 
         });
     };
-
 });

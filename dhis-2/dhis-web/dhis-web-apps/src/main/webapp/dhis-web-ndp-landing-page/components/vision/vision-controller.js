@@ -3,7 +3,7 @@
 /* global ndpFramework */
 
 
-ndpFramework.controller('Vision2040Controller',
+ndpFramework.controller('VisionController',
     function($scope,
         $translate,
         $modal,
@@ -41,7 +41,7 @@ ndpFramework.controller('Vision2040Controller',
     };
 
     $scope.model.horizontalMenus = [
-        {id: 'result', title: 'results', order: 1, view: 'components/vision2040/results.html', active: true, class: 'main-horizontal-menu'}
+        {id: 'target', title: 'targets', order: 1, view: 'components/vision/results.html', active: true, class: 'main-horizontal-menu'}
     ];
 
     $scope.$on('MENU', function(){

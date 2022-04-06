@@ -22,6 +22,10 @@ html, body {
     height: 8px;
 }
 
+.disable-clicks {
+    pointer-events: none;
+}
+
 #leftBar {
     margin-top: 4px;
     border-radius: 3px;

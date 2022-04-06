@@ -49,8 +49,9 @@ ndpFramework.controller('GoalController',
     };
 
     $scope.model.horizontalMenus = [
-        {id: 'result', title: 'results', order: 1, view: 'components/goal/results.html', active: true, class: 'main-horizontal-menu'},
-        {id: 'dashboard', title: 'dashboard', order: 6, view: 'views/dashboard.html', class: 'main-horizontal-menu'}
+        {id: 'target', title: 'targets', order: 1, view: 'components/goal/results.html', active: true, class: 'main-horizontal-menu'},
+        {id: 'physicalPerformance', title: 'physical_performance', order: 2, view: 'components/goal/physical-performance.html', class: 'main-horizontal-menu'},
+        //{id: 'dashboard', title: 'dashboard', order: 6, view: 'views/dashboard.html', class: 'main-horizontal-menu'}
     ];
 
     $scope.$watch('model.selectedGoal', function(){
@@ -332,8 +333,10 @@ ndpFramework.controller('GoalController',
                         $scope.model.resultData = processedData.resultData;
                         $scope.model.performanceData = processedData.performanceData;
                         $scope.model.cumulativeData = processedData.cumulativeData;
+                        $scope.model.physicalPerformanceData = processedData.physicalPerformanceData;
                         $scope.model.costData = processedData.costData;
                         $scope.model.costEffData = processedData.costEffData;
+                        $scope.model.hasPhysicalPerformanceData = processedData.hasPhysicalPerformanceData;
                     }
                 });
             });

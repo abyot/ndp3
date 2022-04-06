@@ -109,13 +109,20 @@ ndpFramework.controller('DataValueExplanationController',
                     dataValueSetUrl += '&startDate=' + $scope.period.startDate;
                     dataValueSetUrl += '&endDate='  + $scope.period.endDate;
 
+                    var pushedVotes = [];
+                    var pushedPeriods = [];
                     DataValueService.getDataValueSet( dataValueSetUrl ).then(function( response ){
                         if( response.dataValues && response.dataValues.length > 0 ){
-                            $scope.dataValues = $filter('filter')(response.dataValues, {
+                            var params = {
                                 dataElement: $scope.selectedItem.dataElementId,
-                                categoryOptionCombo: $scope.selectedCoc.id,
-                                attributeOptionCombo: $scope.selectedAoc.id
-                            });
+                                categoryOptionCombo: $scope.selectedCoc.id
+                            };
+
+                            if ( $scope.selectedAoc && $scope.selectedAoc.id){
+                                params.attributeOptionCombo = $scope.selectedAoc.id;
+                            }
+
+                            $scope.dataValues = $filter('filter')(response.dataValues, params);
 
                             var eventIds = [];
 
@@ -130,10 +137,13 @@ ndpFramework.controller('DataValueExplanationController',
                                     };
                                 }
 
-                                var ou = $scope.votesById[dv.orgUnit];
-                                $scope.dataVotes.push( ou );
-                                if ( $scope.dataPeriods.indexOf(dv.period) === -1){
-                                    $scope.dataPeriods.push( dv.period );
+                                if ( pushedVotes.indexOf( dv.orgUnit ) === -1 ){
+                                    pushedVotes.push( dv.orgUnit );
+                                    $scope.dataVotes.push( $scope.votesById[dv.orgUnit] );
+                                }
+                                if ( pushedPeriods.indexOf(dv.period) === -1){
+                                    pushedPeriods.push( dv.period );
+                                    $scope.dataPeriods.push( {id: dv.period, name: dv.period} );
                                 }
                             });
 

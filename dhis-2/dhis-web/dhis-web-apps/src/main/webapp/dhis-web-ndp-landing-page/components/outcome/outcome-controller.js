@@ -2,7 +2,7 @@
 
 /* global ndpFramework */
 
-ndpFramework.controller('ProgrammeOutcomeController',
+ndpFramework.controller('OutcomeController',
     function($scope,
         $translate,
         $modal,
@@ -45,10 +45,10 @@ ndpFramework.controller('ProgrammeOutcomeController',
     };
 
     $scope.model.horizontalMenus = [
-        {id: 'result', title: 'results', order: 1, view: 'components/programme-outcome/results.html', active: true, class: 'main-horizontal-menu'},
-        {id: 'physicalPerformance', title: 'physical_performance', order: 2, view: 'components/programme-outcome/physical-performance.html', class: 'main-horizontal-menu'},
-        {id: 'budgetPerformance', title: 'budget_performance', order: 3, view: 'components/programme-outcome/budget-performance.html', class: 'main-horizontal-menu'},
-        {id: 'dashboard', title: 'dashboard', order: 6, view: 'views/dashboard.html', class: 'main-horizontal-menu'}
+        {id: 'target', title: 'targets', order: 1, view: 'components/outcome/results.html', active: true, class: 'main-horizontal-menu'},
+        {id: 'physicalPerformance', title: 'physical_performance', order: 2, view: 'components/outcome/physical-performance.html', class: 'main-horizontal-menu'},
+        //{id: 'budgetPerformance', title: 'budget_performance', order: 3, view: 'components/outcome/budget-performance.html', class: 'main-horizontal-menu'},
+        //{id: 'dashboard', title: 'dashboard', order: 6, view: 'views/dashboard.html', class: 'main-horizontal-menu'}
     ];
 
     //Get orgunits for the logged in user
