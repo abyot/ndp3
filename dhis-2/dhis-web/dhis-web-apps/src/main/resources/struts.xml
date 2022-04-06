@@ -24,11 +24,11 @@
         </action>
     </package>
 
-    <!--<package name="dhis-web-ndp-dataentry" extends="dhis-web-commons" namespace="/dhis-web-ndp-dataentry">
+    <package name="dhis-web-ndp-target-setting" extends="dhis-web-commons" namespace="/dhis-web-ndp-target-setting">
         <action name="index" class="org.hisp.dhis.commons.action.NoAction">
             <result name="success" type="redirect">index.html</result>
         </action>
-    </package>-->
+    </package>
 
     <package name="dhis-web-performance-dataentry" extends="dhis-web-commons" namespace="/dhis-web-performance-dataentry">
         <action name="index" class="org.hisp.dhis.commons.action.NoAction">

@@ -17,6 +17,10 @@ html, body {
     font-size: 12pt !important;
 }
 
+.disable-clicks {
+    pointer-events: none;
+}
+
 #leftBar {
     padding: 10px 0;
     margin-top: 4px;

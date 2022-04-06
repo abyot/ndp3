@@ -162,7 +162,7 @@ var actionMappingServices = angular.module('actionMappingServices', ['ngResource
                     angular.forEach(dss, function(ds){
                         ds[key] = ds[key] ? ds[key] : key;
                         ds[key] = ds[key].toLocaleLowerCase();
-                        if( ds.id && CommonUtils.userHasWriteAccess(ds.id) && ds.organisationUnits.hasOwnProperty( ou.id ) &&
+                        if( ds.id && CommonUtils.userHasWriteAccess('ACCESSIBLE_DATASETS', 'dataSets', ds.id) && ds.organisationUnits.hasOwnProperty( ou.id ) &&
                                 (ds[key] === 'resultstracker' || ds[key] === 'llgfinance') ){
                             dataSets.push(ds);
                         }
@@ -194,7 +194,7 @@ var actionMappingServices = angular.module('actionMappingServices', ['ngResource
                 PMTStorageService.currentStore.getAll('dataSets').done(function(dss){
                     var dataSets = [];
                     angular.forEach(dss, function(ds){
-                        if(ds.organisationUnits.hasOwnProperty( ou.id ) && ds.id && CommonUtils.userHasWriteAccess(ds.id)){
+                        if(ds.organisationUnits.hasOwnProperty( ou.id ) && ds.id && CommonUtils.userHasWriteAccess('ACCESSIBLE_DATASETS', 'dataSets', ds.id)){
                             dataSets.push(ds);
                         }
                     });

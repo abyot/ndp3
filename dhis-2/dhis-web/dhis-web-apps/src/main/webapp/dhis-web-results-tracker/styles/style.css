@@ -30,7 +30,9 @@ div#orgUnitTree {
     font-size: 12pt;
 }
 
-
+.disable-clicks {
+    pointer-events: none;
+}
 
 element.style {
 }
