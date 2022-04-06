@@ -176,6 +176,18 @@ var ndpTargetServices = angular.module('ndpTargetServices', ['ngResource'])
             });
 
             return def.promise;
+        },
+        hasTargetDimension: function( categoryCombo ){
+            if ( !categoryCombo || categoryCombo.isDefault || !categoryCombo.categoryOptionCombos ){
+                return false;
+            }
+
+            for(var i=0; i<categoryCombo.categoryOptionCombos.length; i++){
+                if(categoryCombo.categoryOptionCombos[i].btaDimensionType === 'target'){
+                    return true;
+                }
+            }
+            return false;
         }
     };
 })

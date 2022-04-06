@@ -12,6 +12,7 @@ ndpTarget.controller('DataEntryController',
                 PeriodService,
                 CommonUtils,
                 DataValueService,
+                OptionComboService,
                 EventService) {
 
     $scope.saveStatus = {};
@@ -138,6 +139,11 @@ ndpTarget.controller('DataEntryController',
 
             if(!$scope.model.selectedAttributeCategoryCombo || $scope.model.selectedAttributeCategoryCombo.categoryOptionCombos.legth < 1 ){
                 CommonUtils.notify('error', 'missing_dataset_category_combo');
+                return;
+            }
+
+            if (!OptionComboService.hasTargetDimension($scope.model.selectedAttributeCategoryCombo) ){
+                CommonUtils.notify('error', 'system_only_for_target_setting');
                 return;
             }
 
