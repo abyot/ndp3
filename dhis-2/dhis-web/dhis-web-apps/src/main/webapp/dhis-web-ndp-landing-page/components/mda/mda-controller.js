@@ -361,6 +361,8 @@ ndpFramework.controller('MDAController',
             });
             analyticsUrl += '&dimension=dx:' + des.join(';');
 
+            $scope.model.reportReady = false;
+            $scope.model.reportStarted = true;
             Analytics.getData( analyticsUrl ).then(function(data){
                 if( data && data.data && data.metaData ){
                     $scope.model.data = data.data;

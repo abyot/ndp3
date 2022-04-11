@@ -46,7 +46,8 @@ ndpFramework.controller('ActionOutputController',
     };
 
     $scope.model.horizontalMenus = [
-        {id: 'result', title: 'results', order: 1, view: 'components/action/results.html', active: true, class: 'main-horizontal-menu'}
+        {id: 'result', title: 'targets', order: 1, view: 'components/action/results.html', active: true, class: 'main-horizontal-menu'},
+        {id: 'physicalPerformance', title: 'performances', order: 2, view: 'components/action/physical-performance.html', class: 'main-horizontal-menu'}
     ];
 
     //Get orgunits for the logged in user

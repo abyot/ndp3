@@ -50,7 +50,7 @@ ndpFramework.controller('GoalController',
 
     $scope.model.horizontalMenus = [
         {id: 'target', title: 'targets', order: 1, view: 'components/goal/results.html', active: true, class: 'main-horizontal-menu'},
-        {id: 'physicalPerformance', title: 'physical_performance', order: 2, view: 'components/goal/physical-performance.html', class: 'main-horizontal-menu'},
+        {id: 'physicalPerformance', title: 'performances', order: 2, view: 'components/goal/physical-performance.html', class: 'main-horizontal-menu'},
         //{id: 'dashboard', title: 'dashboard', order: 6, view: 'views/dashboard.html', class: 'main-horizontal-menu'}
     ];
 
@@ -296,6 +296,8 @@ ndpFramework.controller('GoalController',
             });
             analyticsUrl += '&dimension=dx:' + des.join(';');
 
+            $scope.model.reportReady = false;
+            $scope.model.reportStarted = true;
             FinancialDataService.getLocalData('data/cost.json').then(function(cost){
                 $scope.model.cost = cost;
 

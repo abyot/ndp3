@@ -46,8 +46,8 @@ ndpFramework.controller('OutputController',
     };
 
     $scope.model.horizontalMenus = [
-        {id: 'result', title: 'results', order: 1, view: 'components/output/results.html', active: true, class: 'main-horizontal-menu'},
-        {id: 'physicalPerformance', title: 'physical_performance', order: 2, view: 'components/output/physical-performance.html', class: 'main-horizontal-menu'},
+        {id: 'result', title: 'targets', order: 1, view: 'components/output/results.html', active: true, class: 'main-horizontal-menu'},
+        {id: 'physicalPerformance', title: 'performances', order: 2, view: 'components/output/physical-performance.html', class: 'main-horizontal-menu'},
         //{id: 'budgetPerformance', title: 'budget_performance', order: 3, view: 'components/output/budget-performance.html', class: 'main-horizontal-menu'},
         //{id: 'dashboard', title: 'dashboard', order: 6, view: 'views/dashboard.html', class: 'main-horizontal-menu'}
     ];
@@ -359,6 +359,8 @@ ndpFramework.controller('OutputController',
             });
             analyticsUrl += '&dimension=dx:' + des.join(';');
 
+            $scope.model.reportReady = false;
+            $scope.model.reportStarted = true;
             Analytics.getData( analyticsUrl ).then(function(data){
                 if( data && data.data && data.metaData ){
                     $scope.model.data = data.data;
