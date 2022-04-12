@@ -348,7 +348,7 @@ ndpFramework.controller('ActionOutputController',
 
         if( $scope.model.dataElementGroup && $scope.model.dataElementGroup.length > 0 && $scope.model.selectedPeriods.length > 0){
             analyticsUrl += '&filter=ou:'+ $scope.selectedOrgUnit.id +'&displayProperty=NAME&includeMetadataDetails=true';
-            //analyticsUrl += '&dimension=co&dimension=' + $scope.model.bta.category + ':' + $.map($scope.model.baseLineTargetActualDimensions, function(dm){return dm;}).join(';');
+            analyticsUrl += '&dimension=co&dimension=' + $scope.model.bta.category + ':' + $.map($scope.model.baseLineTargetActualDimensions, function(dm){return dm;}).join(';');
             analyticsUrl += '&dimension=pe:' + $.map($scope.model.selectedPeriods.concat( $scope.model.basePeriod ), function(pe){return pe.id;}).join(';');
 
             var des = [];
@@ -357,6 +357,8 @@ ndpFramework.controller('ActionOutputController',
             });
             analyticsUrl += '&dimension=dx:' + des.join(';');
 
+            $scope.model.reportReady = false;
+            $scope.model.reportStarted = true;
             Analytics.getData( analyticsUrl ).then(function(data){
                 if( data && data.data && data.metaData ){
                     $scope.model.data = data.data;
@@ -381,12 +383,11 @@ ndpFramework.controller('ActionOutputController',
                         dataElementsById: $scope.model.dataElementsById,
                         legendSetsById: $scope.model.legendSetsById,
                         defaultLegendSet: $scope.model.defaultLegendSet,
-                        displayActionBudgetData: true
+                        //displayActionBudgetData: true
                     };
 
                     var processedData = Analytics.processData( dataParams );
 
-                    console.log('processedData: ', processedData);
                     $scope.model.dataHeaders = processedData.dataHeaders;
                     $scope.model.reportPeriods = processedData.reportPeriods;
                     $scope.model.dataExists = processedData.dataExists;

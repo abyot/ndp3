@@ -104,7 +104,7 @@
                         <th class="sticky"></th>
                         <th class="sticky"></th>
                         <th class="sticky"></th>
-                        <th class="center sticky" ng-repeat="period in model.reportPeriods" ng-if="period.hasData">
+                        <th class="center sticky" colspan="{{period.colSpan}}" ng-repeat="period in model.reportPeriods" ng-if="period.hasData">
                             {{period.displayName}}
                         </th>
                     </tr>
@@ -112,12 +112,27 @@
                         <th class="sticky">{{'sub_interventions'| translate}}</th>
                         <th class="sticky">{{'outputs'| translate}}</th>
                         <th class="sticky">{{'action'| translate}}</th>
-                        <th class="center sticky" ng-repeat="header in model.dataHeaders" ng-if="header.hasResultData">
-                            {{'budget' | translate}}
+                        <th class="center sticky" ng-repeat="header in model.dataHeaders">
+                            {{model.metaData.items[header.dimensionId].name}}
                         </th>
                     </tr>
                 </thead>
-                <tbody ng-include="'views/report-data/result-body.html'"></tbody>
+                <tbody>
+                    <tr ng-repeat="row in model.physicalPerformanceData">
+                        <td class="vertical-center" ng-repeat="col in row" rowspan="{{col.span}}" ng-style="col.trafficLight">
+                            <span ng-if="col.details" ng-click="getDataValueExplanation(col)" title="{{'click_here_for_details'| translate}}" class="link-text">
+                                {{col.val}}
+                            </span>
+                            <span ng-if="!col.details && !col.info">
+                                {{col.val}}
+                            </span>
+                            <span ng-if="col.info" ng-click="getIndicatorDictionary(col.info)">
+                                {{col.val}}
+                                <i class="fa fa-info-circle info-icon cursor-pointer hideInPrint" aria-hidden="true" title="{{'indicator_dictionary'| translate}}"></i>
+                            </span>
+                        </td>
+                    </tr>
+                </tbody>
             </table>
         </div>
     </div>
