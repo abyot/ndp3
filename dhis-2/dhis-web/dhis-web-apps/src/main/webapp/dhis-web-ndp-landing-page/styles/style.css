@@ -588,10 +588,11 @@ ul.tree ul li:last-child:before {
 }
 
 .carousel-inner > .item > img {
-    max-width: 80%;
     height: auto;
     display: table;
     margin: 0 auto;
+    padding-right: 0 !important;
+    padding-left: 0 !important;
 }
 
 .carousel-control {

@@ -55,8 +55,8 @@ ndpFramework.controller('HomeController',
                 $scope.model.slides.push({
                     id: i,
                     type: 'IMG',
-                    path: 'images/NDPII_Visualizations/' + i + '.png',
-                    style: 'background-image:url(images/NDPII_Visualizations/' + i + '.png)'
+                    path: 'images/NDPIII/' + i + '.jpeg',
+                    style: 'background-image:url(images/NDPIII/' + i + '.jpeg)'
                 });
             }
 
