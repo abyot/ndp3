@@ -45,8 +45,8 @@ ndpFramework.controller('HomeController',
             if ( currentNDP && currentNDP.length && currentNDP.length === 1 ){
                 $scope.model.selectedNDP = currentNDP[0];
             }
-            else if ( $scope.model.ndp && $scope.model.ndp.options && $scope.model.ndp.options.length === 1 ){
-                $scope.model.selectedNDP = $scope.model.ndp.options[0];
+            else{
+                 $scope.model.selectedNDP = $scope.model.ndp.options[0];
             }
 
             $scope.model.metaDataCached = true;

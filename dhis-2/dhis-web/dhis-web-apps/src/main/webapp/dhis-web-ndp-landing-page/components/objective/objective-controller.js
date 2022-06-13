@@ -17,6 +17,7 @@ ndpFramework.controller('ObjectiveController',
         OptionComboService,
         Analytics,
         DashboardService,
+        CommonUtils,
         FinancialDataService) {
 
     $scope.showReportFilters = false;
@@ -53,7 +54,7 @@ ndpFramework.controller('ObjectiveController',
     $scope.model.horizontalMenus = [
         {id: 'target', title: 'targets', order: 1, view: 'components/objective/results.html', active: true, class: 'main-horizontal-menu'},
         {id: 'physicalPerformance', title: 'performances', order: 2, view: 'components/objective/physical-performance.html', class: 'main-horizontal-menu'},
-        //{id: 'dashboard', title: 'dashboard', order: 6, view: 'views/dashboard.html', class: 'main-horizontal-menu'}
+        {id: 'completeness', title: 'completeness', order: 3, view: 'components/objective/completeness.html', class: 'main-horizontal-menu'}
     ];
 
     $scope.$watch('model.selectedObjective', function(){
@@ -342,6 +343,9 @@ ndpFramework.controller('ObjectiveController',
                         $scope.model.costData = processedData.costData || [];
                         $scope.model.costEffData = processedData.costEffData || [];
                         $scope.model.hasPhysicalPerformanceData = processedData.hasPhysicalPerformanceData;
+                        $scope.model.numerator = processedData.completenessNum;
+                        $scope.model.denominator = processedData.completenessDen;
+                        $scope.model.selectedDataElementGroupSets = processedData.selectedDataElementGroupSets;
                     }
                 });
             });
@@ -424,6 +428,10 @@ ndpFramework.controller('ObjectiveController',
         $scope.model.reportReady = false;
         $scope.model.dataExists = false;
         $scope.model.dataHeaders = [];
+    };
+
+    $scope.getCoverage = function(numerator, denominator){
+        return CommonUtils.getPercent(numerator, denominator, false);
     };
 
 });

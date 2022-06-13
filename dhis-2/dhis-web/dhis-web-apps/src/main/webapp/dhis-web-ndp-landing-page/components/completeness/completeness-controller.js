@@ -93,45 +93,50 @@ ndpFramework.controller('CompletenessController',
         }
     });
 
-    MetaDataFactory.getAll('optionSets').then(function(optionSets){
+    dhis2.ndp.downloadGroupSets( 'objective' ).then(function(){
 
-        $scope.model.optionSets = optionSets;
+        MetaDataFactory.getAll('optionSets').then(function(optionSets){
 
-        angular.forEach(optionSets, function(optionSet){
-            $scope.model.optionSetsById[optionSet.id] = optionSet;
-        });
+            $scope.model.optionSets = optionSets;
+
+            angular.forEach(optionSets, function(optionSet){
+                $scope.model.optionSetsById[optionSet.id] = optionSet;
+            });
 
 
-        OptionComboService.getBtaDimensions().then(function( bta ){
+            OptionComboService.getBtaDimensions().then(function( bta ){
 
-            if( !bta || !bta.category || !bta.options || bta.options.length !== 3 ){
-                NotificationService.showNotifcationDialog($translate.instant("error"), $translate.instant("invalid_bta_dimensions"));
-                return;
-            }
+                if( !bta || !bta.category || !bta.options || bta.options.length !== 3 ){
+                    NotificationService.showNotifcationDialog($translate.instant("error"), $translate.instant("invalid_bta_dimensions"));
+                    return;
+                }
 
-            $scope.model.bta = bta;
-            $scope.model.baseLineTargetActualDimensions = $.map($scope.model.bta.options, function(d){return d.id;});
+                $scope.model.bta = bta;
+                $scope.model.baseLineTargetActualDimensions = $.map($scope.model.bta.options, function(d){return d.id;});
 
-            MetaDataFactory.getAll('dataElementGroupSets').then(function( dataElementGroupSets ){
-                $scope.model.dataElementGroupSets = dataElementGroupSets;
+                MetaDataFactory.getAll('dataElementGroupSets').then(function( dataElementGroupSets ){
+                    $scope.model.dataElementGroupSets = dataElementGroupSets;
 
-                MetaDataFactory.getDataElementGroups().then(function(dataElementGroups){
-                    $scope.model.dataElementGroups = dataElementGroups;
+                    MetaDataFactory.getDataElementGroups().then(function(dataElementGroups){
+                        $scope.model.dataElementGroups = dataElementGroups;
 
-                    $scope.model.periods = PeriodService.getPeriods($scope.model.selectedPeriodType, $scope.model.periodOffset, $scope.model.openFuturePeriods);
+                        $scope.model.periods = PeriodService.getPeriods($scope.model.selectedPeriodType, $scope.model.periodOffset, $scope.model.openFuturePeriods);
 
-                    var selectedPeriodNames = ['2020/21', '2021/22', '2022/23', '2023/24', '2024/25'];
+                        var selectedPeriodNames = ['2020/21', '2021/22', '2022/23', '2023/24', '2024/25'];
 
-                    angular.forEach($scope.model.periods, function(pe){
-                        if(selectedPeriodNames.indexOf(pe.displayName) > -1 ){
-                           $scope.model.selectedPeriods.push(pe);
-                        }
+                        angular.forEach($scope.model.periods, function(pe){
+                            if(selectedPeriodNames.indexOf(pe.displayName) > -1 ){
+                               $scope.model.selectedPeriods.push(pe);
+                            }
+                        });
+
+                        $scope.model.ndp = $filter('filter')($scope.model.optionSets, {code: 'ndp'})[0];
                     });
-
-                    $scope.model.ndp = $filter('filter')($scope.model.optionSets, {code: 'ndp'})[0];
                 });
             });
         });
+    }, function(){
+        console.log('error');
     });
 
     $scope.getPeriods = function(mode){
@@ -232,7 +237,6 @@ ndpFramework.controller('CompletenessController',
                 var d = $filter('filter')($scope.model.data, {pe: pe.id});
                 pe.hasData = d && d.length > 0;
                 angular.forEach($scope.model.baseLineTargetActualDimensions, function(dm){
-                    //var d = $filter('filter')($scope.model.data, {Duw5yep8Vae: dm, pe: pe.id});
                     var filterParams = {pe: pe.id};
                     filterParams[$scope.model.bta.category] = dm;
                     var d = $filter('dataFilter')($scope.model.data, filterParams);

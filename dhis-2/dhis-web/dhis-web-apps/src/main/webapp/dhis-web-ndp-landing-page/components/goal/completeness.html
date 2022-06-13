@@ -1,4 +1,4 @@
-<div ng-include="'components/objective/filters.html'"></div>
+<div ng-include="'components/goal/filters.html'"></div>
 <div class="row" ng-if="model.reportReady">
     <div class="col-sm-12" ng-if="model.dataExists">
         <span class=" hideInPrint">
@@ -13,36 +13,36 @@
             </span>
         </span>
         <div id="exportTable" class="table-scroll">
-            <table>
-                <tr>
-                    <td class="alert alert-warning" ng-repeat="period in model.reportPeriods" ng-if="!period.hasTargetData">
-                        {{period.displayName}} - {{'has_no_target_data' | translate}}
-                    </td>
-                </tr>
-            </table>
             <table class="table table-bordered table-striped">
                 <thead>
                     <tr>
-                        <th class="sticky"></th>
-                        <th class="sticky"></th>
-                        <th class="sticky"></th>
-                        <th class="center sticky" ng-repeat="period in model.reportPeriods" ng-if="period.hasTargetData">
-                            {{period.displayName}}
-                        </th>
-                        <th rowspan="2" class="vertical-center sticky">
-                            {{'vision_2040_target' | translate}}
+                        <th class="center sticky" colspan="100%">
+                            {{'data_completeness' | translate}} = {{getCoverage(model.numerator, model.denominator)}}
                         </th>
                     </tr>
                     <tr>
-                        <th class="sticky">{{model.selectedMenu.ndp}} {{'objectives'| translate}}</th>
-                        <th>{{'kras'| translate}}</th>
-                        <th>{{'indicators'| translate}}</th>
-                        <th class="center" ng-repeat="header in model.dataHeaders" ng-if="header.hasResultData">
+                        <th class="sticky"></th>
+                        <th class="center sticky" colspan="{{period.colSpan}}" ng-repeat="period in model.reportPeriods" ng-if="period.hasData">
+                            {{period.displayName}}
+                        </th>
+                    </tr>
+                    <tr>
+                        <th class="sticky">{{'goal'| translate}}</th>
+                        <th class="center sticky" ng-repeat="header in model.dataHeaders">
                             {{model.metaData.items[header.dimensionId].name}}
                         </th>
                     </tr>
                 </thead>
-                <tbody ng-include="'views/report-data/result-body.html'"></tbody>
+                <tbody>
+                    <tr ng-repeat="objective in model.selectedDataElementGroupSets">
+                        <td>
+                            {{objective.displayName}}
+                        </td>
+                        <td class="center" ng-repeat="header in model.dataHeaders">
+                            {{getCoverage(objective['available'][header.periodId + '-' + header.dimensionId], objective['expected'][header.periodId + '-' + header.dimensionId])}}
+                        </td>
+                    </tr>
+                </tbody>
             </table>
         </div>
     </div>
@@ -52,3 +52,4 @@
         </div>
     </div>
 </div>
+

@@ -93,6 +93,7 @@ ndpPerformanceDataEntry.controller('DataEntryController',
         $scope.model.periods = [];
         $scope.model.selectedPeriod = null;
         $scope.model.categoryOptionsReady = false;
+        $scope.model.periodOffset = 0;
         $scope.dataValues = {};
         $scope.dataValuesCopy = {};
         if( angular.isObject($scope.model.selectedDataSet) && $scope.model.selectedDataSet.id){
@@ -112,6 +113,7 @@ ndpPerformanceDataEntry.controller('DataEntryController',
 
             $scope.model.periods = PeriodService.getPeriods( $scope.model.selectedDataSet.periodType, $scope.model.periodOffset,  $scope.model.selectedDataSet.openFuturePeriods );
 
+            console.log('the periods:  ', $scope.model.periods);
             if(!$scope.model.selectedDataSet.dataElements || $scope.model.selectedDataSet.dataElements.length < 1){
                 CommonUtils.notify('error', 'missing_data_elements_indicators');
                 return;

@@ -1,6 +1,6 @@
 <div ng-include="'components/outcome/filters.html'"></div>
 <div class="row" ng-if="model.reportReady">
-    <div class="col-sm-12" ng-if="model.hasPhysicalPerformanceData">
+    <div class="col-sm-12" ng-if="model.dataExists">
         <span class=" hideInPrint">
             <span class="dropdown">
                 <label class="btn btn-default dropdown-toggle" data-toggle="dropdown" ng-attr-title="{{'download_as'| translate}}"><i class="fa fa-download"></i></label>
@@ -13,18 +13,14 @@
             </span>
         </span>
         <div id="exportTable" class="table-scroll">
-            <table>
-                <tr>
-                    <td class="alert alert-warning" ng-repeat="period in model.reportPeriods" ng-if="!period.hasData">
-                        {{period.displayName}} - {{'has_no_data' | translate}}
-                    </td>
-                </tr>
-            </table>
             <table class="table table-bordered table-striped">
                 <thead>
                     <tr>
-                        <th class="sticky"></th>
-                        <th class="sticky"></th>
+                        <th class="center sticky" colspan="100%">
+                            {{'data_completeness' | translate}} = {{getCoverage(model.numerator, model.denominator)}}
+                        </th>
+                    </tr>
+                    <tr>
                         <th class="sticky"></th>
                         <th class="center sticky" colspan="{{period.colSpan}}" ng-repeat="period in model.reportPeriods" ng-if="period.hasData">
                             {{period.displayName}}
@@ -32,35 +28,28 @@
                     </tr>
                     <tr>
                         <th class="sticky">{{'programme_objectives'| translate}}</th>
-                        <th class="sticky">{{'outcomes'| translate}}</th>
-                        <th class="sticky">{{'indicator'| translate}}</th>
                         <th class="center sticky" ng-repeat="header in model.dataHeaders">
                             {{model.metaData.items[header.dimensionId].name}}
                         </th>
                     </tr>
                 </thead>
                 <tbody>
-                    <tr ng-repeat="row in model.physicalPerformanceData">
-                        <td class="vertical-center" ng-repeat="col in row" rowspan="{{col.span}}" ng-style="col.trafficLight">
-                            <span ng-if="col.details" ng-click="getDataValueExplanation(col)" title="{{'click_here_for_details'| translate}}" class="link-text">
-                                {{col.val}}
-                            </span>
-                            <span ng-if="!col.details && !col.info">
-                                {{col.val}}
-                            </span>
-                            <span ng-if="col.info" ng-click="getIndicatorDictionary(col.info)">
-                                {{col.val}}
-                                <i class="fa fa-info-circle info-icon cursor-pointer hideInPrint" aria-hidden="true" title="{{'indicator_dictionary'| translate}}"></i>
-                            </span>
+                    <tr ng-repeat="objective in model.selectedDataElementGroupSets">
+                        <td>
+                            {{objective.displayName}}
+                        </td>
+                        <td class="center" ng-repeat="header in model.dataHeaders">
+                            {{getCoverage(objective['available'][header.periodId + '-' + header.dimensionId], objective['expected'][header.periodId + '-' + header.dimensionId])}}
                         </td>
                     </tr>
                 </tbody>
             </table>
         </div>
     </div>
-    <div class="col-sm-12" ng-if="!model.hasPhysicalPerformanceData">
+    <div class="col-sm-12" ng-if="!model.dataExists">
         <div class="alert alert-warning">
             {{'no_data_exists'| translate}}
         </div>
     </div>
 </div>
+

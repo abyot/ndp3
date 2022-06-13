@@ -93,6 +93,7 @@ ndpDataEntry.controller('DataEntryController',
         $scope.model.periods = [];
         $scope.model.selectedPeriod = null;
         $scope.model.categoryOptionsReady = false;
+        $scope.model.periodOffset = 0;
         $scope.dataValues = {};
         $scope.dataValuesCopy = {};
         if( angular.isObject($scope.model.selectedDataSet) && $scope.model.selectedDataSet.id){

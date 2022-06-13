@@ -52,7 +52,11 @@ var ndpPerformanceDataEntryServices = angular.module('ndpPerformanceDataEntrySer
 
         var d2Periods = dhis2.period.generator.generateReversedPeriods( periodType, periodOffset );
 
+        console.log('d2Periods-1:  ', d2Periods);
+
         d2Periods = dhis2.period.generator.filterOpenPeriods( periodType, d2Periods, futurePeriods, null, null );
+
+        console.log('d2Periods-2:  ', d2Periods);
 
         angular.forEach(d2Periods, function(p){
             p.endDate = extractDate(p._endDate);

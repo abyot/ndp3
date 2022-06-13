@@ -15,6 +15,7 @@ ndpFramework.controller('OutputController',
         OrgUnitFactory,
         OptionComboService,
         ResulstChainService,
+        CommonUtils,
         DashboardService,
         Analytics) {
 
@@ -48,8 +49,7 @@ ndpFramework.controller('OutputController',
     $scope.model.horizontalMenus = [
         {id: 'result', title: 'targets', order: 1, view: 'components/output/results.html', active: true, class: 'main-horizontal-menu'},
         {id: 'physicalPerformance', title: 'performances', order: 2, view: 'components/output/physical-performance.html', class: 'main-horizontal-menu'},
-        //{id: 'budgetPerformance', title: 'budget_performance', order: 3, view: 'components/output/budget-performance.html', class: 'main-horizontal-menu'},
-        //{id: 'dashboard', title: 'dashboard', order: 6, view: 'views/dashboard.html', class: 'main-horizontal-menu'}
+        {id: 'completeness', title: 'completeness', order: 3, view: 'components/output/completeness.html', class: 'main-horizontal-menu'}
     ];
 
     //Get orgunits for the logged in user
@@ -397,6 +397,9 @@ ndpFramework.controller('OutputController',
                     $scope.model.performanceData = processedData.performanceData || [];
                     $scope.model.cumulativeData = processedData.cumulativeData || [];
                     $scope.model.hasPhysicalPerformanceData = processedData.hasPhysicalPerformanceData;
+                    $scope.model.numerator = processedData.completenessNum;
+                    $scope.model.denominator = processedData.completenessDen;
+                    $scope.model.selectedDataElementGroupSets = processedData.selectedDataElementGroupSets;
                 }
             });
         }
@@ -470,6 +473,10 @@ ndpFramework.controller('OutputController',
         modalInstance.result.then(function () {
 
         });
+    };
+
+    $scope.getCoverage = function(numerator, denominator){
+        return CommonUtils.getPercent(numerator, denominator, false);
     };
 
 });

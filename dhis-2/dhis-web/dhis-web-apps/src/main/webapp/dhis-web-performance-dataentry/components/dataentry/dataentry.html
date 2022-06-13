@@ -92,7 +92,7 @@
 
                             <button type="button"
                                     class="btn btn-default"
-                                    ng-disabled="model.periodOffset > -1 || !model.selectedDataSet"
+                                    ng-disabled="!model.selectedDataSet || (model.periodOffset > model.selectedDataSet.openFuturePeriods)"
                                     ng-click="getPeriods('NXT')"
                                     title="{{'next_periods'| translate}}">
                                 <i class="fa fa-forward"></i>

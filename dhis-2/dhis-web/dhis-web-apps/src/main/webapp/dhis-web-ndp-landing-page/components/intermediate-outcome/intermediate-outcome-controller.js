@@ -16,6 +16,7 @@ ndpFramework.controller('IntermediateOutcomeController',
         OptionComboService,
         ResulstChainService,
         DashboardService,
+        CommonUtils,
         Analytics) {
 
     $scope.model = {
@@ -49,8 +50,7 @@ ndpFramework.controller('IntermediateOutcomeController',
     $scope.model.horizontalMenus = [
         {id: 'result', title: 'targets', order: 1, view: 'components/intermediate-outcome/results.html', active: true, class: 'main-horizontal-menu'},
         {id: 'physicalPerformance', title: 'performances', order: 2, view: 'components/intermediate-outcome/physical-performance.html', class: 'main-horizontal-menu'},
-        //{id: 'budgetPerformance', title: 'budget_performance', order: 3, view: 'components/intermediate-outcome/budget-performance.html', class: 'main-horizontal-menu'},
-        //{id: 'dashboard', title: 'dashboard', order: 6, view: 'views/dashboard.html', class: 'main-horizontal-menu'}
+        {id: 'completeness', title: 'completeness', order: 3, view: 'components/intermediate-outcome/completeness.html', class: 'main-horizontal-menu'}
     ];
 
     //Get orgunits for the logged in user
@@ -356,6 +356,9 @@ ndpFramework.controller('IntermediateOutcomeController',
                     $scope.model.performanceData = processedData.performanceData || [];
                     $scope.model.cumulativeData = processedData.cumulativeData || [];
                     $scope.model.hasPhysicalPerformanceData = processedData.hasPhysicalPerformanceData;
+                    $scope.model.numerator = processedData.completenessNum;
+                    $scope.model.denominator = processedData.completenessDen;
+                    $scope.model.selectedDataElementGroupSets = processedData.selectedDataElementGroupSets;
                 }
             });
         }
@@ -429,5 +432,9 @@ ndpFramework.controller('IntermediateOutcomeController',
         modalInstance.result.then(function () {
 
         });
+    };
+
+    $scope.getCoverage = function(numerator, denominator){
+        return CommonUtils.getPercent(numerator, denominator, false);
     };
 });

@@ -72,6 +72,7 @@ ndpTarget.controller('DataEntryController',
         $scope.model.selectedAttributeCategoryCombo = null;
         $scope.model.selectedAttributeOptionCombos = null;
         $scope.model.selectedPeriod = null;
+        $scope.model.periodOffset = 0;
         $scope.dataValues = {};
         $scope.dataValuesCopy = {};
         $scope.saveStatus = {};
