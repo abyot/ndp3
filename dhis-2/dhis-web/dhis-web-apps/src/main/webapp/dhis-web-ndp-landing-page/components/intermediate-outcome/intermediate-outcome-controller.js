@@ -49,7 +49,7 @@ ndpFramework.controller('IntermediateOutcomeController',
 
     $scope.model.horizontalMenus = [
         {id: 'result', title: 'targets', order: 1, view: 'components/intermediate-outcome/results.html', active: true, class: 'main-horizontal-menu'},
-        {id: 'physicalPerformance', title: 'performances', order: 2, view: 'components/intermediate-outcome/physical-performance.html', class: 'main-horizontal-menu'},
+        {id: 'physicalPerformance', title: 'performance', order: 2, view: 'components/intermediate-outcome/physical-performance.html', class: 'main-horizontal-menu'},
         {id: 'completeness', title: 'completeness', order: 3, view: 'components/intermediate-outcome/completeness.html', class: 'main-horizontal-menu'}
     ];
 
@@ -390,14 +390,18 @@ ndpFramework.controller('IntermediateOutcomeController',
     };
 
     $scope.exportData = function ( name ) {
-        var blob = new Blob([document.getElementById('exportTable').innerHTML], {
+        var blob = new Blob([document.getElementById(name).innerHTML], {
             type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=utf-8"
         });
 
-        var reportName = $scope.model.selectedNdpProgram.displayName + " - objectives" + " .xls";
-        if( name ){
-            reportName = name + ' performance.xls';
+        var reportName = $scope.model.selectedNdpProgram.displayName + " - intermediate outcome";
+
+        if ( name ) {
+            reportName += " - " + name;
         }
+
+        reportName += ".xls";
+
         saveAs(blob, reportName);
     };
 

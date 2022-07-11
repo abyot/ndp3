@@ -6,6 +6,7 @@
 ndpPerformanceDataEntry.controller('DataEntryController',
         function($scope,
                 $modal,
+                $filter,
                 orderByFilter,
                 MetaDataFactory,
                 DataSetFactory,
@@ -30,6 +31,9 @@ ndpPerformanceDataEntry.controller('DataEntryController',
         baseLineTargetActualDimensions: [],
         selectedAttributeCategoryCombo: null,
         selectedAttributeOptionCombos: null,
+        baseline: null,
+        target: null,
+        actual: null,
         dataSetsById: {},
         categoryCombosById: {},
         optionSets: [],
@@ -75,6 +79,7 @@ ndpPerformanceDataEntry.controller('DataEntryController',
         $scope.dataValues = {};
         $scope.dataValuesCopy = {};
         $scope.saveStatus = {};
+        $scope.model.dataSetCompleteness = false;
     };
 
     //load datasets associated with the selected org unit.
@@ -95,6 +100,7 @@ ndpPerformanceDataEntry.controller('DataEntryController',
         $scope.model.categoryOptionsReady = false;
         $scope.model.periodOffset = 0;
         $scope.dataValues = {};
+        $scope.model.dataSetCompleteness = false;
         $scope.dataValuesCopy = {};
         if( angular.isObject($scope.model.selectedDataSet) && $scope.model.selectedDataSet.id){
             $scope.loadDataSetDetails();
@@ -105,6 +111,7 @@ ndpPerformanceDataEntry.controller('DataEntryController',
         $scope.dataValues = {};
         $scope.dataValuesCopy = {};
         $scope.saveStatus = {};
+        $scope.model.dataSetCompleteness = false;
         $scope.loadDataEntryForm();
     });
 
@@ -128,6 +135,18 @@ ndpPerformanceDataEntry.controller('DataEntryController',
                 CommonUtils.notify('error', 'missing_dataset_category_combo');
                 return;
             }
+
+            angular.forEach($scope.model.selectedAttributeCategoryCombo.categoryOptionCombos, function(aoc){
+                if ( aoc.btaDimensionType === 'baseline' ){
+                    $scope.model.baseline = aoc;
+                }
+                else if ( aoc.btaDimensionType === 'target' ){
+                    $scope.model.target = aoc;
+                }
+                else if ( aoc.btaDimensionType === 'actual' ){
+                    $scope.model.actual = aoc;
+                }
+            });
 
             $scope.model.selectedDataSet.dataElements = orderByFilter( $scope.model.selectedDataSet.dataElements, '-displayName').reverse();
             $scope.model.dataElements = [];
@@ -203,7 +222,10 @@ ndpPerformanceDataEntry.controller('DataEntryController',
                         response.completeDataSetRegistrations.length &&
                         response.completeDataSetRegistrations.length > 0){
 
-                    $scope.model.dataSetCompleteness = true;
+                    var cdsr = $filter('filter')(response.completeDataSetRegistrations, {attributeOptionCombo: $scope.model.actual.id, }, true);
+                    if ( cdsr.length === 1 ){
+                        $scope.model.dataSetCompleteness = true;
+                    }
                 }
             });
         }
@@ -335,7 +357,9 @@ ndpPerformanceDataEntry.controller('DataEntryController',
         ModalService.showModal({}, modalOptions).then(function(result){
             var dsr = {completeDataSetRegistrations: []};
             angular.forEach($scope.model.selectedAttributeCategoryCombo.categoryOptionCombos, function(aoc){
-                dsr.completeDataSetRegistrations.push( {dataSet: $scope.model.selectedDataSet.id, organisationUnit: $scope.selectedOrgUnit.id, period: $scope.model.selectedPeriod.id, attributeOptionCombo: aoc.id} );
+                if ( aoc.btaDimensionType === 'actual' ){
+                    dsr.completeDataSetRegistrations.push( {dataSet: $scope.model.selectedDataSet.id, organisationUnit: $scope.selectedOrgUnit.id, period: $scope.model.selectedPeriod.id, attributeOptionCombo: aoc.id} );
+                }
             });
 
             CompletenessService.saveDsr(dsr).then(function(response){
@@ -363,23 +387,25 @@ ndpPerformanceDataEntry.controller('DataEntryController',
         ModalService.showModal({}, modalOptions).then(function(result){
 
             angular.forEach($scope.model.selectedAttributeCategoryCombo.categoryOptionCombos, function(aoc){
-                CompletenessService.delete($scope.model.selectedDataSet.id,
-                    $scope.model.selectedPeriod.id,
-                    $scope.selectedOrgUnit.id,
-                    $scope.model.selectedAttributeCategoryCombo.id,
-                    CommonUtils.getOptionIds(aoc.categoryOptions),
-                    false).then(function(response){
+                if ( aoc.btaDimensionType === 'actual' ){
+                    CompletenessService.delete($scope.model.selectedDataSet.id,
+                        $scope.model.selectedPeriod.id,
+                        $scope.selectedOrgUnit.id,
+                        $scope.model.selectedAttributeCategoryCombo.id,
+                        CommonUtils.getOptionIds(aoc.categoryOptions),
+                        false).then(function(response){
 
-                    var dialogOptions = {
-                        headerText: 'success',
-                        bodyText: 'data_unsubmitted'
-                    };
-                    DialogService.showDialog({}, dialogOptions);
-                    $scope.model.dataSetCompleteness = false;
+                        var dialogOptions = {
+                            headerText: 'success',
+                            bodyText: 'data_unsubmitted'
+                        };
+                        DialogService.showDialog({}, dialogOptions);
+                        $scope.model.dataSetCompleteness = false;
 
-                }, function(response){
-                    CommonUtils.errorNotifier( response );
-                });
+                    }, function(response){
+                        CommonUtils.errorNotifier( response );
+                    });
+                }
             });
         });
     };

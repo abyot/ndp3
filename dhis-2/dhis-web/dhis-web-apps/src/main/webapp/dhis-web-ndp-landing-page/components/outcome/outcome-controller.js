@@ -47,7 +47,7 @@ ndpFramework.controller('OutcomeController',
 
     $scope.model.horizontalMenus = [
         {id: 'target', title: 'targets', order: 1, view: 'components/outcome/results.html', active: true, class: 'main-horizontal-menu'},
-        {id: 'physicalPerformance', title: 'performances', order: 2, view: 'components/outcome/physical-performance.html', class: 'main-horizontal-menu'},
+        {id: 'physicalPerformance', title: 'performance', order: 2, view: 'components/outcome/physical-performance.html', class: 'main-horizontal-menu'},
         {id: 'completeness', title: 'completeness', order: 3, view: 'components/outcome/completeness.html', class: 'main-horizontal-menu'}
     ];
 
@@ -374,14 +374,18 @@ ndpFramework.controller('OutcomeController',
     };
 
     $scope.exportData = function ( name ) {
-        var blob = new Blob([document.getElementById('exportTable').innerHTML], {
+        var blob = new Blob([document.getElementById(name).innerHTML], {
             type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=utf-8"
         });
 
-        var reportName = $scope.model.selectedNdpProgram.displayName + " - objectives" + " .xls";
-        if( name ){
-            reportName = name + ' performance.xls';
+        var reportName = $scope.model.selectedNdpProgram.displayName + " - objectives";
+
+        if ( name ) {
+            reportName += " - " + name;
         }
+
+        reportName += ".xls";
+
         saveAs(blob, reportName);
     };
 

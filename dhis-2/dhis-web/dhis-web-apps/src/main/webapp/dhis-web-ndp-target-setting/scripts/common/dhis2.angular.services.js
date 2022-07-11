@@ -329,6 +329,15 @@ var d2Services = angular.module('d2Services', ['ngResource'])
             }
             return false;
         },
+        userHasAuthority: function( auth ){
+            var userInfo = SessionStorageService.get('USER_PROFILE');
+            if ( userInfo && userInfo.authorities ){
+                if ( userInfo.authorities.indexOf(auth) !== -1 || userInfo.authorities.indexOf('ALL') !== -1 ){
+                    return true;
+                }
+            }
+            return false;
+        },
         userHasWriteAccess: function( storage, object, objectId ){
             var objs = SessionStorageService.get(storage);
             objs = objs[object];

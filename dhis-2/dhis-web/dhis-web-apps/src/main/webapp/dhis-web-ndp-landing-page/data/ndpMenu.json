@@ -210,14 +210,6 @@
         "color": "dg-menu"
       },
       {
-        "id": "DG-COMP",
-        "domain": "COMP",
-        "code": "COMP",
-        "displayName": "data_completeness",
-        "view": "components/completeness/completeness.html",
-        "color": "dg-menu"
-      },
-      {
         "id": "DG-WFG",
         "domain": "WFG",
         "code": "WFG",

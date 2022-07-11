@@ -7,12 +7,12 @@
                 <ul class="dropdown-menu">
                     <li><h6 class="dropdown-header">{{'download_as'| translate}}</h6></li>
                     <li class="divider"></li>
-                    <li><a href ng-click="exportData()">{{'csv'| translate}}</a></li>
+                    <li><a href ng-click="exportData('result')">{{'csv'| translate}}</a></li>
                     <li><a href onclick="javascript:window.print()">{{'pdf'| translate}}</a></li>
                 </ul>
             </span>
         </span>
-        <div id="exportTable" class="table-scroll">
+        <div id="result" class="table-scroll">
             <table>
                 <tr>
                     <td class="alert alert-warning" ng-repeat="period in model.reportPeriods" ng-if="!period.hasTargetData">

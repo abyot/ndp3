@@ -135,6 +135,7 @@ function downloadMetaData()
 
     promise = promise.then( dhis2.ndpde.store.open );
 
+    promise = promise.then( getUserProfile );
     promise = promise.then( getUserAccessibleDataSets );
     promise = promise.then( getUserAccessibleOptionCombos );
     promise = promise.then( getOrgUnitLevels );
@@ -171,6 +172,10 @@ function downloadMetaData()
 
     def.resolve();
 };
+
+function getUserProfile(){
+    return dhis2.metadata.getMetaObject(null, 'USER_PROFILE', dhis2.ndpde.apiUrl + '/me.json', 'fields=id,displayName,userCredentials[username, displayName],authorities', 'sessionStorage', dhis2.ndpde.store);
+}
 
 function getUserAccessibleDataSets(){
     return dhis2.metadata.getMetaObject(null, 'ACCESSIBLE_DATASETS', dhis2.ndpde.apiUrl + '/dataSets.json', 'fields=id,access[data[write]]&paging=false', 'sessionStorage', dhis2.ndpde.store);

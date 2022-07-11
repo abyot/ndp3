@@ -13,7 +13,10 @@ ndpTarget.controller('DataEntryController',
                 CommonUtils,
                 DataValueService,
                 OptionComboService,
-                EventService) {
+                EventService,
+                CompletenessService,
+                ModalService,
+                DialogService) {
 
     $scope.saveStatus = {};
     $scope.model = {
@@ -29,6 +32,9 @@ ndpTarget.controller('DataEntryController',
         baseLineTargetActualDimensions: [],
         selectedAttributeCategoryCombo: null,
         selectedAttributeOptionCombos: null,
+        baseline: null,
+        target: null,
+        actual: null,
         dataSetsById: {},
         categoryCombosById: {},
         optionSets: [],
@@ -76,6 +82,7 @@ ndpTarget.controller('DataEntryController',
         $scope.dataValues = {};
         $scope.dataValuesCopy = {};
         $scope.saveStatus = {};
+        $scope.model.dataSetCompleteness = false;
     };
 
     //load datasets associated with the selected org unit.
@@ -96,6 +103,7 @@ ndpTarget.controller('DataEntryController',
         $scope.model.categoryOptionsReady = false;
         $scope.dataValues = {};
         $scope.dataValuesCopy = {};
+        $scope.model.dataSetCompleteness = false;
         if( angular.isObject($scope.model.selectedDataSet) && $scope.model.selectedDataSet.id){
             $scope.loadDataSetDetails();
         }
@@ -105,7 +113,7 @@ ndpTarget.controller('DataEntryController',
         $scope.dataValues = {};
         $scope.dataValuesCopy = {};
         $scope.saveStatus = {};
-
+        $scope.model.dataSetCompleteness = false;
         var getActualPeriods = function(){
             $scope.model.actualPeriods = [];
             if ( $scope.model.selectedPeriod && $scope.model.selectedPeriod.id ){
@@ -147,6 +155,18 @@ ndpTarget.controller('DataEntryController',
                 CommonUtils.notify('error', 'system_only_for_target_setting');
                 return;
             }
+
+            angular.forEach($scope.model.selectedAttributeCategoryCombo.categoryOptionCombos, function(aoc){
+                if ( aoc.btaDimensionType === 'baseline' ){
+                    $scope.model.baseline = aoc;
+                }
+                else if ( aoc.btaDimensionType === 'target' ){
+                    $scope.model.target = aoc;
+                }
+                else if ( aoc.btaDimensionType === 'actual' ){
+                    $scope.model.actual = aoc;
+                }
+            });
 
             $scope.model.selectedDataSet.dataElements = orderByFilter( $scope.model.selectedDataSet.dataElements, '-displayName').reverse();
             $scope.model.dataElements = [];
@@ -217,6 +237,20 @@ ndpTarget.controller('DataEntryController',
                     copyDataValues();
                 }
 
+            });
+
+            CompletenessService.get( $scope.model.selectedDataSet.id,
+                                $scope.selectedOrgUnit.id,
+                                $scope.model.selectedPeriod.startDate,
+                                $scope.model.selectedPeriod.endDate,
+                                false).then(function(response){
+                if( response &&
+                        response.completeDataSetRegistrations &&
+                        response.completeDataSetRegistrations.length &&
+                        response.completeDataSetRegistrations.length > 0){
+
+                    $scope.model.dataSetCompleteness = true;
+                }
             });
         }
     };
@@ -416,6 +450,86 @@ ndpTarget.controller('DataEntryController',
 
         modalInstance.result.then(function( dataValues ) {
             $scope.dataValues = dataValues;
+        });
+    };
+
+    $scope.isDisabled = function( aoc ){
+        return !aoc.dWrite || $scope.model.dataSetCompleteness;
+    };
+
+    $scope.canSubmitData = function(){
+        return CommonUtils.userHasAuthority('F_COMPLETE_DATASET');
+    };
+
+    $scope.canUnSubmitData = function(){
+        return CommonUtils.userHasAuthority('F_UNCOMPLETE_DATASET');
+    };
+
+    $scope.saveCompletness = function(){
+        var modalOptions = {
+            closeButtonText: 'no',
+            actionButtonText: 'yes',
+            headerText: 'submit_data',
+            bodyText: 'are_you_sure_to_submit_data'
+        };
+
+        ModalService.showModal({}, modalOptions).then(function(result){
+            var dsr = {completeDataSetRegistrations: []};
+            angular.forEach($scope.model.selectedAttributeCategoryCombo.categoryOptionCombos, function(aoc){
+                if ( aoc.btaDimensionType === 'baseline'  || aoc.btaDimensionType === 'target' ){
+                    angular.forEach($scope.model.actualPeriods, function(p){
+                        dsr.completeDataSetRegistrations.push( {dataSet: $scope.model.selectedDataSet.id, organisationUnit: $scope.selectedOrgUnit.id, period: p.id, attributeOptionCombo: aoc.id} );
+                    });
+                }
+            });
+
+            CompletenessService.saveDsr(dsr).then(function(response){
+                var dialogOptions = {
+                    headerText: 'success',
+                    bodyText: 'data_submitted'
+                };
+                DialogService.showDialog({}, dialogOptions);
+                $scope.model.dataSetCompleteness = true;
+
+            }, function(response){
+                CommonUtils.errorNotifier( response );
+            });
+        });
+    };
+
+    $scope.deleteCompletness = function( orgUnit, multiOrgUnit){
+        var modalOptions = {
+            closeButtonText: 'no',
+            actionButtonText: 'yes',
+            headerText: 'un_submit_data',
+            bodyText: 'are_you_sure_to_recall_data_and_edit'
+        };
+
+        ModalService.showModal({}, modalOptions).then(function(result){
+
+            angular.forEach($scope.model.selectedAttributeCategoryCombo.categoryOptionCombos, function(aoc){
+                if ( aoc.btaDimensionType === 'baseline'  || aoc.btaDimensionType === 'target' ){
+                    angular.forEach($scope.model.actualPeriods, function(p){
+                        CompletenessService.delete($scope.model.selectedDataSet.id,
+                            p.id,
+                            $scope.selectedOrgUnit.id,
+                            $scope.model.selectedAttributeCategoryCombo.id,
+                            CommonUtils.getOptionIds(aoc.categoryOptions),
+                            false).then(function(response){
+
+                            var dialogOptions = {
+                                headerText: 'success',
+                                bodyText: 'data_unsubmitted'
+                            };
+                            DialogService.showDialog({}, dialogOptions);
+                            $scope.model.dataSetCompleteness = false;
+
+                        }, function(response){
+                            CommonUtils.errorNotifier( response );
+                        });
+                    });
+                }
+            });
         });
     };
 });

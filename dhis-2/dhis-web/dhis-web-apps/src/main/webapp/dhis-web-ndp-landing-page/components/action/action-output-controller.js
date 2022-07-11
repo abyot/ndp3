@@ -1,6 +1,6 @@
 /* Controllers */
 
-/* global ndpFramework */
+/* global ndpFramework, dhis2 */
 
 ndpFramework.controller('ActionOutputController',
     function($scope,
@@ -48,7 +48,7 @@ ndpFramework.controller('ActionOutputController',
 
     $scope.model.horizontalMenus = [
         {id: 'result', title: 'targets', order: 1, view: 'components/action/results.html', active: true, class: 'main-horizontal-menu'},
-        {id: 'physicalPerformance', title: 'performances', order: 2, view: 'components/action/physical-performance.html', class: 'main-horizontal-menu'},
+        {id: 'physicalPerformance', title: 'performance', order: 2, view: 'components/action/physical-performance.html', class: 'main-horizontal-menu'},
         {id: 'completeness', title: 'completeness', order: 3, view: 'components/action/completeness.html', class: 'main-horizontal-menu'}
     ];
 
@@ -432,14 +432,18 @@ ndpFramework.controller('ActionOutputController',
     };
 
     $scope.exportData = function ( name ) {
-        var blob = new Blob([document.getElementById('exportTable').innerHTML], {
+        var blob = new Blob([document.getElementById(name).innerHTML], {
             type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=utf-8"
         });
 
-        var reportName = $scope.model.selectedNdpProgram.displayName + " - objectives" + " .xls";
-        if( name ){
-            reportName = name + ' performance.xls';
+        var reportName = $scope.model.selectedNdpProgram.displayName + " - action";
+
+        if ( name ) {
+            reportName += " - " + name;
         }
+
+        reportName += ".xls";
+
         saveAs(blob, reportName);
     };
 
