@@ -35,6 +35,7 @@ ndpFramework.controller('IntermediateOutcomeController',
         ndpProgrammes: [],
         dataElementGroup: [],
         selectedDataElementGroupSets: [],
+        performanceOverviewHeaders: [],
         dataElementGroups: [],
         selectedNdpProgram: null,
         selectedPeriods: [],
@@ -50,7 +51,8 @@ ndpFramework.controller('IntermediateOutcomeController',
     $scope.model.horizontalMenus = [
         {id: 'result', title: 'targets', order: 1, view: 'components/intermediate-outcome/results.html', active: true, class: 'main-horizontal-menu'},
         {id: 'physicalPerformance', title: 'performance', order: 2, view: 'components/intermediate-outcome/physical-performance.html', class: 'main-horizontal-menu'},
-        {id: 'completeness', title: 'completeness', order: 3, view: 'components/intermediate-outcome/completeness.html', class: 'main-horizontal-menu'}
+        {id: 'performanceOverview', title: 'performance_overview', order: 3, view: 'components/intermediate-outcome/performance-overview.html', class: 'main-horizontal-menu'},
+        {id: 'completeness', title: 'completeness', order: 4, view: 'components/intermediate-outcome/completeness.html', class: 'main-horizontal-menu'}
     ];
 
     //Get orgunits for the logged in user
@@ -203,8 +205,20 @@ ndpFramework.controller('IntermediateOutcomeController',
 
                                     angular.forEach($scope.model.periods, function(pe){
                                         if(selectedPeriodNames.indexOf(pe.displayName) > -1 ){
-                                           $scope.model.selectedPeriods.push(pe);
+                                            $scope.model.selectedPeriods.push(pe);
                                         }
+                                    });
+
+                                    var pHeaders = CommonUtils.getPerformanceOverviewHeaders();
+                                    $scope.model.pHeadersLength = pHeaders.length;
+                                    var prds = $scope.model.selectedPeriods;
+                                    prds = prds.reverse();
+                                    angular.forEach(prds, function(pe){
+                                        angular.forEach( pHeaders, function(p){
+                                            var h = angular.copy( p );
+                                            h.period = pe.id;
+                                            $scope.model.performanceOverviewHeaders.push( h );
+                                        });
                                     });
 
                                     $scope.model.metaDataCached = true;
@@ -343,7 +357,8 @@ ndpFramework.controller('IntermediateOutcomeController',
                         allPeriods: $scope.model.allPeriods,
                         dataElementsById: $scope.model.dataElementsById,
                         legendSetsById: $scope.model.legendSetsById,
-                        defaultLegendSet: $scope.model.defaultLegendSet
+                        defaultLegendSet: $scope.model.defaultLegendSet,
+                        performanceOverviewHeaders: $scope.model.performanceOverviewHeaders
                     };
 
                     var processedData = Analytics.processData( dataParams );
@@ -359,6 +374,7 @@ ndpFramework.controller('IntermediateOutcomeController',
                     $scope.model.numerator = processedData.completenessNum;
                     $scope.model.denominator = processedData.completenessDen;
                     $scope.model.selectedDataElementGroupSets = processedData.selectedDataElementGroupSets;
+                    $scope.model.performanceOverviewData = processedData.performanceOverviewData;
                 }
             });
         }
@@ -440,5 +456,9 @@ ndpFramework.controller('IntermediateOutcomeController',
 
     $scope.getCoverage = function(numerator, denominator){
         return CommonUtils.getPercent(numerator, denominator, false);
+    };
+
+    $scope.getHeaderClass = function(header){
+        return header.style;
     };
 });

@@ -395,8 +395,8 @@ var d2Services = angular.module('d2Services', ['ngResource'])
             return arr.length > 0 ? arr.map(getValue).reduce(sum) : '';
         },
         getPercent: function(op1, op2, turnOffPercent ){
-            op1 = dhis2.validation.isNumber(op1) ? parseInt(op1) : 0;
-            op2 = dhis2.validation.isNumber(op2) ? parseInt(op2) : 0;
+            op1 = dhis2.validation.isNumber(op1) ? parseFloat(op1) : 0;
+            op2 = dhis2.validation.isNumber(op2) ? parseFloat(op2) : 0;
             if( op1 === 0){
                 return turnOffPercent ? 0 : '0%';
             }
@@ -632,6 +632,20 @@ var d2Services = angular.module('d2Services', ['ngResource'])
             var def = $q.defer();
             def.resolve( res );
             return def.promise;
+        },
+        getPerformanceOverviewHeaders: function(){
+
+            var ac = { id: 'A', name: $translate.instant('achieved'), lRange:  100, style: 'green-background'};
+
+            var ma = { id: 'M', name: $translate.instant('moderately_achieved'), lRange: 75, hRange: 99, style: 'yellow-background' };
+
+            var na = { id: 'X', name: $translate.instant('not_achieved'), hRange: 74, style: 'red-background' };
+
+            var nd = { id: 'N', name: $translate.instant('no_data'), style: 'grey-background' };
+
+            var al = { id: 'All', name: $translate.instant('all'), style: 'white-background' };
+
+            return [ac, ma, na, nd, al];
         }
     };
 })

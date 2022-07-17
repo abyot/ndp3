@@ -296,22 +296,32 @@ html, body {
 }
 
 .red-background {
-    background-color: #f4b183 !important;
+    background-color: #CD615A !important;
     color: #000;
 }
 
 .yellow-background {
-    background-color: #ffff00 !important;
+    background-color: #F4CD4D !important;
     color: #000;
 }
 
 .green-background {
-    background-color: #92d050 !important;
+    background-color: #339D73 !important;
     color: #000;
 }
 
 .blue-background {
     background-color: #00b0f0 !important;
+    color: #000;
+}
+
+.white-background {
+    background-color: #fff !important;
+    color: #000;
+}
+
+.grey-background {
+    background-color: #aaa !important;
     color: #000;
 }
 

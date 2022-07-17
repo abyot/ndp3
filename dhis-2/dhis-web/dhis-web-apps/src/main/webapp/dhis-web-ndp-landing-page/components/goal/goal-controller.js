@@ -33,6 +33,7 @@ ndpFramework.controller('GoalController',
         selectedGoal: null,
         dataElementGroups: [],
         baseLineTargetActualDimensions: [],
+        performanceOverviewHeaders: [],
         categoryCombosById: {},
         optionSets: [],
         optionSetsById: [],
@@ -52,7 +53,8 @@ ndpFramework.controller('GoalController',
     $scope.model.horizontalMenus = [
         {id: 'target', title: 'targets', order: 1, view: 'components/goal/results.html', active: true, class: 'main-horizontal-menu'},
         {id: 'physicalPerformance', title: 'performance', order: 2, view: 'components/goal/physical-performance.html', class: 'main-horizontal-menu'},
-        {id: 'completeness', title: 'completeness', order: 3, view: 'components/goal/completeness.html', class: 'main-horizontal-menu'}
+        {id: 'performanceOverview', title: 'performance_overview', order: 3, view: 'components/goal/performance-overview.html', class: 'main-horizontal-menu'},
+        {id: 'completeness', title: 'completeness', order: 4, view: 'components/goal/completeness.html', class: 'main-horizontal-menu'}
     ];
 
     $scope.$watch('model.selectedGoal', function(){
@@ -182,8 +184,20 @@ ndpFramework.controller('GoalController',
 
                         angular.forEach($scope.model.periods, function(pe){
                             if(selectedPeriodNames.indexOf(pe.displayName) > -1 ){
-                               $scope.model.selectedPeriods.push(pe);
+                                $scope.model.selectedPeriods.push(pe);
                             }
+                        });
+
+                        var pHeaders = CommonUtils.getPerformanceOverviewHeaders();
+                        $scope.model.pHeadersLength = pHeaders.length;
+                        var prds = $scope.model.selectedPeriods;
+                        prds = prds.reverse();
+                        angular.forEach(prds, function(pe){
+                            angular.forEach( pHeaders, function(p){
+                                var h = angular.copy( p );
+                                h.period = pe.id;
+                                $scope.model.performanceOverviewHeaders.push( h );
+                            });
                         });
 
                         //Get orgunits for the logged in user
@@ -325,7 +339,8 @@ ndpFramework.controller('GoalController',
                             allPeriods: $scope.model.allPeriods,
                             dataElementsById: $scope.model.dataElementsById,
                             cost: $scope.model.cost,
-                            displayVision2040: true
+                            displayVision2040: true,
+                            performanceOverviewHeaders: $scope.model.performanceOverviewHeaders
                         };
 
                         var processedData = Analytics.processData( dataParams );
@@ -343,6 +358,7 @@ ndpFramework.controller('GoalController',
                         $scope.model.numerator = processedData.completenessNum;
                         $scope.model.denominator = processedData.completenessDen;
                         $scope.model.selectedDataElementGroupSets = processedData.selectedDataElementGroupSets;
+                        $scope.model.performanceOverviewData = processedData.performanceOverviewData;
                     }
                 });
             });
@@ -432,5 +448,9 @@ ndpFramework.controller('GoalController',
 
     $scope.getCoverage = function(numerator, denominator){
         return CommonUtils.getPercent(numerator, denominator, false);
+    };
+
+    $scope.getHeaderClass = function(header){
+        return header.style;
     };
 });

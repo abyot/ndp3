@@ -895,9 +895,11 @@ var ndpFrameworkServices = angular.module('ndpFrameworkServices', ['ngResource']
             var dataExists = false;
             var dataHeaders = [];
             var performanceHeaders = orderByFilter( dataParams.reportPeriods, '-id').reverse();
+            var performanceOverviewHeaders = dataParams.performanceOverviewHeaders;
             var resultData = [];
             var physicalPerformanceData = [];
             var performanceData = [];
+            var performanceOverviewData = [];
             var cumulativeData = [];
             var costData = [];
             var costEffData = [];
@@ -1216,6 +1218,9 @@ var ndpFrameworkServices = angular.module('ndpFrameworkServices', ['ngResource']
                         }
                     });
                 }
+                if ( dataParams.performanceOverviewHeaders ){
+
+                }
                 if ( pe.hasData) {
                     pe.colSpan = colSpan;
                 }
@@ -1232,6 +1237,7 @@ var ndpFrameworkServices = angular.module('ndpFrameworkServices', ['ngResource']
                 var resultRow = [], parsedResultRow = [],
                     physicalPerformanceRow = [], parsedPhysicalPerformanceRow = [],
                     performanceRow = [], parsedPerformanceRow = [],
+                    performanceOverviewRow = [], performanceOverviewPercentageRow = [], parsedPerformanceOverviewRow = [],
                     cumulativeRow = [], parsedCumulativeRow = [],
                     costRow = [], parsedCostRow = [],
                     costEffRow = [], parsedCostEffRow = [],
@@ -1240,18 +1246,23 @@ var ndpFrameworkServices = angular.module('ndpFrameworkServices', ['ngResource']
                 angular.forEach(dataParams.selectedDataElementGroupSets, function(degs){
                     degs.expected = {};
                     degs.available = {};
-                    var groupSet = {val: degs.displayName, span: 0};
+                    var groupSet = {val: degs.displayName, span: 0, pSpan: 0};
                     var addLeadingRow = function(){
                         resultRow.push(groupSet);
                         physicalPerformanceRow.push(groupSet);
                         performanceRow.push(groupSet);
+                        performanceOverviewRow.push(groupSet);
                         cumulativeRow.push(groupSet);
                         costRow.push(groupSet);
                         costEffRow.push(groupSet);
                     };
                     var generateRow = function(group, deg){
+                        groupSet.pSpan +=2;
                         if( deg && deg.dataElements && deg.dataElements.length > 0 ){
+                            var index = 0;
+                            var pov = {};
                             angular.forEach(deg.dataElements, function(de){
+                                index++;
                                 angular.forEach(de.categoryOptionCombos, function(oc){
                                     groupSet.span++;
                                     group.span++;
@@ -1303,7 +1314,50 @@ var ndpFrameworkServices = angular.module('ndpFrameworkServices', ['ngResource']
 
                                         physicalPerformanceRow.push({val: val, span: 1, trafficLight: trafficLight, details: de.id, period: period, coc: oc, aoc: dh.dimensionId});
 
+                                        if ( dh.dimensionId === dataParams.actualDimension.id ){
+                                            var ah = angular.copy(dh);
+                                            ah.dimensionId = dataParams.actualDimension.id;
+                                            var th = angular.copy(dh);
+                                            th.dimensionId = dataParams.targetDimension.id;
+                                            var av = filterResultData(ah, de.id, oc.id, data);
+                                            var tv = filterTargetData(th, de.id, oc.id, data);
+
+                                            if ( !pov[deg.id + '-' + 'A-' + dh.periodId] ){
+                                                pov[deg.id + '-' + 'A-' + dh.periodId] = 0;
+                                            }
+
+                                            if ( !pov[deg.id + '-' + 'M-' + dh.periodId] ){
+                                                pov[deg.id + '-' + 'M-' + dh.periodId] = 0;
+                                            }
+
+                                            if ( !pov[deg.id + '-' + 'X-' + dh.periodId] ){
+                                                pov[deg.id + '-' + 'X-' + dh.periodId] = 0;
+                                            }
+
+                                            if ( !pov[deg.id + '-' + 'N-' + dh.periodId] ){
+                                                pov[deg.id + '-' + 'N-' + dh.periodId] = 0;
+                                            }
+
+                                            if ( !av || !tv ){
+                                                pov[deg.id + '-' + 'N-' + dh.periodId] +=1;
+                                            }
+                                            else{
+                                                var t = CommonUtils.getPercent( av, tv, true);
+                                                if (t >= 100.00 ){
+                                                    pov[deg.id + '-' + 'A-' + dh.periodId] +=1;
+                                                }
+                                                else if ( t>=75.00 && t<=99.00 ){
+                                                    pov[deg.id + '-' + 'M-' + dh.periodId] +=1;
+                                                }
+                                                else {
+                                                    pov[deg.id + '-' + 'X-' + dh.periodId] +=1;
+                                                }
+                                            }
+
+                                            pov[deg.id + '-' + 'All-' + dh.periodId] = ((pov[deg.id + '-' + 'A-' + dh.periodId]*3 + pov[deg.id + '-' + 'M-' + dh.periodId]*2 + pov[deg.id + '-' + 'N-' + dh.periodId]*1) / deg.dataElements.length).toFixed(2);
+                                        }
                                     });
+
                                     if ( dataParams.displayVision2040 && dataParams.dataElementsById[de.id] ){
                                         resultRow.push({vision2040: dataParams.dataElementsById[de.id].vision2040});
                                         physicalPerformanceRow.push({vision2040: dataParams.dataElementsById[de.id].vision2040});
@@ -1433,11 +1487,28 @@ var ndpFrameworkServices = angular.module('ndpFrameworkServices', ['ngResource']
                                         resultRow = [];
                                     }
 
+                                    // Performance overview data
+                                    if ( index === deg.dataElements.length ){
+                                        group.pSpan = 2;
+                                        performanceOverviewRow.push({val: deg.dataElements.length, pSpan: 2, info: deg.id});
+                                        angular.forEach(performanceOverviewHeaders, function(ph){
+                                            var v = pov[deg.id + '-' + ph.id + '-' + ph.period];
+                                            performanceOverviewRow.push({val: v, pSpan: 1});
+                                            performanceOverviewPercentageRow.push({val: ph.id === 'All' ? v : CommonUtils.getPercent( v, deg.dataElements.length, false), pSpan: 1});
+                                        });
+                                        parsedPerformanceOverviewRow.push(performanceOverviewRow);
+                                        parsedPerformanceOverviewRow.push(performanceOverviewPercentageRow);
+                                        performanceOverviewRow = [];
+                                        performanceOverviewPercentageRow = [];
+                                    }
+
                                     //Performance, Cumulative, Cost and CostEff data
-                                    performanceRow.push({val: name , span: 1, info: de.id});
-                                    cumulativeRow.push({val: name , span: 1, info: de.id});
-                                    costRow.push({val: name , span: 1, info: de.id});
-                                    costEffRow.push({val: name , span: 1, info: de.id});
+                                    var r = {val: name , span: 1, info: de.id};
+                                    performanceRow.push(r);
+                                    cumulativeRow.push(r);
+                                    costRow.push(r);
+                                    costEffRow.push(r);
+
                                     angular.forEach(performanceHeaders, function(dh){
                                         cumulativeRow.push({val: filterCumulativeData(dh, de.id, oc.id, data, dataParams), span: 1});
                                         var pce = getPerforAndCostData(dh, de.id, oc.id, data, dataParams);
@@ -1486,6 +1557,7 @@ var ndpFrameworkServices = angular.module('ndpFrameworkServices', ['ngResource']
                         parsedPhysicalPerformanceRow.push(physicalPerformanceRow);
                         physicalPerformanceRow = [];
                     };
+
                     var generateCompletenessInfo = function( degs ){
                         angular.forEach(degs.dataElementGroups, function(deg){
                             var _deg = $filter('filter')(dataParams.dataElementGroups, {id: deg.id})[0];
@@ -1517,10 +1589,11 @@ var ndpFrameworkServices = angular.module('ndpFrameworkServices', ['ngResource']
                         angular.forEach(degs.dataElementGroups, function(deg){
                             if( dataParams.selectedDataElementGroup && dataParams.selectedDataElementGroup.id ){
                                 if ( deg.id === dataParams.selectedDataElementGroup.id ){
-                                    var group = {val: deg.displayName, span: 0};
+                                    var group = {val: deg.displayName, span: 0, pSpan: 2};
                                     resultRow.push(group);
                                     physicalPerformanceRow.push(group);
                                     performanceRow.push(group);
+                                    performanceOverviewRow.push(group);
                                     cumulativeRow.push(group);
                                     costRow.push(group);
                                     costEffRow.push(group);
@@ -1530,10 +1603,11 @@ var ndpFrameworkServices = angular.module('ndpFrameworkServices', ['ngResource']
                                 }
                             }
                             else{
-                                var group = {val: deg.displayName, span: 0};
+                                var group = {val: deg.displayName, span: 0, pSpan: 2};
                                 resultRow.push(group);
                                 physicalPerformanceRow.push(group);
                                 performanceRow.push(group);
+                                performanceOverviewRow.push(group);
                                 cumulativeRow.push(group);
                                 costRow.push(group);
                                 costEffRow.push(group);
@@ -1550,6 +1624,7 @@ var ndpFrameworkServices = angular.module('ndpFrameworkServices', ['ngResource']
                 resultData = parsedResultRow;
                 physicalPerformanceData = parsedPhysicalPerformanceRow;
                 performanceData = parsedPerformanceRow;
+                performanceOverviewData = parsedPerformanceOverviewRow;
                 cumulativeData = parsedCumulativeRow;
                 costData = parsedCostRow;
                 costEffData = parsedCostEffRow;
@@ -1573,7 +1648,8 @@ var ndpFrameworkServices = angular.module('ndpFrameworkServices', ['ngResource']
                 actionCost: actionCost,
                 completenessNum: completenessNum,
                 completenessDen: completenessDen,
-                selectedDataElementGroupSets: dataParams.selectedDataElementGroupSets
+                selectedDataElementGroupSets: dataParams.selectedDataElementGroupSets,
+                performanceOverviewData: performanceOverviewData
             };
         }
     };

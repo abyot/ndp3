@@ -1,0 +1,64 @@
+<div ng-include="'components/output/filters.html'"></div>
+<div class="row" ng-if="model.reportReady">
+    <div class="col-sm-12" ng-if="model.hasPhysicalPerformanceData">
+        <span class=" hideInPrint">
+            <span class="dropdown">
+                <label class="btn btn-default dropdown-toggle" data-toggle="dropdown" ng-attr-title="{{'download_as'| translate}}"><i class="fa fa-download"></i></label>
+                <ul class="dropdown-menu">
+                    <li><h6 class="dropdown-header">{{'download_as'| translate}}</h6></li>
+                    <li class="divider"></li>
+                    <li><a href ng-click="exportData('performance_overview')">{{'csv'| translate}}</a></li>
+                    <li><a href onclick="javascript:window.print()">{{'pdf'| translate}}</a></li>
+                </ul>
+            </span>
+        </span>
+        <div id="performance_overview" class="table-scroll">
+            <table>
+                <tr>
+                    <td class="alert alert-warning" ng-repeat="period in model.reportPeriods" ng-if="!period.hasData">
+                        {{period.displayName}} - {{'has_no_data' | translate}}
+                    </td>
+                </tr>
+            </table>
+            <table class="table table-bordered table-striped">
+                <thead>
+                    <tr>
+                        <th class="sticky"></th>
+                        <th class="sticky"></th>
+                        <th class="sticky"></th>
+                        <th class="center sticky" colspan="{{model.pHeadersLength}}"
+                            ng-repeat="period in model.reportPeriods"
+                            ng-if="period.hasData">
+                            {{period.displayName}}
+                        </th>
+                    </tr>
+                    <tr>
+                        <th class="sticky">{{'sub_interventions'| translate}}</th>
+                        <th class="sticky">{{'outputs'| translate}}</th>
+                        <th class="sticky">{{'indicator'| translate}}</th>
+                        <th class="center sticky"
+                            ng-class="getHeaderClass(header)"
+                            ng-repeat="header in model.performanceOverviewHeaders">
+                            {{header.id}}
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr ng-repeat="row in model.performanceOverviewData">
+                        <td class="vertical-center"
+                            ng-repeat="col in row"
+                            rowspan="{{col.pSpan}}"
+                            ng-style="col.align">
+                            {{col.val}} - {{col.align}}
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div class="col-sm-12" ng-if="!model.hasPhysicalPerformanceData">
+        <div class="alert alert-warning">
+            {{'no_data_exists'| translate}}
+        </div>
+    </div>
+</div>
