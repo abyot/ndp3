@@ -637,15 +637,15 @@ var d2Services = angular.module('d2Services', ['ngResource'])
         },
         getPerformanceOverviewHeaders: function(){
 
-            var ac = { id: 'A', name: $translate.instant('achieved'), lRange:  100, style: 'green-background'};
+            var ac = { id: 'A', name: $translate.instant('achieved'), lRange:  100, style: {"background-color": '#339D73 !important', "color": '#000'} };
 
-            var ma = { id: 'M', name: $translate.instant('moderately_achieved'), lRange: 75, hRange: 99, style: 'yellow-background' };
+            var ma = { id: 'M', name: $translate.instant('moderately_achieved'), lRange: 75, hRange: 99, style: {"background-color": '#F4CD4D !important', "color": '#000'} };
 
-            var na = { id: 'N', name: $translate.instant('not_achieved'), hRange: 74, style: 'red-background' };
+            var na = { id: 'N', name: $translate.instant('not_achieved'), hRange: 74, style: {"background-color": '#CD615A !important', "color": '#000'} };
 
-            var nd = { id: 'X', name: $translate.instant('no_data'), style: 'grey-background' };
+            var nd = { id: 'X', name: $translate.instant('no_data'), style: {"background-color": '#aaa !important', "color": '#000'}};
 
-            var al = { id: 'All', name: $translate.instant('weighted_score'), style: 'white-background' };
+            var al = { id: 'All', name: $translate.instant('weighted_score'), style: {"background-color": '#fff !important', "color": '#000'}};
 
             return [ac, ma, na, nd, al];
         }

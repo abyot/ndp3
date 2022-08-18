@@ -13,8 +13,12 @@
             </span>
         </span>
         <div id="performance_overview" class="table-scroll">
-            <div ng-include="'views/performance-overview-legend.html'"></div>
             <table>
+                <tr>
+                    <td class="col-sm-2" ng-repeat="header in model.performanceHeaders" ng-style="header.style">
+                        {{header.name}}
+                    </td>
+                </tr>
                 <tr>
                     <td class="alert alert-warning" ng-repeat="period in model.reportPeriods" ng-if="!period.hasData">
                         {{period.displayName}} - {{'has_no_data' | translate}}
@@ -38,7 +42,7 @@
                         <th class="sticky">{{'outcomes'| translate}}</th>
                         <th class="sticky">{{'indicator'| translate}}</th>
                         <th class="center sticky"
-                            ng-class="getHeaderClass(header)"
+                            ng-style="header.style"
                             ng-repeat="header in model.performanceOverviewHeaders">
                             {{header.id}}
                         </th>

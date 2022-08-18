@@ -204,7 +204,7 @@ ndpFramework.controller('ObjectiveController',
                             $scope.selectedOrgUnit = $scope.orgUnits[0] ? $scope.orgUnits[0] : null;
                             $scope.model.metaDataCached = true;
                             $scope.populateMenu();
-
+                            $scope.model.performanceHeaders = CommonUtils.getPerformanceOverviewHeaders();
                             /*$scope.model.dashboardFetched = true;
                             $scope.model.dashboardName = 'Objectives';
                             DashboardService.getByName( $scope.model.dashboardName ).then(function( result ){

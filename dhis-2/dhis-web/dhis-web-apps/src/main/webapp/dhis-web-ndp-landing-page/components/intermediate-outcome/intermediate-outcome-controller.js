@@ -211,7 +211,7 @@ ndpFramework.controller('IntermediateOutcomeController',
 
                                     $scope.model.metaDataCached = true;
                                     $scope.populateMenu();
-
+                                    $scope.model.performanceHeaders = CommonUtils.getPerformanceOverviewHeaders();
                                     /*$scope.model.dashboardName = 'Sub-Programme Outcomes';
                                     DashboardService.getByName( $scope.model.dashboardName ).then(function( result ){
                                         $scope.model.dashboardItems = result.dashboardItems;

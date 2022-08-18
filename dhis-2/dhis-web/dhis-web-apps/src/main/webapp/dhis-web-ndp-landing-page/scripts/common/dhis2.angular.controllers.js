@@ -601,11 +601,4 @@ var d2Controllers = angular.module('d2Controllers', [])
 
 .controller('CANMenuController', function($scope, CommonUtils) {
 	$scope.icons = CommonUtils.getIcons();
-})
-
-.controller('PerformanceLegnedController', function($scope, CommonUtils){
-    $scope.model.performanceHeaders = CommonUtils.getPerformanceOverviewHeaders();
-    $scope.getHeaderClass = function(header){
-        return header.style;
-    };
 });
