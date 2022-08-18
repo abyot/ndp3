@@ -1051,7 +1051,7 @@ var ndpFrameworkServices = angular.module('ndpFrameworkServices', ['ngResource']
                 }
 
                 if ( !ranges.green || !ranges.yellowStart || !ranges.yellowEnd || !ranges.red ){
-                    ranges = {
+                    /*ranges = {
                         green: 15,
                         greenColor: '#339D73',
                         yellowStart: 15,
@@ -1059,12 +1059,24 @@ var ndpFrameworkServices = angular.module('ndpFrameworkServices', ['ngResource']
                         yellowColor: '#F4CD4D',
                         red: 30,
                         redColor: '#CD615A'
+                    };*/
+                    ranges = {
+                        green: 100,
+                        greenColor: '#339D73',
+                        yellowStart: 75,
+                        yellowEnd: 99,
+                        yellowColor: '#F4CD4D',
+                        red: 74,
+                        redColor: '#CD615A'
                     };
                 }
 
-                if ( dhis2.validation.isNumber( actual ) && dhis2.validation.isNumber( target ) ){
+                if ( !dhis2.validation.isNumber( actual ) || ! dhis2.validation.isNumber( target ) ){
+                    color = '#aaa';
+                }
+                else {
                     hasPhysicalPerformanceData = true;
-                    var t = CommonUtils.getPercent( Math.abs(actual - target), target, true);
+                    /*var t = CommonUtils.getPercent( Math.abs(actual - target), target, true);
                     if ( t <= ranges.green ){
                         color = ranges.greenColor;
                     }
@@ -1072,6 +1084,16 @@ var ndpFrameworkServices = angular.module('ndpFrameworkServices', ['ngResource']
                         color = ranges.yellowColor;
                     }
                     else if ( t > ranges.red ){
+                        color = ranges.redColor;
+                    }*/
+                    var t = CommonUtils.getPercent( actual, target, true, true);
+                    if ( t >= ranges.green ){
+                        color = ranges.greenColor;
+                    }
+                    else if( t >= ranges.yellowStart && t <= ranges.yellowEnd ){
+                        color = ranges.yellowColor;
+                    }
+                    else {
                         color = ranges.redColor;
                     }
                 }
@@ -1157,6 +1179,28 @@ var ndpFrameworkServices = angular.module('ndpFrameworkServices', ['ngResource']
                 filterParams[dataParams.bta.category] = header.dimensionId;
                 var res = $filter('dataFilter')(data, filterParams)[0];
                 return res && res.value ? true : false;
+            };
+
+            var getPerformanceOverviewStyle = function( v, size, x ){
+                if( !v || isNaN(v) ){
+                    return;
+                }
+                var color = '';
+                if ( size && x && size === x ){
+                    return {"background-color": '#aaa'};
+                }
+
+                if( v >= 3 ){
+                    color = '#339D73';
+                }
+                else if ( v>=2.25 && v<=2.99 ){
+                    color = '#F4CD4D';
+                }
+                else{
+                    color = '#CD615A';
+                }
+
+                return {"background-color": color};
             };
 
             angular.forEach(reportPeriods, function(pe){
@@ -1330,27 +1374,27 @@ var ndpFrameworkServices = angular.module('ndpFrameworkServices', ['ngResource']
                                                 pov[deg.id + '-' + 'M-' + dh.periodId] = 0;
                                             }
 
-                                            if ( !pov[deg.id + '-' + 'X-' + dh.periodId] ){
-                                                pov[deg.id + '-' + 'X-' + dh.periodId] = 0;
-                                            }
-
                                             if ( !pov[deg.id + '-' + 'N-' + dh.periodId] ){
                                                 pov[deg.id + '-' + 'N-' + dh.periodId] = 0;
                                             }
 
+                                            if ( !pov[deg.id + '-' + 'X-' + dh.periodId] ){
+                                                pov[deg.id + '-' + 'X-' + dh.periodId] = 0;
+                                            }
+
                                             if ( !av || !tv ){
-                                                pov[deg.id + '-' + 'N-' + dh.periodId] +=1;
+                                                pov[deg.id + '-' + 'X-' + dh.periodId] +=1;
                                             }
                                             else{
-                                                var t = CommonUtils.getPercent( av, tv, true);
-                                                if (t >= 100.00 ){
+                                                var t = CommonUtils.getPercent( av, tv, true, true);
+                                                if (t >= 100){
                                                     pov[deg.id + '-' + 'A-' + dh.periodId] +=1;
                                                 }
-                                                else if ( t>=75.00 && t<=99.00 ){
+                                                else if ( t>=75 && t<=99 ){
                                                     pov[deg.id + '-' + 'M-' + dh.periodId] +=1;
                                                 }
                                                 else {
-                                                    pov[deg.id + '-' + 'X-' + dh.periodId] +=1;
+                                                    pov[deg.id + '-' + 'N-' + dh.periodId] +=1;
                                                 }
                                             }
 
@@ -1493,8 +1537,16 @@ var ndpFrameworkServices = angular.module('ndpFrameworkServices', ['ngResource']
                                         performanceOverviewRow.push({val: deg.dataElements.length, pSpan: 2, info: deg.id});
                                         angular.forEach(performanceOverviewHeaders, function(ph){
                                             var v = pov[deg.id + '-' + ph.id + '-' + ph.period];
-                                            performanceOverviewRow.push({val: v, pSpan: 1});
-                                            performanceOverviewPercentageRow.push({val: ph.id === 'All' ? v : CommonUtils.getPercent( v, deg.dataElements.length, false), pSpan: 1});
+                                            var x = pov[deg.id + '-X-' + ph.period];
+                                            var prcnt = CommonUtils.getPercent( v, deg.dataElements.length, true, true);
+                                            if( ph.id === 'All' ){
+                                                performanceOverviewRow.push({val: v, pSpan: 2, style: getPerformanceOverviewStyle(v, deg.dataElements.length, x)});
+                                                //performanceOverviewPercentageRow.push({val: v, pSpan: 1, style: getPerformanceOverviewStyle(v, deg.dataElements.length, x)});
+                                            }
+                                            else{
+                                                performanceOverviewRow.push({val: v, pSpan: 1});
+                                                performanceOverviewPercentageRow.push({val: prcnt + '%', pSpan: 1});
+                                            }
                                         });
                                         parsedPerformanceOverviewRow.push(performanceOverviewRow);
                                         parsedPerformanceOverviewRow.push(performanceOverviewPercentageRow);

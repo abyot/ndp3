@@ -1,0 +1,9 @@
+<div class="bordered-div" ng-controller="PerformanceLegnedController">
+    <table>
+        <tr>
+            <td class="col-sm-2" ng-repeat="header in model.performanceHeaders" ng-class="getHeaderClass(header)">
+                {{header.name}}
+            </td>
+        </tr>
+    </table>
+</div>

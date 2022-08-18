@@ -13,6 +13,7 @@
             </span>
         </span>
         <div id="performance_overview" class="table-scroll">
+            <div ng-include="'views/performance-overview-legend.html'"></div>
             <table>
                 <tr>
                     <td class="alert alert-warning" ng-repeat="period in model.reportPeriods" ng-if="!period.hasData">
@@ -45,7 +46,7 @@
                 </thead>
                 <tbody>
                     <tr ng-repeat="row in model.performanceOverviewData">
-                        <td class="vertical-center" ng-repeat="col in row" rowspan="{{col.pSpan}}">
+                        <td class="vertical-center" ng-repeat="col in row" rowspan="{{col.pSpan}}" ng-style="col.style">
                             {{col.val}}
                         </td>
                     </tr>

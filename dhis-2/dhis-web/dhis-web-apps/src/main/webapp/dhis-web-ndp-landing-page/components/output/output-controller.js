@@ -245,18 +245,6 @@ ndpFramework.controller('OutputController',
                                         }
                                     });
 
-                                    var pHeaders = CommonUtils.getPerformanceOverviewHeaders();
-                                    $scope.model.pHeadersLength = pHeaders.length;
-                                    var prds = $scope.model.selectedPeriods;
-                                    prds = prds.reverse();
-                                    angular.forEach(prds, function(pe){
-                                        angular.forEach( pHeaders, function(p){
-                                            var h = angular.copy( p );
-                                            h.period = pe.id;
-                                            $scope.model.performanceOverviewHeaders.push( h );
-                                        });
-                                    });
-
                                     $scope.model.metaDataCached = true;
                                     $scope.populateMenu();
 
@@ -366,6 +354,18 @@ ndpFramework.controller('OutputController',
             analyticsUrl += '&filter=ou:'+ $scope.selectedOrgUnit.id +'&displayProperty=NAME&includeMetadataDetails=true';
             analyticsUrl += '&dimension=co&dimension=' + $scope.model.bta.category + ':' + $.map($scope.model.baseLineTargetActualDimensions, function(dm){return dm;}).join(';');
             analyticsUrl += '&dimension=pe:' + $.map($scope.model.selectedPeriods.concat( $scope.model.basePeriod ), function(pe){return pe.id;}).join(';');
+
+            var pHeaders = CommonUtils.getPerformanceOverviewHeaders();
+            $scope.model.pHeadersLength = pHeaders.length;
+            var prds = orderByFilter( $scope.model.selectedPeriods, '-id').reverse();
+            $scope.model.performanceOverviewHeaders = [];
+            angular.forEach(prds, function(pe){
+                angular.forEach( pHeaders, function(p){
+                    var h = angular.copy( p );
+                    h.period = pe.id;
+                    $scope.model.performanceOverviewHeaders.push( h );
+                });
+            });
 
             var des = [];
             angular.forEach($scope.model.dataElementGroup, function(deg){
